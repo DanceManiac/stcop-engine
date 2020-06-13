@@ -330,6 +330,9 @@ int CScriptStorage::vscript_log		(ScriptStorage::ELuaMessageType tLuaMessageType
 	return		(0);
 #else // #ifdef PRINT_CALL_STACK
 
+	if (!strstr(Core.Params, "-lua_error")) 
+		return (0);
+
 	LPCSTR		S = "", SS = "";
 	LPSTR		S1;
 	string4096	S2;
@@ -431,12 +434,15 @@ int __cdecl CScriptStorage::script_log	(ScriptStorage::ELuaMessageType tLuaMessa
 
 #ifdef PRINT_CALL_STACK
 #	ifndef ENGINE_BUILD
-	static bool	reenterability = false;
-	if (!reenterability) {
-		reenterability = true;
-		if (eLuaMessageTypeError == tLuaMessageType)
-			ai().script_engine().print_stack	();
-		reenterability = false;
+	if (strstr(Core.Params, "-lua_error"))
+	{
+		static bool	reenterability = false;
+		if (!reenterability) {
+			reenterability = true;
+			if (eLuaMessageTypeError == tLuaMessageType)
+				ai().script_engine().print_stack();
+			reenterability = false;
+		}
 	}
 #	endif // #ifndef ENGINE_BUILD
 #endif // #ifdef PRINT_CALL_STACK
