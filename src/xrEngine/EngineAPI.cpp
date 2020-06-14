@@ -64,8 +64,6 @@ void CEngineAPI::InitializeNotDedicated()
 {
     SECUROM_MARKER_HIGH_SECURITY_ON(2)
 
-        LPCSTR r2_name = "xrRender_R2.dll";
-    LPCSTR r3_name = "xrRender_R3.dll";
     LPCSTR r4_name = "xrRender_R4.dll";
 
     if (psDeviceFlags.test(rsR4))
@@ -77,39 +75,7 @@ void CEngineAPI::InitializeNotDedicated()
         {
             // try to load R1
             Msg("! ...Failed - incompatible hardware/pre-Vista OS.");
-            psDeviceFlags.set(rsR2, TRUE);
         }
-    }
-
-    if (psDeviceFlags.test(rsR3))
-    {
-        // try to initialize R3
-        Log("Loading DLL:", r3_name);
-        hRender = LoadLibrary(r3_name);
-        if (0 == hRender)
-        {
-            // try to load R1
-            Msg("! ...Failed - incompatible hardware/pre-Vista OS.");
-            psDeviceFlags.set(rsR2, TRUE);
-        }
-        else
-            g_current_renderer = 3;
-    }
-
-    if (psDeviceFlags.test(rsR2))
-    {
-        // try to initialize R2
-        psDeviceFlags.set(rsR4, FALSE);
-        psDeviceFlags.set(rsR3, FALSE);
-        Log("Loading DLL:", r2_name);
-        hRender = LoadLibrary(r2_name);
-        if (0 == hRender)
-        {
-            // try to load R1
-            Msg("! ...Failed - incompatible hardware.");
-        }
-        else
-            g_current_renderer = 2;
     }
 
     SECUROM_MARKER_HIGH_SECURITY_OFF(2)
@@ -121,27 +87,7 @@ void CEngineAPI::Initialize(void)
 {
     //////////////////////////////////////////////////////////////////////////
     // render
-    LPCSTR r1_name = "xrRender_R1.dll";
-
-#ifndef DEDICATED_SERVER
     InitializeNotDedicated();
-#endif // DEDICATED_SERVER
-
-    if (0 == hRender)
-    {
-        // try to load R1
-        psDeviceFlags.set(rsR4, FALSE);
-        psDeviceFlags.set(rsR3, FALSE);
-        psDeviceFlags.set(rsR2, FALSE);
-        renderer_value = 0; //con cmd
-
-        Log("Loading DLL:", r1_name);
-        hRender = LoadLibrary(r1_name);
-        if (0 == hRender) R_CHK(GetLastError());
-        R_ASSERT(hRender);
-        g_current_renderer = 1;
-    }
-
     Device.ConnectToRender();
 
     // game

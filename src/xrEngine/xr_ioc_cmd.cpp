@@ -162,12 +162,6 @@ public:
     CCC_TuneTextureMaterial(LPCSTR N) :IConsole_Command(N) {};
     virtual void	Execute(LPCSTR args)
     {
-        if (!psDeviceFlags.test(rsR2) && !psDeviceFlags.test(rsR3) && !psDeviceFlags.test(rsR4))
-        {
-            Msg("This command not supported for static render.");
-            return;
-        }
-
         if (0 == xr_strcmp(args, "null")) 
         { 
             Msg("Material override off"); 
@@ -554,13 +548,12 @@ public:
         // 0 - r1
         // 1..3 - r2
         // 4 - r3
-        psDeviceFlags.set(rsR2, ((renderer_value > 0) && renderer_value < 4));
-        psDeviceFlags.set(rsR3, (renderer_value == 4));
-        psDeviceFlags.set(rsR4, (renderer_value >= 5));
 
-        r2_sun_static = (renderer_value < 2);
+        psDeviceFlags.set(rsR4, TRUE);
 
-        r2_advanced_pp = (renderer_value >= 3);
+        r2_sun_static = FALSE;
+
+        r2_advanced_pp = TRUE;
     }
 
     virtual void Save(IWriter* F)

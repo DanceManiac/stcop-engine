@@ -38,12 +38,10 @@ enum
     mtParticles = (1ul << 17ul),
 
     rsCameraPos = (1ul << 18ul),
-    rsR2 = (1ul << 19ul),
-    rsR3 = (1ul << 20ul),
-    rsR4 = (1ul << 21ul),
+    rsR4 = (1ul << 19ul),
 
-    rsFPS = (1ul << 22ul),
-    // 24-32 bit - reserved to Editor
+    rsFPS = (1ul << 20ul),
+    // 21-32 bit - reserved to Editor
 };
 
 
