@@ -46,11 +46,6 @@ void R_dsgraph_structure::r_dsgraph_insert_dynamic	(dxRender_Visual *pVisual, Fv
 	if (pVisual->vis.marker	==	RI.marker)	return	;
 	pVisual->vis.marker		=	RI.marker			;
 
-#if RENDER==R_R1
-	if (RI.o.vis_intersect &&	(pVisual->vis.accept_frame!=Device.dwFrame))	return;
-	pVisual->vis.accept_frame	=	Device.dwFrame	;
-#endif
-
 	float distSQ			;
 	float SSA;
 
@@ -94,8 +89,7 @@ void R_dsgraph_structure::r_dsgraph_insert_dynamic	(dxRender_Visual *pVisual, Fv
 			N->val.pVisual = pVisual;
 			N->val.Matrix = *RI.val_pTransform;
 			N->val.se = sh;
-		} 
-		else 
+		}
 		{
 			mapHUD_Node* N			= mapHUD.insertInAnyWay		(distSQ);
 			N->val.ssa				= SSA;
@@ -104,7 +98,6 @@ void R_dsgraph_structure::r_dsgraph_insert_dynamic	(dxRender_Visual *pVisual, Fv
 			N->val.Matrix			= *RI.val_pTransform;
 			N->val.se				= sh;
 		}
-#if RENDER!=R_R1
 		if (sh->flags.bEmissive) 
 		{
 			mapSorted_Node* N = mapHUDEmissive.insertInAnyWay(distSQ);
@@ -114,14 +107,10 @@ void R_dsgraph_structure::r_dsgraph_insert_dynamic	(dxRender_Visual *pVisual, Fv
 			N->val.Matrix = *RI.val_pTransform;
 			N->val.se = sh_d;		// 4=L_special
 		}
-#endif // RENDER!=R_R1
 		return;
 	}
 
 	// Shadows registering
-#if RENDER==R_R1
-	RI.L_Shadows->add_element	(item);
-#endif
 	if (RI.val_bInvisible)		return;
 
 	// strict-sorting selection
@@ -179,28 +168,19 @@ void R_dsgraph_structure::r_dsgraph_insert_dynamic	(dxRender_Visual *pVisual, Fv
 		mapMatrixPS::TNode*			Nps		= Nvs->val.insert	(pass.ps);
 	#endif	//	USE_DX10
 #else
-	#if defined(USE_DX10) || defined(USE_DX11)
-		mapMatrixVS::TNode*			Nvs		= map.insert		(&*pass.vs);
-		mapMatrixGS::TNode*			Ngs		= Nvs->val.insert	(pass.gs->gs);
-		mapMatrixPS::TNode*			Nps		= Ngs->val.insert	(pass.ps->ps);
-	#else	//	USE_DX10
-		mapMatrixVS::TNode*			Nvs		= map.insert		(pass.vs->vs);
-		mapMatrixPS::TNode*			Nps		= Nvs->val.insert	(pass.ps->ps);
-	#endif	//	USE_DX10
+		mapMatrixVS::TNode* Nvs = map.insert(&*pass.vs);
+		mapMatrixGS::TNode* Ngs = Nvs->val.insert(pass.gs->gs);
+		mapMatrixPS::TNode* Nps = Ngs->val.insert(pass.ps->ps);
 #endif
 
-#ifdef USE_DX11
-#	ifdef USE_RESOURCE_DEBUGGER
+#ifdef USE_RESOURCE_DEBUGGER
 		Nps->val.hs = pass.hs;
 		Nps->val.ds = pass.ds;
 		mapMatrixCS::TNode*			Ncs		= Nps->val.mapCS.insert	(pass.constants._get());
-#	else
+#else
 		Nps->val.hs = pass.hs->sh;
 		Nps->val.ds = pass.ds->sh;
 		mapMatrixCS::TNode*			Ncs		= Nps->val.mapCS.insert	(pass.constants._get());
-#	endif
-#else
-		mapMatrixCS::TNode*			Ncs		= Nps->val.insert	(pass.constants._get());
 #endif
 		mapMatrixStates::TNode*		Nstate	= Ncs->val.insert	(pass.state->state);
 		mapMatrixTextures::TNode*	Ntex	= Nstate->val.insert(pass.T._get());
@@ -211,30 +191,18 @@ void R_dsgraph_structure::r_dsgraph_insert_dynamic	(dxRender_Visual *pVisual, Fv
 		if (SSA>Ntex->val.ssa)		{ Ntex->val.ssa = SSA;
 		if (SSA>Nstate->val.ssa)	{ Nstate->val.ssa = SSA;
 		if (SSA>Ncs->val.ssa)		{ Ncs->val.ssa = SSA;
-#ifdef USE_DX11
 		if (SSA>Nps->val.mapCS.ssa)		{ Nps->val.mapCS.ssa = SSA;
-#else
-		if (SSA>Nps->val.ssa)		{ Nps->val.ssa = SSA;
-#endif
-#if defined(USE_DX10) || defined(USE_DX11)
 		if (SSA>Ngs->val.ssa)		{ Ngs->val.ssa = SSA;
-#endif	//	USE_DX10
 		if (SSA>Nvs->val.ssa)		{ Nvs->val.ssa = SSA;
-#if defined(USE_DX10) || defined(USE_DX11)
 		} } } } } }
-#else	//	USE_DX10
-		} } } } }
-#endif	//	USE_DX10
 	}
 
-#if RENDER!=R_R1
 	if (val_recorder)			{
 		Fbox3		temp		;
 		Fmatrix&	xf			= *RI.val_pTransform;
 		temp.xform	(pVisual->vis.box,xf);
 		val_recorder->push_back	(temp);
 	}
-#endif
 }
 
 void R_dsgraph_structure::r_dsgraph_insert_static	(dxRender_Visual *pVisual)
@@ -243,11 +211,6 @@ void R_dsgraph_structure::r_dsgraph_insert_static	(dxRender_Visual *pVisual)
 
 	if (pVisual->vis.marker		==	RI.marker)	return	;
 	pVisual->vis.marker			=	RI.marker			;
-
-#if RENDER==R_R1
-	if (RI.o.vis_intersect &&	(pVisual->vis.accept_frame!=Device.dwFrame))	return;
-	pVisual->vis.accept_frame	=	Device.dwFrame		;
-#endif
 
 	float distSQ;
 	float SSA					=	CalcSSA		(distSQ,pVisual->vis.sphere.P,pVisual);
@@ -282,7 +245,6 @@ void R_dsgraph_structure::r_dsgraph_insert_static	(dxRender_Visual *pVisual)
 		return;
 	}
 
-#if RENDER!=R_R1
 	// Emissive geometry should be marked and R2 special-cases it
 	// a) Allow to skeep already lit pixels
 	// b) Allow to make them 100% lit and really bright
@@ -305,7 +267,6 @@ void R_dsgraph_structure::r_dsgraph_insert_static	(dxRender_Visual *pVisual)
 		N->val.se				= sh;							
 		return					;
 	}
-#endif
 
 	if	(val_feedback && counter_S==val_feedback_breakp)	val_feedback->rfeedback_static(pVisual);
 
@@ -319,37 +280,23 @@ void R_dsgraph_structure::r_dsgraph_insert_static	(dxRender_Visual *pVisual)
 		mapNormal_T&				map		= mapNormalPasses[sh->flags.iPriority/2][iPass];
 
 #ifdef USE_RESOURCE_DEBUGGER
-#	if defined(USE_DX10) || defined(USE_DX11)
 		mapNormalVS::TNode*			Nvs		= map.insert		(pass.vs);
 		mapNormalGS::TNode*			Ngs		= Nvs->val.insert	(pass.gs);
 		mapNormalPS::TNode*			Nps		= Ngs->val.insert	(pass.ps);
-#	else	//	USE_DX10
-		mapNormalVS::TNode*			Nvs		= map.insert		(pass.vs);
-		mapNormalPS::TNode*			Nps		= Nvs->val.insert	(pass.ps);
-#	endif	//	USE_DX10
 #else // USE_RESOURCE_DEBUGGER
-#	if defined(USE_DX10) || defined(USE_DX11)
 		mapNormalVS::TNode*			Nvs		= map.insert		(&*pass.vs);
 		mapNormalGS::TNode*			Ngs		= Nvs->val.insert	(pass.gs->gs);
 		mapNormalPS::TNode*			Nps		= Ngs->val.insert	(pass.ps->ps);
-#	else	//	USE_DX10
-		mapNormalVS::TNode*			Nvs		= map.insert		(pass.vs->vs);
-		mapNormalPS::TNode*			Nps		= Nvs->val.insert	(pass.ps->ps);
-#	endif	//	USE_DX10
 #endif // USE_RESOURCE_DEBUGGER
 
-#ifdef USE_DX11
-#	ifdef USE_RESOURCE_DEBUGGER
+#ifdef USE_RESOURCE_DEBUGGER
 		Nps->val.hs = pass.hs;
 		Nps->val.ds = pass.ds;
 		mapNormalCS::TNode*			Ncs		= Nps->val.mapCS.insert	(pass.constants._get());
-#	else
+#else
 		Nps->val.hs = pass.hs->sh;
 		Nps->val.ds = pass.ds->sh;
 		mapNormalCS::TNode*			Ncs		= Nps->val.mapCS.insert	(pass.constants._get());
-#	endif
-#else
-		mapNormalCS::TNode*			Ncs		= Nps->val.insert	(pass.constants._get());
 #endif
 		mapNormalStates::TNode*		Nstate	= Ncs->val.insert	(pass.state->state);
 		mapNormalTextures::TNode*	Ntex	= Nstate->val.insert(pass.T._get());
@@ -361,28 +308,16 @@ void R_dsgraph_structure::r_dsgraph_insert_static	(dxRender_Visual *pVisual)
 		if (SSA>Ntex->val.ssa)		{ Ntex->val.ssa = SSA;
 		if (SSA>Nstate->val.ssa)	{ Nstate->val.ssa = SSA;
 		if (SSA>Ncs->val.ssa)		{ Ncs->val.ssa = SSA;
-#ifdef USE_DX11
 		if (SSA>Nps->val.mapCS.ssa)		{ Nps->val.mapCS.ssa = SSA;
-#else
-		if (SSA>Nps->val.ssa)		{ Nps->val.ssa = SSA;
-#endif
 
-#if defined(USE_DX10) || defined(USE_DX11)
 		if (SSA>Ngs->val.ssa)		{ Ngs->val.ssa = SSA;
-#endif	//	USE_DX10
 		if (SSA>Nvs->val.ssa)		{ Nvs->val.ssa = SSA;
-#if defined(USE_DX10) || defined(USE_DX11)
 		} } } } } }
-#else	//	USE_DX10
-		} } } } }
-#endif	//	USE_DX10
 	}
 
-#if RENDER!=R_R1
 	if (val_recorder)			{
 		val_recorder->push_back	(pVisual->vis.box	);
 	}
-#endif
 }
 
 
@@ -415,11 +350,7 @@ IC bool IsValuableToRenderDyn(dxRender_Visual* pVisual, Fmatrix& transform_matri
 		return adjusted_distane;
 	};
 
-#if RENDER!=R_R1
 	u32 smapsize = RImplementation.o.smapsize;
-#else
-	u32 smapsize = 2048;
-#endif
 
 
 	if (sm && smapsize < 4096)
@@ -479,10 +410,8 @@ void CRender::add_leafs_Dynamic	(dxRender_Visual *pVisual, bool bIgnoreOpt)
 	switch (pVisual->Type) {
 	case MT_PARTICLE_GROUP:
 		{
-#if RENDER!=R_R1
 			if (phase == PHASE_SMAP)
 				return;
-#endif
 			// Add all children, doesn't perform any tests
 			PS::CParticleGroup* pG	= (PS::CParticleGroup*)pVisual;
 			for (PS::CParticleGroup::SItemVecIt i_it=pG->items.begin(); i_it!=pG->items.end(); ++i_it)	{
@@ -575,11 +504,7 @@ IC bool IsValuableToRender(dxRender_Visual* pVisual, bool sm)
 		return adjusted_distane;
 	};
 
-#if RENDER!=R_R1
 	u32 smapsize = RImplementation.o.smapsize;
-#else
-	u32 smapsize = 2048;
-#endif
 
 	if (sm && smapsize < 4096)
 	{
@@ -946,11 +871,7 @@ void CRender::add_Static(dxRender_Visual *pVisual, u32 planes)
 				N->val.ssa				= ssa;
 				N->val.pVisual			= pVisual;
 			}
-#if RENDER!=R_R1
 			if (ssa>r_ssaLOD_B || phase==PHASE_SMAP)
-#else
-			if (ssa>r_ssaLOD_B)
-#endif
 			{
 				// Add all children, perform tests
 				I = pV->children.begin	();
