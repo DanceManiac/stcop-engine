@@ -2491,6 +2491,9 @@
     <Filter Include="Core\Client\Objects\items &amp; weapons\Weapons\Custom Weapon\Weapon Generic\Refactored">
       <UniqueIdentifier>{c1e5e685-0596-498f-be3a-ffe061f0dbce}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Core\Client\Objects\items &amp; weapons\Weapons\Custom Weapon\Weapon Generic\Refactored\Functors">
+      <UniqueIdentifier>{ed7c89e6-7cf5-4d03-bd3b-6b64cf33228d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="mt_config.h">
@@ -10986,6 +10989,39 @@
     <ClCompile Include="AmebaZone.cpp" />
     <ClCompile Include="Weapon.cpp">
       <Filter>Core\Client\Objects\items &amp; weapons\Weapons\Custom Weapon\Weapon Generic\Refactored</Filter>
+    </ClCompile>
+    <ClCompile Include="WeaponFunctors.cpp">
+      <Filter>Core\Client\Objects\items &amp; weapons\Weapons\Custom Weapon\Weapon Generic\Refactored\Functors</Filter>
+    </ClCompile>
+    <ClCompile Include="WeaponCommonFunctors.cpp">
+      <Filter>Core\Client\Objects\items &amp; weapons\Weapons\Custom Weapon\Weapon Generic\Refactored\Functors</Filter>
+    </ClCompile>
+    <ClCompile Include="WeaponAmmoController.cpp">
+      <Filter>Core\Client\Objects\items &amp; weapons\Weapons\Custom Weapon\Weapon Generic\Refactored\Functors</Filter>
+    </ClCompile>
+    <ClCompile Include="WeaponZoomController.cpp">
+      <Filter>Core\Client\Objects\items &amp; weapons\Weapons\Custom Weapon\Weapon Generic\Refactored\Functors</Filter>
+    </ClCompile>
+    <ClCompile Include="WeaponShootController.cpp">
+      <Filter>Core\Client\Objects\items &amp; weapons\Weapons\Custom Weapon\Weapon Generic\Refactored\Functors</Filter>
+    </ClCompile>
+    <ClCompile Include="WeaponAddonController.cpp">
+      <Filter>Core\Client\Objects\items &amp; weapons\Weapons\Custom Weapon\Weapon Generic\Refactored\Functors</Filter>
+    </ClCompile>
+    <ClCompile Include="WeaponAddonFunctors.cpp">
+      <Filter>Core\Client\Objects\items &amp; weapons\Weapons\Custom Weapon\Weapon Generic\Refactored\Functors</Filter>
+    </ClCompile>
+    <ClCompile Include="WeaponLoad.cpp">
+      <Filter>Core\Client\Objects\items &amp; weapons\Weapons\Custom Weapon\Weapon Generic\Refactored\Functors</Filter>
+    </ClCompile>
+    <ClCompile Include="WeaponRendering.cpp">
+      <Filter>Core\Client\Objects\items &amp; weapons\Weapons\Custom Weapon\Weapon Generic\Refactored\Functors</Filter>
+    </ClCompile>
+    <ClCompile Include="WeaponInertion.cpp">
+      <Filter>Core\Client\Objects\items &amp; weapons\Weapons\Custom Weapon\Weapon Generic\Refactored\Functors</Filter>
+    </ClCompile>
+    <ClCompile Include="WeaponSaveManager.cpp">
+      <Filter>Core\Client\Objects\items &amp; weapons\Weapons\Custom Weapon\Weapon Generic\Refactored\Functors</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
