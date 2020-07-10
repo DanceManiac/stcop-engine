@@ -162,6 +162,8 @@ bool CWeapon::AllowBore()
 	return true;
 }
 
+extern u32 hud_adj_mode;
+
 void CWeapon::UpdateCL()
 {
 	inherited::UpdateCL();
@@ -255,8 +257,6 @@ BOOL CWeapon::ParentIsActor()
 
 	return EA->cast_actor() != 0;
 }
-
-extern u32 hud_adj_mode;
 
 bool CWeapon::ZoomHideCrosshair()
 {

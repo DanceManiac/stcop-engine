@@ -104,6 +104,8 @@ public:
 
 	virtual void	InitAddons		();
 
+	
+
 	virtual bool	Action			(u16 cmd, u32 flags);
 	bool			IsAmmoAvailable	();
 

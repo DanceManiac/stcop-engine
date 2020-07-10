@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "Weapon.h"
 #include "actor.h"
+#include "ui/UIWindow.h"
 
 ENGINE_API extern float psHUD_FOV_def;
 
@@ -75,5 +76,5 @@ CWeapon::CWeapon()
 CWeapon::~CWeapon()
 {
 	xr_delete(m_UIScope);
-	delete_data(m_scopes);
+	delete_data(m_addons_list);
 }

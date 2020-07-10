@@ -34,23 +34,44 @@ public:
 	CWeapon();
 	virtual					~CWeapon();
 
+public:
+	xr_vector<shared_str>	m_ammoTypes;
+
+	xr_vector<shared_str>	m_addons_list;      // All addons section list
+	xr_vector<shared_str>	m_addons_item_list; // Addon items
+	xr_vector<shared_str>	m_fakes_list;       // Fake skeletons for addons
+
+	u8						m_cur_scope;
+	u8						m_cur_silencer; // Silencer or soundmoderator
+	u8						m_cur_glauncher;
+
+	CWeaponAmmo*			m_pCurrentAmmo;
+	u8						m_ammoType;
+	bool					m_bHasTracers;
+	u8						m_u8TracerColorID;
+	u8						m_set_next_ammoType_on_reload;
+	// Multitype ammo support
+	xr_vector<CCartridge>	m_magazine;
+	CCartridge				m_DefaultCartridge;
+	float					m_fCurrentCartirdgeDisp;
+
 	// [FFT++]: аддоны и управление аддонами
 	bool			bUseAltScope;
 	bool			bScopeIsHasTexture;
 	bool            bNVsecondVPavaible;
 	bool            bNVsecondVPstatus;
 
-	virtual	bool			bInZoomRightNow() const { return m_zoom_params.m_fZoomRotationFactor > 0.05; }
-	IC		bool			bIsSecondVPZoomPresent() const { return GetSecondVPZoomFactor() > 0.000f; }
+	virtual	bool	bInZoomRightNow() const { return m_zoom_params.m_fZoomRotationFactor > 0.05; }
+	IC		bool	bIsSecondVPZoomPresent() const { return GetSecondVPZoomFactor() > 0.000f; }
 	bool			bLoadAltScopesParams(LPCSTR section);
 	bool            bReloadSectionScope(LPCSTR section);
-	virtual	bool            bMarkCanShow() { return IsZoomed(); }
+	virtual	bool    bMarkCanShow() { return IsZoomed(); }
 	bool            bChangeNVSecondVPStatus();
 
-	virtual void			UpdateAddonsTransform(bool for_hud = false); // FFT++
-	virtual void			UpdateAddonsHudParams(); // FFT++
+	virtual void	UpdateAddonsTransform(bool for_hud = false); // FFT++
+	virtual void	UpdateAddonsHudParams(); // FFT++
 
-	virtual void			UpdateSecondVP(bool bInGrenade = false);
+	virtual void	UpdateSecondVP(bool bInGrenade = false);
 	void			LoadModParams(LPCSTR section);
 	void			Load3DScopeParams(LPCSTR section);
 	void			LoadOriginalScopesParams(LPCSTR section);
@@ -59,8 +80,8 @@ public:
 	void			ZoomDynamicMod(bool bIncrement, bool bForceLimit);
 	void			UpdateAltScope();
 
-	virtual float			GetControlInertionFactor() const;
-	IC		float			GetZRotatingFactor()    const { return m_zoom_params.m_fZoomRotationFactor; }
+	virtual float	GetControlInertionFactor() const;
+	IC		float	GetZRotatingFactor()    const { return m_zoom_params.m_fZoomRotationFactor; }
 	float			GetSecondVPZoomFactor() const;
 	float			GetHudFov();
 	float			GetSecondVPFov() const;
@@ -84,92 +105,6 @@ public:
 	float			m_fLR_InertiaFactor; // Фактор горизонтальной инерции худа при движении камеры [-1; +1]
 	float			m_fUD_InertiaFactor; // Фактор вертикальной инерции худа при движении камеры [-1; +1]
 	Fvector			m_strafe_offset[4][2]; //pos,rot,data1,data2/ normal,aim-GL --#SM+#--
-
-//Adjusting world position
-
-	virtual Fvector get_angle_offset()
-	{
-		VERIFY(m_dbgItem);
-		Fvector v;
-		m_strapped_mode ? m_StrapOffset.getHPB(v) : m_Offset.getHPB(v);
-		return v;
-	};
-	virtual Fvector get_pos_offset()
-	{
-		VERIFY(m_dbgItem);
-		return m_strapped_mode ? m_StrapOffset.c : m_Offset.c;
-	};
-	virtual void set_angle_offset(Fvector val)
-	{
-		Fvector c = get_pos_offset();
-		Fmatrix& mat = m_strapped_mode ? m_StrapOffset : m_Offset;
-		mat.setHPB(VPUSH(val));
-		mat.c = c;
-	}
-	virtual void rot(int axis, float val)
-	{
-		Fvector v = get_angle_offset();
-		v[axis] += val;
-		set_angle_offset(v);
-	}
-	virtual void rot_dx(float val)
-	{
-		Fvector v = get_angle_offset();
-		v.x += val;
-		set_angle_offset(v);
-	}
-	virtual void rot_dy(float val)
-	{
-		Fvector v = get_angle_offset();
-		v.y += val;
-		set_angle_offset(v);
-	}
-	virtual void rot_dz(float val)
-	{
-		Fvector v = get_angle_offset();
-		v.z += val;
-		set_angle_offset(v);
-	}
-
-	virtual void mov(int axis, float val)
-	{
-		Fvector c = get_pos_offset();
-		c[axis] += val;
-		if (m_strapped_mode)
-			m_StrapOffset.c = c;
-		else
-			m_Offset.c = c;
-	}
-	virtual void mov_dx(float val)
-	{
-		Fvector c = get_pos_offset();
-		c.x += val;
-		if (m_strapped_mode)
-			m_StrapOffset.c = c;
-		else
-			m_Offset.c = c;
-	}
-	virtual void mov_dy(float val)
-	{
-		Fvector c = get_pos_offset();
-		c.y += val;
-		if (m_strapped_mode)
-			m_StrapOffset.c = c;
-		else
-			m_Offset.c = c;
-	}
-	virtual void mov_dz(float val)
-	{
-		Fvector c = get_pos_offset();
-		c.z += val;
-		if (m_strapped_mode)
-			m_StrapOffset.c = c;
-		else
-			m_Offset.c = c;
-	}
-	virtual void SaveAttachableParams();
-	virtual void ParseCurrentItem(CGameFont* F);
-	//End=================================
 
 	// Generic
 	virtual void			Load(LPCSTR section);
@@ -562,25 +497,8 @@ protected:
 	bool					m_bAmmoWasSpawned;
 
 	virtual bool			IsNecessaryItem(const shared_str& item_sect);
-
 public:
-	xr_vector<shared_str>	m_ammoTypes;
-
-	DEFINE_VECTOR(shared_str, SCOPES_VECTOR, SCOPES_VECTOR_IT);
-	SCOPES_VECTOR			m_scopes;
-	u8						m_cur_scope;
-
-	CWeaponAmmo* m_pCurrentAmmo;
-	u8						m_ammoType;
-	bool					m_bHasTracers;
-	u8						m_u8TracerColorID;
-	u8						m_set_next_ammoType_on_reload;
-	// Multitype ammo support
-	xr_vector<CCartridge>	m_magazine;
-	CCartridge				m_DefaultCartridge;
-	float					m_fCurrentCartirdgeDisp;
-
-	bool				unlimited_ammo();
+	bool					unlimited_ammo();
 	IC	bool				can_be_strapped() const { return m_can_be_strapped; };
 
 protected:
@@ -616,7 +534,7 @@ private:
 	float					m_hit_probability[egdCount];
 
 public:
-	const float& hit_probability() const;
+	const float&			hit_probability() const;
 
 private:
 	Fvector					m_overriden_activation_speed;
@@ -626,10 +544,96 @@ private:
 	bool					m_bRememberActorNVisnStatus;
 public:
 	virtual void			SetActivationSpeedOverride(Fvector const& speed);
-	bool			GetRememberActorNVisnStatus() { return m_bRememberActorNVisnStatus; };
+	bool					GetRememberActorNVisnStatus() { return m_bRememberActorNVisnStatus; };
 	virtual void			EnableActorNVisnAfterZoom();
 
 	virtual void				DumpActiveParams(shared_str const& section_name, CInifile& dst_ini) const;
 	virtual shared_str const	GetAnticheatSectionName() const { return cNameSect(); };
+
+	//Adjusting world position
+
+	virtual Fvector get_angle_offset()
+	{
+		VERIFY(m_dbgItem);
+		Fvector v;
+		m_strapped_mode ? m_StrapOffset.getHPB(v) : m_Offset.getHPB(v);
+		return v;
+	};
+	virtual Fvector get_pos_offset()
+	{
+		VERIFY(m_dbgItem);
+		return m_strapped_mode ? m_StrapOffset.c : m_Offset.c;
+	};
+	virtual void set_angle_offset(Fvector val)
+	{
+		Fvector c = get_pos_offset();
+		Fmatrix& mat = m_strapped_mode ? m_StrapOffset : m_Offset;
+		mat.setHPB(VPUSH(val));
+		mat.c = c;
+	}
+	virtual void rot(int axis, float val)
+	{
+		Fvector v = get_angle_offset();
+		v[axis] += val;
+		set_angle_offset(v);
+	}
+	virtual void rot_dx(float val)
+	{
+		Fvector v = get_angle_offset();
+		v.x += val;
+		set_angle_offset(v);
+	}
+	virtual void rot_dy(float val)
+	{
+		Fvector v = get_angle_offset();
+		v.y += val;
+		set_angle_offset(v);
+	}
+	virtual void rot_dz(float val)
+	{
+		Fvector v = get_angle_offset();
+		v.z += val;
+		set_angle_offset(v);
+	}
+
+	virtual void mov(int axis, float val)
+	{
+		Fvector c = get_pos_offset();
+		c[axis] += val;
+		if (m_strapped_mode)
+			m_StrapOffset.c = c;
+		else
+			m_Offset.c = c;
+	}
+	virtual void mov_dx(float val)
+	{
+		Fvector c = get_pos_offset();
+		c.x += val;
+		if (m_strapped_mode)
+			m_StrapOffset.c = c;
+		else
+			m_Offset.c = c;
+	}
+	virtual void mov_dy(float val)
+	{
+		Fvector c = get_pos_offset();
+		c.y += val;
+		if (m_strapped_mode)
+			m_StrapOffset.c = c;
+		else
+			m_Offset.c = c;
+	}
+	virtual void mov_dz(float val)
+	{
+		Fvector c = get_pos_offset();
+		c.z += val;
+		if (m_strapped_mode)
+			m_StrapOffset.c = c;
+		else
+			m_Offset.c = c;
+	}
+	virtual void SaveAttachableParams();
+	virtual void ParseCurrentItem(CGameFont* F);
+	//End=================================
 };
 

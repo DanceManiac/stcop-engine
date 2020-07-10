@@ -51,7 +51,7 @@ int CWeapon::GetScopeX()
 	}
 	else
 	{
-		return pSettings->r_s32(m_scopes[m_cur_scope], "scope_x");
+		return pSettings->r_s32(m_addons_list[m_cur_scope], "scope_x");
 	}
 }
 
@@ -70,7 +70,7 @@ int CWeapon::GetScopeY()
 	}
 	else
 	{
-		return pSettings->r_s32(m_scopes[m_cur_scope], "scope_y");
+		return pSettings->r_s32(m_addons_list[m_cur_scope], "scope_y");
 	}
 }
 
@@ -78,11 +78,11 @@ const shared_str CWeapon::GetScopeName() const
 {
 	if (bUseAltScope)
 	{
-		return m_scopes[m_cur_scope];
+		return m_addons_list[m_cur_scope];
 	}
 	else
 	{
-		return pSettings->r_string(m_scopes[m_cur_scope], "scope_name");
+		return pSettings->r_string(m_addons_list[m_cur_scope], "scope_name");
 	}
 }
 
@@ -107,7 +107,7 @@ float CWeapon::Weight() const
 	if (IsGrenadeLauncherAttached() && GetGrenadeLauncherName().size()) {
 		res += pSettings->r_float(GetGrenadeLauncherName(), "inv_weight");
 	}
-	if (IsScopeAttached() && m_scopes.size()) {
+	if (IsScopeAttached() && m_addons_list.size()) {
 		res += pSettings->r_float(GetScopeName(), "inv_weight");
 	}
 	if (IsSilencerAttached() && GetSilencerName().size()) {
@@ -131,7 +131,7 @@ u32 CWeapon::Cost() const
 	if (IsGrenadeLauncherAttached() && GetGrenadeLauncherName().size()) {
 		res += pSettings->r_u32(GetGrenadeLauncherName(), "cost");
 	}
-	if (IsScopeAttached() && m_scopes.size()) {
+	if (IsScopeAttached() && m_addons_list.size()) {
 		res += pSettings->r_u32(GetScopeName(), "cost");
 	}
 	if (IsSilencerAttached() && GetSilencerName().size()) {

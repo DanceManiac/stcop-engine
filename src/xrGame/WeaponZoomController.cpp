@@ -5,6 +5,7 @@
 #include "inventory.h"
 #include "gamepersistent.h"
 #include "HUDManager.h"
+#include "WeaponBinocularsVision.h"
 
 ENGINE_API extern float psHUD_FOV_def;
 

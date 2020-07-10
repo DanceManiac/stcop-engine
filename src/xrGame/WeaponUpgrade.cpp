@@ -233,7 +233,7 @@ bool CWeapon::install_upgrade_addon_old( LPCSTR section, bool test )
 					}
 					else
 					{
-						m_scopes.push_back(scope_section);
+						m_addons_list.push_back(scope_section);
 					}
 				}
 			}
@@ -249,17 +249,17 @@ bool CWeapon::install_upgrade_addon_old( LPCSTR section, bool test )
 						{
 							string128						scope_section;
 							_GetItem(str, i, scope_section);
-							m_scopes.push_back(scope_section);
+							m_addons_list.push_back(scope_section);
 						}
 					}
 					else
 					{
-						m_scopes.push_back(section);
+						m_addons_list.push_back(section);
 					}
 				}
 				else
 				{
-					m_scopes.push_back(section);
+					m_addons_list.push_back(section);
 					if (m_eScopeStatus == ALife::eAddonPermanent)
 						InitAddons();
 				}

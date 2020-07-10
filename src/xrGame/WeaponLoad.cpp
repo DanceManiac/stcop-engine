@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "Weapon.h"
+#include "ui/UIWindow.h"
 #include "ui/UIXmlInit.h"
 
 extern CUIXml* pWpnScopeXml = NULL;
@@ -472,7 +473,7 @@ bool CWeapon::bLoadAltScopesParams(LPCSTR section)
 		{
 			string128 scope_section;
 			_GetItem(str, i, scope_section);
-			m_scopes.push_back(scope_section);
+			m_addons_list.push_back(scope_section);
 		}
 	}
 	else if (m_eScopeStatus == ALife::eAddonPermanent)
@@ -494,12 +495,12 @@ void CWeapon::LoadOriginalScopesParams(LPCSTR section)
 			{
 				string128						scope_section;
 				_GetItem(str, i, scope_section);
-				m_scopes.push_back(scope_section);
+				m_addons_list.push_back(scope_section);
 			}
 		}
 		else
 		{
-			m_scopes.push_back(section);
+			m_addons_list.push_back(section);
 		}
 	}
 	else if (m_eScopeStatus == ALife::eAddonPermanent)
