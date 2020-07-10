@@ -9,12 +9,16 @@
 #include <d3dx9.h>
 #pragma warning(default:4995)
 
-#include <D3DX10Tex.h>
+#include <D3DX11Tex.h>
 
 #include "../xrRender/dxRenderDeviceRender.h"
 
+#include "XRayDDSLoader.h"
+
 // #include "std_classes.h"
 // #include "xr_avi.h"
+
+#define OLD_LOADER_DDS
 
 void fix_texture_name(LPSTR fn)
 {
@@ -130,264 +134,108 @@ void				TW_Save	(ID3DTexture2D* T, LPCSTR name, LPCSTR prefix, LPCSTR postfix)
 		if ('\\'==fn[it])	fn[it]	= '_';
 	string256		fn2;	strconcat	(sizeof(fn2),fn2,"debug\\",fn,".dds");
 	Log						("* debug texture save: ",fn2);
-#ifdef USE_DX11
+
 	R_CHK					(D3DX11SaveTextureToFile(HW.pContext, T, D3DX11_IFF_DDS, fn2));
-#else
-	R_CHK					(D3DX10SaveTextureToFile(T, D3DX10_IFF_DDS, fn2));
-#endif
 }
-/*
-ID3DTexture2D*	TW_LoadTextureFromTexture
-(
- ID3DTexture2D*		t_from,
- D3DFORMAT&				t_dest_fmt,
- int						levels_2_skip,
- u32&					w,
- u32&					h
- )
+
+ID3DBaseTexture* CRender::texture_load(LPCSTR fRName, u32& ret_msize, bool bStaging)
 {
-	// Calculate levels & dimensions
-	ID3DTexture2D*		t_dest			= NULL;
-	D3DSURFACE_DESC			t_from_desc0	;
-	R_CHK					(t_from->GetLevelDesc	(0,&t_from_desc0));
-	int levels_exist		= t_from->GetLevelCount();
-	int top_width			= t_from_desc0.Width;
-	int top_height			= t_from_desc0.Height;
-	Reduce					(top_width,top_height,levels_exist,levels_2_skip);
+	//Moved here just to avoid warning
 
-	// Create HW-surface
-	if (D3DX_DEFAULT==t_dest_fmt)	t_dest_fmt = t_from_desc0.Format;
-	R_CHK					(D3DXCreateTexture(
-		HW.pDevice,
-		top_width,top_height,
-		levels_exist,0,t_dest_fmt,
-		D3DPOOL_MANAGED,&t_dest
-		));
+	//R_ASSERT(fRName);
 
-	// Copy surfaces & destroy temporary
-	ID3DTexture2D* T_src= t_from;
-	ID3DTexture2D* T_dst= t_dest;
+	D3DX11_IMAGE_INFO IMG;
 
-	int		L_src			= T_src->GetLevelCount	()-1;
-	int		L_dst			= T_dst->GetLevelCount	()-1;
-	for (; L_dst>=0; L_src--,L_dst--)
-	{
-		// Get surfaces
-		IDirect3DSurface9		*S_src, *S_dst;
-		R_CHK	(T_src->GetSurfaceLevel	(L_src,&S_src));
-		R_CHK	(T_dst->GetSurfaceLevel	(L_dst,&S_dst));
-
-		// Copy
-		R_CHK	(D3DXLoadSurfaceFromSurface(S_dst,NULL,NULL,S_src,NULL,NULL,D3DX_FILTER_NONE,0));
-
-		// Release surfaces
-		_RELEASE				(S_src);
-		_RELEASE				(S_dst);
-	}
-
-	// OK
-	w						= top_width;
-	h						= top_height;
-	return					t_dest;
-}
-
-template	<class _It>
-IC	void	TW_Iterate_1OP
-(
- ID3DTexture2D*		t_dst,
- ID3DTexture2D*		t_src,
- const _It				pred
- )
-{
-	DWORD mips							= t_dst->GetLevelCount();
-	R_ASSERT							(mips == t_src->GetLevelCount());
-	for (DWORD i = 0; i < mips; i++)	{
-		D3DLOCKED_RECT				Rsrc,Rdst;
-		D3DSURFACE_DESC				desc,descS;
-
-		t_dst->GetLevelDesc			(i, &desc);
-		t_src->GetLevelDesc			(i, &descS);
-		VERIFY						(desc.Format==descS.Format);
-		VERIFY						(desc.Format==D3DFMT_A8R8G8B8);
-		t_src->LockRect				(i,&Rsrc,0,0);
-		t_dst->LockRect				(i,&Rdst,0,0);
-		for (u32 y = 0; y < desc.Height; y++)	{
-			for (u32 x = 0; x < desc.Width; x++)	{
-				DWORD&	pSrc	= *(((DWORD*)((BYTE*)Rsrc.pBits + (y * Rsrc.Pitch)))+x);
-				DWORD&	pDst	= *(((DWORD*)((BYTE*)Rdst.pBits + (y * Rdst.Pitch)))+x);
-				pDst			= pred(pDst,pSrc);
-			}
-		}
-		t_dst->UnlockRect			(i);
-		t_src->UnlockRect			(i);
-	}
-}
-template	<class _It>
-IC	void	TW_Iterate_2OP
-(
- ID3DTexture2D*		t_dst,
- ID3DTexture2D*		t_src0,
- ID3DTexture2D*		t_src1,
- const _It				pred
- )
-{
-	DWORD mips							= t_dst->GetLevelCount();
-	R_ASSERT							(mips == t_src0->GetLevelCount());
-	R_ASSERT							(mips == t_src1->GetLevelCount());
-	for (DWORD i = 0; i < mips; i++)	{
-		D3DLOCKED_RECT				Rsrc0,Rsrc1,Rdst;
-		D3DSURFACE_DESC				desc,descS0,descS1;
-
-		t_dst->GetLevelDesc			(i, &desc);
-		t_src0->GetLevelDesc		(i, &descS0);
-		t_src1->GetLevelDesc		(i, &descS1);
-		VERIFY						(desc.Format==descS0.Format);
-		VERIFY						(desc.Format==descS1.Format);
-		VERIFY						(desc.Format==D3DFMT_A8R8G8B8);
-		t_src0->LockRect			(i,&Rsrc0,	0,0);
-		t_src1->LockRect			(i,&Rsrc1,	0,0);
-		t_dst->LockRect				(i,&Rdst,	0,0);
-		for (u32 y = 0; y < desc.Height; y++)	{
-			for (u32 x = 0; x < desc.Width; x++)	{
-				DWORD&	pSrc0	= *(((DWORD*)((BYTE*)Rsrc0.pBits + (y * Rsrc0.Pitch)))+x);
-				DWORD&	pSrc1	= *(((DWORD*)((BYTE*)Rsrc1.pBits + (y * Rsrc1.Pitch)))+x);
-				DWORD&	pDst	= *(((DWORD*)((BYTE*)Rdst.pBits  + (y * Rdst.Pitch)))+x);
-				pDst			= pred(pDst,pSrc0,pSrc1);
-			}
-		}
-		t_dst->UnlockRect			(i);
-		t_src0->UnlockRect			(i);
-		t_src1->UnlockRect			(i);
-	}
-}
-
-IC u32 it_gloss_rev		(u32 d, u32 s)	{	return	color_rgba	(
-	color_get_A(s),		// gloss
-	color_get_B(d),
-	color_get_G(d),
-	color_get_R(d)		);
-}
-IC u32 it_gloss_rev_base(u32 d, u32 s)	{	
-	u32		occ		= color_get_A(d)/3;
-	u32		def		= 8;
-	u32		gloss	= (occ*1+def*3)/4;
-	return	color_rgba	(
-		gloss,			// gloss
-		color_get_B(d),
-		color_get_G(d),
-		color_get_R(d)
-		);
-}
-IC u32 it_difference	(u32 d, u32 orig, u32 ucomp)	{	return	color_rgba(
-	128+(int(color_get_R(orig))-int(color_get_R(ucomp)))*2,		// R-error
-	128+(int(color_get_G(orig))-int(color_get_G(ucomp)))*2,		// G-error
-	128+(int(color_get_B(orig))-int(color_get_B(ucomp)))*2,		// B-error
-	128+(int(color_get_A(orig))-int(color_get_A(ucomp)))*2	);	// A-error	
-}
-IC u32 it_height_rev	(u32 d, u32 s)	{	return	color_rgba	(
-	color_get_A(d),					// diff x
-	color_get_B(d),					// diff y
-	color_get_G(d),					// diff z
-	color_get_R(s)	);				// height
-}
-IC u32 it_height_rev_base(u32 d, u32 s)	{	return	color_rgba	(
-	color_get_A(d),					// diff x
-	color_get_B(d),					// diff y
-	color_get_G(d),					// diff z
-	(color_get_R(s)+color_get_G(s)+color_get_B(s))/3	);	// height
-}
-*/
-ID3DBaseTexture*	CRender::texture_load(LPCSTR fRName, u32& ret_msize, bool bStaging)
-{
-	//	Moved here just to avoid warning
-#ifdef USE_DX11
-	D3DX11_IMAGE_INFO			IMG;
-#else
-	D3DX10_IMAGE_INFO			IMG;
-#endif
 	ZeroMemory(&IMG, sizeof(IMG));
 
 	//	Staging control
-	static const bool bAllowStaging = strstr(Core.Params, "-staging");
+	static bool bAllowStaging = !strstr(Core.Params, "staging");
 	bStaging &= bAllowStaging;
 
-	ID3DBaseTexture*		pTexture2D		= NULL;
-	//IDirect3DCubeTexture9*	pTextureCUBE	= NULL;
+	ID3DBaseTexture* pTexture2D = NULL;
+
 	string_path				fn;
-	//u32						dwWidth,dwHeight;
-	u32						img_size		= 0;
-	int						img_loaded_lod	= 0;
-	//D3DFORMAT				fmt;
-	u32						mip_cnt=u32(-1);
+	u32						img_size = 0;
+	int						img_loaded_lod = 0;
+
+	u32						mip_cnt = u32(-1);
 	// validation
-	R_ASSERT				(fRName);
-	R_ASSERT				(fRName[0]);
+	R_ASSERT(fRName);
+	R_ASSERT(fRName[0]);
 
 	// make file name
-	string_path				fname;
-	xr_strcpy(fname,fRName); //. andy if (strext(fname)) *strext(fname)=0;
-	fix_texture_name		(fname);
-	IReader* S				= NULL;
-	if (!FS.exist(fn,"$game_textures$",	fname,	".dds")	&& strstr(fname,"_bump"))	goto _BUMP_from_base;
-	if (FS.exist(fn,"$level$",			fname,	".dds"))							goto _DDS;
-	if (FS.exist(fn,"$game_saves$",		fname,	".dds"))							goto _DDS;
-	if (FS.exist(fn,"$game_textures$",	fname,	".dds"))							goto _DDS;
+	string_path fname;
+	xr_strcpy(fname, fRName); //. andy if (strext(fname)) *strext(fname)=0;
 
+	fix_texture_name(fname);
+	XRayDDSLoader TextureLoader;
+	IReader* S = NULL;
 
-#ifdef _EDITOR
-	ELog.Msg(mtError,"Can't find texture '%s'",fname);
-	return 0;
-#else
+	if (!FS.exist(fn, "$game_textures$", fname, ".dds") && strstr(fname, "_bump"))	goto _BUMP_from_base;
+	if (FS.exist(fn, "$level$", fname, ".dds"))									goto _DDS;
+	if (FS.exist(fn, "$game_saves$", fname, ".dds"))							goto _DDS;
+	if (FS.exist(fn, "$game_textures$", fname, ".dds"))							goto _DDS;
+CANT_LOAD:
+	Msg("! Can't find texture '%s'", fname);
 
-	Msg("! Can't find texture '%s'",fname);
-	R_ASSERT(FS.exist(fn,"$game_textures$",	"ed\\ed_not_existing_texture",".dds"));
+	// Use default no texture
+	R_ASSERT(FS.exist(fn, "$game_textures$", "ed\\ed_not_existing_texture", ".dds"));
+
 	goto _DDS;
-
-	//	Debug.fatal(DEBUG_INFO,"Can't find texture '%s'",fname);
-
-#endif
 
 _DDS:
 	{
 		// Load and get header
+#ifdef OLD_LOADER_DDS
 
-		S						= FS.r_open	(fn);
-#ifdef DEBUG
-		Msg						("* Loaded: %s[%d]",fn,S->length());
-#endif // DEBUG
-		img_size				= S->length	();
-		R_ASSERT				(S);
-		//R_CHK2					(D3DXGetImageInfoFromFileInMemory	(S->pointer(),S->length(),&IMG), fn);
-#ifdef USE_DX11
-		R_CHK2 (D3DX11GetImageInfoFromMemory(S->pointer(),S->length(), 0, &IMG, 0), fn);
+		S = FS.r_open(fn);
+
+		img_size = S->length();
+
+		R_ASSERT(S);
+
+		R_CHK2(D3DX11GetImageInfoFromMemory(S->pointer(), S->length(), 0, &IMG, 0), fn);
+
+		//if (IMG.ResourceType	== D3DRTYPE_CUBETEXTURE) goto _DDS_CUBE;
+
+		if (IMG.MiscFlags & D3D_RESOURCE_MISC_TEXTURECUBE)
+			goto _DDS_CUBE;
+		else
+			goto _DDS_2D;
 #else
-		R_CHK2 (D3DX10GetImageInfoFromMemory(S->pointer(),S->length(), 0, &IMG, 0), fn);
-#endif
-		//if (IMG.ResourceType	== D3DRTYPE_CUBETEXTURE)			goto _DDS_CUBE;
-		if (IMG.MiscFlags & D3D_RESOURCE_MISC_TEXTURECUBE)			goto _DDS_CUBE;
-		else														goto _DDS_2D;
-
-_DDS_CUBE:
 		{
-			//R_CHK(D3DXCreateCubeTextureFromFileInMemoryEx(
-			//	HW.pDevice,
-			//	S->pointer(),S->length(),
-			//	D3DX_DEFAULT,
-			//	IMG.MipLevels,0,
-			//	IMG.Format,
-			//	D3DPOOL_MANAGED,
-			//	D3DX_DEFAULT,
-			//	D3DX_DEFAULT,
-			//	0,&IMG,0,
-			//	&pTextureCUBE
-			//	));
-
-			//	Inited to default by provided default constructor
-#ifdef USE_DX11
-			D3DX11_IMAGE_LOAD_INFO LoadInfo;
-#else
-			D3DX10_IMAGE_LOAD_INFO LoadInfo;
+#ifdef DEBUG
+			Msg("Load Texture:%s", fn);
 #endif
+			if (!TextureLoader.Load(fn))
+			{
+				Msg("Cant Load Texture:%s", fn);
+				goto CANT_LOAD;
+			}
+			else
+			{
+				if (TextureLoader.isCube())
+				{
+#ifdef DEBUG
+					Msg("is cube Texture:%s", fn);
+#endif
+					goto _DDS_CUBE;
+				}
+				else
+				{
+					goto _DDS_2D;
+				}
+			}
+		}
+#endif
+
+	_DDS_CUBE:
+
+		{
+#ifdef OLD_LOADER_DDS
+			//	Inited to default by provided default constructor
+			D3DX11_IMAGE_LOAD_INFO LoadInfo;
+
 			//LoadInfo.Usage = D3D_USAGE_IMMUTABLE;
 			if (bStaging)
 			{
@@ -397,78 +245,48 @@ _DDS_CUBE:
 			}
 			else
 			{
-				LoadInfo.Usage = D3D_USAGE_IMMUTABLE;
+				LoadInfo.Usage = D3D_USAGE_DEFAULT;
 				LoadInfo.BindFlags = D3D_BIND_SHADER_RESOURCE;
 			}
-			
+
 			LoadInfo.pSrcInfo = &IMG;
 
-#ifdef USE_DX11
-			R_CHK(D3DX11CreateTextureFromMemory(
-				HW.pDevice,
-				S->pointer(),S->length(),
-				&LoadInfo,
-				0,
-				&pTexture2D,
-				0
-				));
-#else
-			R_CHK(D3DX10CreateTextureFromMemory(
-				HW.pDevice,
-				S->pointer(),S->length(),
-				&LoadInfo,
-				0,
-				&pTexture2D,
-				0
-				));
-#endif
+			R_CHK(D3DX11CreateTextureFromMemory(HW.pDevice, S->pointer(), S->length(), &LoadInfo, 0, &pTexture2D, 0));
 
-			FS.r_close				(S);
+			FS.r_close(S);
 
 			// OK
-			mip_cnt					= IMG.MipLevels;
-			ret_msize				= calc_texture_size(img_loaded_lod, mip_cnt, img_size);
-			return					pTexture2D;
+			mip_cnt = IMG.MipLevels;
+			ret_msize = calc_texture_size(img_loaded_lod, mip_cnt, img_size);
+#else
+			ID3D11Texture2D* ptr = 0;
+			TextureLoader.To(ptr, bStaging);
+			ret_msize = (u32)TextureLoader.GetSizeInMemory();
+			pTexture2D = ptr;
+#endif
+			return pTexture2D;
 		}
-_DDS_2D:
+
+	_DDS_2D:
 		{
+#ifdef OLD_LOADER_DDS
 			// Check for LMAP and compress if needed
-			strlwr					(fn);
+			strlwr(fn);
 
-
-			// Load   SYS-MEM-surface, bound to device restrictions
-			//ID3DTexture2D*		T_sysmem;
-			//R_CHK2(D3DXCreateTextureFromFileInMemoryEx
-			//	(
-			//	HW.pDevice,S->pointer(),S->length(),
-			//	D3DX_DEFAULT,D3DX_DEFAULT,
-			//	IMG.MipLevels,0,
-			//	IMG.Format,
-			//	D3DPOOL_SYSTEMMEM,
-			//	D3DX_DEFAULT,
-			//	D3DX_DEFAULT,
-			//	0,&IMG,0,
-			//	&T_sysmem
-			//	), fn);
-
-			img_loaded_lod			= get_texture_load_lod(fn);
+			img_loaded_lod = get_texture_load_lod(fn);
 
 			//	Inited to default by provided default constructor
-#ifdef USE_DX11
+
 			D3DX11_IMAGE_LOAD_INFO LoadInfo;
-#else
-			D3DX10_IMAGE_LOAD_INFO LoadInfo;
-#endif
+
 			//LoadInfo.FirstMipLevel = img_loaded_lod;
-			LoadInfo.Width	= IMG.Width;
-			LoadInfo.Height	= IMG.Height;
+			LoadInfo.Width = IMG.Width;
+			LoadInfo.Height = IMG.Height;
 
-			LoadInfo.FirstMipLevel = img_loaded_lod;
-
-			/*if (img_loaded_lod) // Mortan: если буду чинить x32 не забыть вернуть
+			if (img_loaded_lod)
 			{
 				Reduce(LoadInfo.Width, LoadInfo.Height, IMG.MipLevels, img_loaded_lod);
-			}*/
+			}
 
 			//LoadInfo.Usage = D3D_USAGE_IMMUTABLE;
 			if (bStaging)
@@ -479,63 +297,68 @@ _DDS_2D:
 			}
 			else
 			{
-				LoadInfo.Usage = D3D_USAGE_IMMUTABLE;
+				LoadInfo.Usage = D3D_USAGE_DEFAULT;
 				LoadInfo.BindFlags = D3D_BIND_SHADER_RESOURCE;
 			}
+
 			LoadInfo.pSrcInfo = &IMG;
 
-#ifdef USE_DX11
-			R_CHK(D3DX11CreateTextureFromMemory
-				(
-				HW.pDevice,S->pointer(),S->length(),
-				&LoadInfo,
-				0,
-				&pTexture2D,
-				0
-				), fn);
-#else
-			R_CHK(D3DX10CreateTextureFromMemory
-				(
-				HW.pDevice,S->pointer(),S->length(),
-				&LoadInfo,
-				0,
-				&pTexture2D,
-				0
-				), fn);
-#endif
-			FS.r_close				(S);
-			mip_cnt					= IMG.MipLevels;
+			R_CHK2(D3DX11CreateTextureFromMemory(HW.pDevice, S->pointer(), S->length(), &LoadInfo, 0, &pTexture2D, 0), fn);
+
+			FS.r_close(S);
+			mip_cnt = IMG.MipLevels;
+
 			// OK
-			ret_msize				= calc_texture_size(img_loaded_lod, mip_cnt, img_size);
-			return					pTexture2D;
-		}
-	}
+			ret_msize = calc_texture_size(img_loaded_lod, mip_cnt, img_size);
+#else
+			ID3D11Texture2D* ptr = 0;
+			TextureLoader.To(ptr, bStaging);
+			ret_msize = (u32)TextureLoader.GetSizeInMemory();
+			pTexture2D = ptr;
+#endif
+			return pTexture2D;
+				}
+			}
 
 _BUMP_from_base:
 	{
-		//Msg			("! auto-generated bump map: %s",fname);
-		Msg			("! Fallback to default bump map: %s",fname);
-		//////////////////
-		if (strstr(fname,"_bump#"))			
-		{
-			R_ASSERT2	(FS.exist(fn,"$game_textures$",	"ed\\ed_dummy_bump#",	".dds"), "ed_dummy_bump#");
-			S						= FS.r_open	(fn);
-			R_ASSERT2				(S, fn);
-			img_size				= S->length	();
-			goto		_DDS_2D;
-		}
-		if (strstr(fname,"_bump"))			
-		{
-			R_ASSERT2	(FS.exist(fn,"$game_textures$",	"ed\\ed_dummy_bump",	".dds"),"ed_dummy_bump");
-			S						= FS.r_open	(fn);
+		// Use default no bump
 
-			R_ASSERT2	(S, fn);
+		Msg("! Can't find bump texture '%s'", fname);
 
-			img_size				= S->length	();
-			goto		_DDS_2D;
+		if (strstr(fname, "_bump#"))
+		{
+			R_ASSERT2(FS.exist(fn, "$game_textures$", "ed\\ed_dummy_bump#", ".dds"), "ed_dummy_bump#");
+
+			S = FS.r_open(fn);
+
+			R_ASSERT2(S, fn);
+
+			img_size = S->length();
+#ifndef OLD_LOADER_DDS
+			FS.r_close(S);
+			goto _DDS;
+#endif
+			goto _DDS_2D;
 		}
-		//////////////////
+
+		if (strstr(fname, "_bump"))
+		{
+			R_ASSERT2(FS.exist(fn, "$game_textures$", "ed\\ed_dummy_bump", ".dds"), "ed_dummy_bump");
+
+			S = FS.r_open(fn);
+
+			R_ASSERT2(S, fn);
+
+			img_size = S->length();
+#ifndef OLD_LOADER_DDS
+			FS.r_close(S);
+			goto _DDS;
+#endif
+			goto _DDS_2D;
+		}
 	}
 
 	return 0;
-}
+		}
+
