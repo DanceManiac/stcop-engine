@@ -563,14 +563,6 @@ void CRender::add_leafs_Static(dxRender_Visual *pVisual)
 	if (VIS == fcvNone)
 		return;
 
-/*#if RENDER!=R_R1
-	if (!IsValuableToRender(pVisual, phase == PHASE_SMAP))
-		return;
-#else
-	if (!IsValuableToRender(pVisual, false))
-		return;
-#endif*/
-
 	if (!HOM.visible(pVisual->vis))		return;
 
 	// Visual is 100% visible - simply add it
@@ -766,49 +758,50 @@ BOOL CRender::add_Dynamic(dxRender_Visual *pVisual, u32 planes)
 void CRender::add_StaticForCulling(dxRender_Visual* pVisual, CSector* sector)
 {
 	//Нужно проверить производиельность такого метода, может быть с ним будет хуже
-	//Чем в оригинале
-
-	for (u32 v_it = 0; v_it < sector->r_frustums.size(); v_it++)
-	{
-		u32 plane = sector->r_frustums[v_it].getMask();
-
-		if(pVisual->Type == MT_PARTICLE_GROUP || pVisual->Type == MT_LOD)
-			add_Static(pVisual, plane);
-		
-		switch (pVisual->Type) 
-		{
-			case MT_HIERRARHY:
-			{
-				// Add all children
-				FHierrarhyVisual* pV = (FHierrarhyVisual*)pVisual;
-				for (auto it : pV->children)
-				{
-
-				}
-			}break;
-		}
-
-	}
-	
+	//Чем в оригинале	
 }
 
-void CRender::add_Static(dxRender_Visual *pVisual, u32 planes)
+void CRender::add_Static(dxRender_Visual *pVisual, xr_vector<CFrustum>* sector_frustums, u64 mask)
 {
 
-/*#if RENDER!=R_R1
-	if (!IsValuableToRender(pVisual, phase == PHASE_SMAP))
-		return;
-#else
-	if (!IsValuableToRender(pVisual, false))
-		return;
-#endif*/
-
 	// Check frustum visibility and calculate distance to visual's center
-	EFC_Visible	VIS;
+	EFC_Visible	VIS_V,VIS_S = fcvNone;;
 	vis_data&	vis			= pVisual->vis;
-	VIS = View->testSAABB	(vis.sphere.P,vis.sphere.R,vis.box.data(),planes);
-	if (fcvNone==VIS)		
+
+	// Always test view frustum
+	u32 planes_v = View->getMask();
+
+	VIS_V = View->testSAABB	(vis.sphere.P,vis.sphere.R,vis.box.data(), planes_v);
+
+	if (fcvNone== VIS_V)
 		return;
+
+	u64 frustums_mask = mask;
+
+	// Test sector frustums, if prompted
+	if (sector_frustums && sector_frustums->size())
+	{
+		u64 loop_mask = 0;
+
+		for (size_t i = 0; i < sector_frustums->size(); ++i)
+		{
+			loop_mask = u64(1) << i;
+
+			if (mask & loop_mask) // basicly, this is to avoid testing non touching frustums in recursive calls to avoid slowdowns
+			{
+				u32 planes_s = sector_frustums->at(i).getMask();
+
+				EFC_Visible res = sector_frustums->at(i).testSAABB(vis.sphere.P, vis.sphere.R, vis.box.data(), planes_s);
+				VIS_S = (EFC_Visible)_max((u32)VIS_S, (u32)res); // save only partitial or fully and the greatest
+
+				if (res == fcvNone) // if not visible in this frustum - dont use it for recursive calls then
+					frustums_mask &= ~loop_mask;
+			}
+		}
+
+		if (VIS_S == fcvNone)
+			return;
+	}
 
 	if (!HOM.visible(vis))	
 		return;
@@ -823,10 +816,10 @@ void CRender::add_Static(dxRender_Visual *pVisual, u32 planes)
 			PS::CParticleGroup* pG = (PS::CParticleGroup*)pVisual;
 			for (PS::CParticleGroup::SItemVecIt i_it=pG->items.begin(); i_it!=pG->items.end(); ++i_it){
 				PS::CParticleGroup::SItem&			I		= *i_it;
-				if (fcvPartial==VIS) {
-					if (I._effect)		add_Dynamic				(I._effect,planes);
-					for (xr_vector<dxRender_Visual*>::iterator pit = I._children_related.begin();	pit!=I._children_related.end(); ++pit)	add_Dynamic(*pit,planes);
-					for (xr_vector<dxRender_Visual*>::iterator pit = I._children_free.begin();		pit!=I._children_free.end();	++pit)	add_Dynamic(*pit,planes);
+				if (fcvPartial== VIS_V) {
+					if (I._effect)		add_Dynamic				(I._effect, planes_v);
+					for (xr_vector<dxRender_Visual*>::iterator pit = I._children_related.begin();	pit!=I._children_related.end(); ++pit)	add_Dynamic(*pit, planes_v);
+					for (xr_vector<dxRender_Visual*>::iterator pit = I._children_free.begin();		pit!=I._children_free.end();	++pit)	add_Dynamic(*pit, planes_v);
 				} else {
 					if (I._effect)		add_leafs_Dynamic		(I._effect);
 					for (xr_vector<dxRender_Visual*>::iterator pit = I._children_related.begin();	pit!=I._children_related.end(); ++pit)	add_leafs_Dynamic(*pit);
@@ -841,8 +834,8 @@ void CRender::add_Static(dxRender_Visual *pVisual, u32 planes)
 			FHierrarhyVisual* pV = (FHierrarhyVisual*)pVisual;
 			I = pV->children.begin	();
 			E = pV->children.end		();
-			if (fcvPartial==VIS) {
-				for (; I!=E; ++I)	add_Static			(*I,planes);
+			if (fcvPartial==VIS_V) {
+				for (; I!=E; ++I)	add_Static			(*I, sector_frustums, frustums_mask);
 			} else {
 				for (; I!=E; ++I)	add_leafs_Static	(*I);
 			}
@@ -856,8 +849,8 @@ void CRender::add_Static(dxRender_Visual *pVisual, u32 planes)
 			pV->CalculateBones		(TRUE);
 			I = pV->children.begin	();
 			E = pV->children.end	();
-			if (fcvPartial==VIS) {
-				for (; I!=E; ++I)	add_Static			(*I,planes);
+			if (fcvPartial==VIS_V) {
+				for (; I!=E; ++I)	add_Static			(*I, sector_frustums, frustums_mask);
 			} else {
 				for (; I!=E; ++I)	add_leafs_Static	(*I);
 			}

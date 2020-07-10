@@ -82,10 +82,7 @@ void CRender::render_main	(Fmatrix&	m_ViewProjection, bool _fportals)
 		{
 			CSector*	sector		= (CSector*)PortalTraverser.r_sectors[s_it];
 			dxRender_Visual*	root	= sector->root();
-			for (u32 v_it=0; v_it<sector->r_frustums.size(); v_it++)	{
-				set_Frustum			(&(sector->r_frustums[v_it]));
-				add_Geometry		(root);
-			}
+			add_Geometry(root, &sector->r_frustums);
 		}
 
 		tbb::concurrent_vector<IRenderable*> renderable_objects;
