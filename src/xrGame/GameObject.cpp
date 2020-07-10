@@ -688,6 +688,12 @@ void CGameObject::renderable_Render	()
 	inherited::renderable_Render();
 	::Render->set_Transform		(&XFORM());
 	::Render->add_Visual		(Visual());
+
+	if (cast_entity_alive() && cast_entity_alive()->g_Alive())
+		Visual()->getHeatData().current_heat = 1.0f;
+	else
+		Visual()->getHeatData().current_heat = 0.0f;
+
 	Visual()->getVisData().hom_frame = Device.dwFrame;
 }
 

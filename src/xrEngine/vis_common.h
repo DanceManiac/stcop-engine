@@ -25,3 +25,13 @@ struct vis_data
 };
 #pragma pack(pop)
 #endif
+
+struct heat_cap
+{
+    float current_heat;
+
+    IC void clear()
+    {
+        current_heat = 0.0f;
+    }
+};

@@ -52,7 +52,8 @@ void __fastcall mapMatrix_Render	(mapMatrixItems& N)
 		_MatrixItem&	Ni				= *I;
 		RCache.set_xform_world			(Ni.Matrix);
 		RImplementation.apply_object	(Ni.pObject);
-		RImplementation.apply_lmaterial	();
+		bool bVp = RImplementation.currentViewPort == SECONDARY_WEAPON_SCOPE;
+		RImplementation.apply_lmaterial	(bVp, Ni.pVisual->getHeatData().current_heat);
 
 		float LOD = calcLOD(Ni.ssa,Ni.pVisual->vis.sphere.R);
 #ifdef USE_DX11
@@ -72,7 +73,8 @@ void __fastcall sorted_L1		(mapSorted_Node *N)
 	RCache.set_Element				(N->val.se);
 	RCache.set_xform_world			(N->val.Matrix);
 	RImplementation.apply_object	(N->val.pObject);
-	RImplementation.apply_lmaterial	();
+	bool bVp = RImplementation.currentViewPort == SECONDARY_WEAPON_SCOPE;
+	RImplementation.apply_lmaterial(bVp, V->getHeatData().current_heat);
 	V->Render						(calcLOD(N->key,V->vis.sphere.R));
 }
 
@@ -332,7 +334,7 @@ void R_dsgraph_structure::r_dsgraph_render_graph	(u32	_priority, bool _clear)
 								{
 									mapNormalTextures::TNode*	Ntex	= nrmTextures[tex_id];
 									RCache.set_Textures					(Ntex->key);
-									RImplementation.apply_lmaterial		();
+									RImplementation.apply_lmaterial		(RImplementation.currentViewPort == SECONDARY_WEAPON_SCOPE);
 
 									mapNormalItems&				items	= Ntex->val;		items.ssa	= 0;
 									mapNormal_Render					(items);
@@ -426,7 +428,7 @@ void R_dsgraph_structure::r_dsgraph_render_graph	(u32	_priority, bool _clear)
 							{
 								mapMatrixTextures::TNode*	Ntex	= matTextures[tex_id];
 								RCache.set_Textures					(Ntex->key);
-								RImplementation.apply_lmaterial		();
+								RImplementation.apply_lmaterial		(RImplementation.currentViewPort == SECONDARY_WEAPON_SCOPE);
 
 								mapMatrixItems&				items	= Ntex->val;		items.ssa	= 0;
 								mapMatrix_Render					(items);

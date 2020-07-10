@@ -229,6 +229,9 @@ void CRender::render_menu	()
 extern u32 g_r;
 void CRender::Render		()
 {
+
+	g_pGamePersistent->m_pGShaderConstants->m_blender_mode.w = currentViewPort == SECONDARY_WEAPON_SCOPE ? 1.0f : 0.0f;
+
 	PIX_EVENT(CRender_Render);
 
 	g_r						= 1;
