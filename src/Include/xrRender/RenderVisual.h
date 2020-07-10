@@ -6,6 +6,7 @@ class IKinematics;
 class IKinematicsAnimated;
 class IParticleCustom;
 struct vis_data;
+struct heat_cap;
 
 class IRenderVisual
 {
@@ -15,6 +16,7 @@ public:
 	virtual ~IRenderVisual() {;}
 
 	virtual vis_data&	_BCL	getVisData() = 0;
+	virtual heat_cap&	_BCL	getHeatData() = 0;
 	virtual u32					getType() = 0;
 
 #ifdef DEBUG

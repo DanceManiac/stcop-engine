@@ -78,13 +78,8 @@ void  dxRenderDeviceRender::Reset( HWND hWnd, u32 &dwWidth, u32 &dwHeight, float
 	Memory.mem_compact		();
 	HW.Reset				(hWnd);
 
-#if defined(USE_DX10) || defined(USE_DX11)
 	dwWidth					= HW.m_ChainDesc.BufferDesc.Width;
 	dwHeight				= HW.m_ChainDesc.BufferDesc.Height;
-#else	//	USE_DX10
-	dwWidth					= HW.DevPP.BackBufferWidth;
-	dwHeight				= HW.DevPP.BackBufferHeight;
-#endif	//	USE_DX10
 
 	fWidth_2				= float(dwWidth/2);
 	fHeight_2				= float(dwHeight/2);
@@ -166,13 +161,8 @@ void dxRenderDeviceRender::OnDeviceCreate(LPCSTR shName)
 void dxRenderDeviceRender::Create( HWND hWnd, u32 &dwWidth, u32 &dwHeight, float &fWidth_2, float &fHeight_2, bool move_window)
 {
 	HW.CreateDevice		(hWnd, move_window);
-#if defined(USE_DX10) || defined(USE_DX11)
 	dwWidth					= HW.m_ChainDesc.BufferDesc.Width;
 	dwHeight				= HW.m_ChainDesc.BufferDesc.Height;
-#else	//	USE_DX10
-	dwWidth					= HW.DevPP.BackBufferWidth;
-	dwHeight				= HW.DevPP.BackBufferHeight;
-#endif	//	USE_DX10
 	fWidth_2			= float(dwWidth/2)			;
 	fHeight_2			= float(dwHeight/2)			;
 	Resources			= xr_new<CResourceManager>		();
@@ -315,9 +305,6 @@ u32 dxRenderDeviceRender::GetCacheStatPolys()
 
 void dxRenderDeviceRender::Begin()
 {
-#if !defined(USE_DX10) && !defined(USE_DX11)
-	CHK_DX					(HW.pDevice->BeginScene());
-#endif	//	USE_DX10
 	RCache.OnFrameBegin		();
 	RCache.set_CullMode		(CULL_CW);
 	RCache.set_CullMode		(CULL_CCW);
@@ -326,23 +313,14 @@ void dxRenderDeviceRender::Begin()
 
 void dxRenderDeviceRender::Clear()
 {
-#if defined(USE_DX10) || defined(USE_DX11)
-	HW.pContext->ClearDepthStencilView(RCache.get_ZB(), 
-		D3D_CLEAR_DEPTH|D3D_CLEAR_STENCIL, 1.0f, 0);
+	HW.pContext->ClearDepthStencilView(RCache.get_ZB(),
+		D3D_CLEAR_DEPTH | D3D_CLEAR_STENCIL, 1.0f, 0);
 
 	if (psDeviceFlags.test(rsClearBB))
 	{
-		FLOAT ColorRGBA[4] = {0.0f,0.0f,0.0f,0.0f};
+		FLOAT ColorRGBA[4] = { 0.0f,0.0f,0.0f,0.0f };
 		HW.pContext->ClearRenderTargetView(RCache.get_RT(), ColorRGBA);
 	}
-#else	//	USE_DX10
-	CHK_DX(HW.pDevice->Clear(0,0,
-		D3DCLEAR_ZBUFFER|
-		(psDeviceFlags.test(rsClearBB)?D3DCLEAR_TARGET:0)|
-		(HW.Caps.bStencil?D3DCLEAR_STENCIL:0),
-		D3DCOLOR_XRGB(0,0,0),1,0
-		));
-#endif	//	USE_DX10
 }
 
 void DoAsyncScreenshot();
@@ -359,21 +337,11 @@ void dxRenderDeviceRender::End()
 	if(RImplementation.currentViewPort == MAIN_VIEWPORT)
 		DoAsyncScreenshot();
 
-#if defined(USE_DX10) || defined(USE_DX11)
-	//HW.m_pSwapChain->Present( 0, 0 );
 	if (RImplementation.needPresenting) //--#SM+#-- +SecondVP+ Не выводим кадр из второго рендера на экран
 	{
 		bool bUseVSync = psDeviceFlags.is(rsFullscreen) && psDeviceFlags.test(rsVSync); // xxx: weird tearing glitches when VSync turned on for windowed mode in DX10\11
 		HW.m_pSwapChain->Present(bUseVSync ? 1 : 0, 0);
 	}
-#else	//	USE_DX10
-	CHK_DX				(HW.pDevice->EndScene());
-
-	if (RImplementation.needPresenting) //--#SM+#-- +SecondVP+ Не выводим кадр из второго рендера на экран
-		HW.pDevice->Present(NULL, NULL, NULL, NULL);
-#endif	//	USE_DX10
-	//HRESULT _hr		= HW.pDevice->Present( NULL, NULL, NULL, NULL );
-	//if				(D3DERR_DEVICELOST==_hr)	return;			// we will handle this later
 }
 
 void dxRenderDeviceRender::ResourcesDestroyNecessaryTextures()
@@ -383,12 +351,8 @@ void dxRenderDeviceRender::ResourcesDestroyNecessaryTextures()
 
 void dxRenderDeviceRender::ClearTarget()
 {
-#if defined(USE_DX10) || defined(USE_DX11)
 	FLOAT ColorRGBA[4] = {0.0f,0.0f,0.0f,0.0f};
 	HW.pContext->ClearRenderTargetView(RCache.get_RT(), ColorRGBA);
-#else	//	USE_DX10
-	CHK_DX(HW.pDevice->Clear(0,0,D3DCLEAR_TARGET,D3DCOLOR_XRGB(0,0,0),1,0));
-#endif	//	USE_DX10
 }
 
 void dxRenderDeviceRender::SetCacheXform(Fmatrix &mView, Fmatrix &mProject)

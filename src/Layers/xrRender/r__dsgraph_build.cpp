@@ -397,14 +397,6 @@ void CRender::add_leafs_Dynamic	(dxRender_Visual *pVisual, bool bIgnoreOpt)
 	if (0==pVisual)				return;
 
 	// Visual is 100% visible - simply add it
-/*#if RENDER!=R_R1
-	if (!bIgnoreOpt && !IsValuableToRenderDyn(pVisual, *val_pTransform, phase == PHASE_SMAP))
-		return;
-#else
-	if (!bIgnoreOpt && !IsValuableToRenderDyn(pVisual, *val_pTransform, false))
-		return;
-#endif*/
-
 	xr_vector<dxRender_Visual*>::iterator I,E;	// it may be useful for 'hierrarhy' visual
 
 	switch (pVisual->Type) {
@@ -413,12 +405,13 @@ void CRender::add_leafs_Dynamic	(dxRender_Visual *pVisual, bool bIgnoreOpt)
 			if (phase == PHASE_SMAP)
 				return;
 			// Add all children, doesn't perform any tests
-			PS::CParticleGroup* pG	= (PS::CParticleGroup*)pVisual;
-			for (PS::CParticleGroup::SItemVecIt i_it=pG->items.begin(); i_it!=pG->items.end(); ++i_it)	{
-				PS::CParticleGroup::SItem&			I		= *i_it;
-				if (I._effect)		add_leafs_Dynamic		(I._effect, bIgnoreOpt);
-				for (xr_vector<dxRender_Visual*>::iterator pit = I._children_related.begin();	pit!=I._children_related.end(); ++pit)	add_leafs_Dynamic(*pit, bIgnoreOpt);
-				for (xr_vector<dxRender_Visual*>::iterator pit = I._children_free.begin();		pit!=I._children_free.end();	++pit)	add_leafs_Dynamic(*pit, bIgnoreOpt);
+
+			PS::CParticleGroup* pG = (PS::CParticleGroup*)pVisual;
+			for (auto &i_it : pG->items)
+			{
+				if (i_it._effect)add_leafs_Dynamic(i_it._effect, bIgnoreOpt);
+				for (auto pit : i_it._children_related)	add_leafs_Dynamic(pit, bIgnoreOpt);
+				for (auto pit : i_it._children_free) add_leafs_Dynamic(pit, bIgnoreOpt);
 			}
 		}
 		return;
@@ -426,9 +419,12 @@ void CRender::add_leafs_Dynamic	(dxRender_Visual *pVisual, bool bIgnoreOpt)
 		{
 			// Add all children, doesn't perform any tests
 			FHierrarhyVisual* pV = (FHierrarhyVisual*)pVisual;
-			I = pV->children.begin	();
-			E = pV->children.end	();
-			for (; I!=E; ++I)	add_leafs_Dynamic	(*I);
+			for (auto I : pV->children)
+			{
+				I->heat = pV->getHeatData();
+				add_leafs_Dynamic(I);
+			}
+
 		}
 		return;
 	case MT_SKELETON_ANIM:
@@ -450,9 +446,12 @@ void CRender::add_leafs_Dynamic	(dxRender_Visual *pVisual, bool bIgnoreOpt)
 			} else {
 				pV->CalculateBones			(TRUE);
 				pV->CalculateWallmarks		();		//. bug?
-				I = pV->children.begin		();
-				E = pV->children.end		();
-				for (; I!=E; ++I)	add_leafs_Dynamic	(*I);
+
+				for (auto I : pV->children)
+				{
+					I->heat = pV->getHeatData();
+					add_leafs_Dynamic(I);
+				}
 			}
 		}
 		return;
@@ -594,9 +593,11 @@ void CRender::add_leafs_Static(dxRender_Visual *pVisual)
 		{
 			// Add all children, doesn't perform any tests
 			FHierrarhyVisual* pV	= (FHierrarhyVisual*)pVisual;
-			I = pV->children.begin	();
-			E = pV->children.end	();
-			for (; I!=E; ++I)		add_leafs_Static (*I);
+			for (auto I : pV->children)
+			{
+				I->heat = pV->getHeatData();
+				add_leafs_Static(I);
+			}
 		}
 		return;
 	case MT_SKELETON_ANIM:
@@ -605,9 +606,11 @@ void CRender::add_leafs_Static(dxRender_Visual *pVisual)
 			// Add all children, doesn't perform any tests
 			CKinematics * pV		= (CKinematics*)pVisual;
 			pV->CalculateBones		(TRUE);
-			I = pV->children.begin	();
-			E = pV->children.end	();
-			for (; I!=E; ++I)		add_leafs_Static	(*I);
+			for (auto I : pV->children)
+			{
+				I->heat = pV->getHeatData();
+				add_leafs_Static(I);
+			}
 		}
 		return;
 	case MT_LOD:
@@ -630,9 +633,11 @@ void CRender::add_leafs_Static(dxRender_Visual *pVisual)
 #endif
 			{
 				// Add all children, doesn't perform any tests
-				I = pV->children.begin	();
-				E = pV->children.end	();
-				for (; I!=E; ++I)	add_leafs_Static (*I);
+				for (auto I : pV->children)
+				{
+					I->heat = pV->getHeatData();
+					add_leafs_Static(I);
+				}
 			}
 		}
 		return;

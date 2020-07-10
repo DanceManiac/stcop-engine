@@ -227,7 +227,7 @@ public:
 		o_sun						= 0.75f*LT.get_sun			()	;
 		CopyMemory(o_hemi_cube, LT.get_hemi_cube(), CROS_impl::NUM_FACES*sizeof(float));
 	}
-	IC void							apply_lmaterial				()
+	IC void							apply_lmaterial(bool bOverride = false, float new_material = 0.0f)
 	{
 		R_constant*		C	= &*RCache.get_c	(c_sbase);		// get sampler
 		if (0==C)			return;
@@ -237,15 +237,20 @@ public:
 		VERIFY				(T);
 		float	mtl			= T->m_material;
 
+		if (bOverride) 
+			mtl = new_material * 3.785;
+
 		if (override_material && (xr_strcmp(T->cName, d_texture_name) == 0))
 		{
 			mtl = d_material + d_material_weight;
 		}
 
+		if (!bOverride) mtl = (mtl + .5f) / 4.f;
+
 #ifdef	DEBUG
 		if (ps_r2_ls_flags.test(R2FLAG_GLOBALMATERIAL))	mtl=ps_r2_gmaterial;
 #endif
-		RCache.hemi.set_material (o_hemi,o_sun,0,(mtl+.5f)/4.f);
+		RCache.hemi.set_material (o_hemi,o_sun,0,mtl);
 		RCache.hemi.set_pos_faces(o_hemi_cube[CROS_impl::CUBE_FACE_POS_X],
 			o_hemi_cube[CROS_impl::CUBE_FACE_POS_Y],
 			o_hemi_cube[CROS_impl::CUBE_FACE_POS_Z]);
