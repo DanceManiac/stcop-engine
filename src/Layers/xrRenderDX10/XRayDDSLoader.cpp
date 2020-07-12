@@ -79,6 +79,15 @@ int XRayDDSLoader::Load(IReader* F)
 			else
 				m_px = TPF_R8;
 			u8 coutComp = GetCountComp(m_px);
+
+			if (coutComp == 1 && header.ddspf.dwBitsMask[3])
+			{
+				std::swap(size_bit[0], size_bit[3]);
+
+				std::swap(shift_bit[0], shift_bit[3]);
+				std::swap(header.ddspf.dwBitsMask[0], header.ddspf.dwBitsMask[3]);
+			}
+
 			u32 pixel = 0;
 			Create();
 			for (size_t d = 0; d < m_depth; d++)
