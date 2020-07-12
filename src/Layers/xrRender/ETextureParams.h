@@ -145,10 +145,10 @@ struct ECORE_API STextureParams{
 
     IC BOOL HasAlpha()
     { 
-    	// исходная текстура содержит альфа канал
+    	// РёСЃС…РѕРґРЅР°СЏ С‚РµРєСЃС‚СѓСЂР° СЃРѕРґРµСЂР¶РёС‚ Р°Р»СЊС„Р° РєР°РЅР°Р»
     	return flags.is(flHasAlpha);
     }
-	IC BOOL HasAlphaChannel() // игровая текстура содержит альфа канал
+	IC BOOL HasAlphaChannel() // РёРіСЂРѕРІР°СЏ С‚РµРєСЃС‚СѓСЂР° СЃРѕРґРµСЂР¶РёС‚ Р°Р»СЊС„Р° РєР°РЅР°Р»
 	{
 		switch (fmt)
 		{
@@ -165,15 +165,6 @@ struct ECORE_API STextureParams{
 	}
     void Load (IReader& F);
     void Save (IWriter& F);
-#ifdef _EDITOR
-	PropValue::TOnChange			OnTypeChangeEvent;
-	void __stdcall	OnTypeChange	(PropValue* v);
-    void 			FillProp		(LPCSTR base_name, PropItemVec& items, PropValue::TOnChange OnChangeEvent);
-    LPCSTR 			FormatString	();
-	u32 			MemoryUsage		(LPCSTR base_name);
-    BOOL			similar			(STextureParams& tp1, xr_vector<AnsiString>& sel_params);
-    
-#endif
 };
 #pragma pack( pop )
 

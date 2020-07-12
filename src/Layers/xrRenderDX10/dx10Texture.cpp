@@ -18,7 +18,7 @@
 // #include "std_classes.h"
 // #include "xr_avi.h"
 
-#define OLD_LOADER_DDS
+//#define OLD_LOADER_DDS
 
 void fix_texture_name(LPSTR fn)
 {

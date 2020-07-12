@@ -119,10 +119,6 @@ void	CResourceManager::OnDeviceCreate	(IReader* F)
 
 void	CResourceManager::OnDeviceCreate	(LPCSTR shName)
 {
-#ifdef _EDITOR
-	if (!FS.exist(shName)) return;
-#endif
-
 	// Check if file is compressed already
 	string32	ID			= "shENGINE";
 	string32	id;
