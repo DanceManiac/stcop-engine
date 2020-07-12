@@ -1,4 +1,4 @@
-﻿// This header defines constants and structures that are useful when parsing 
+// This header defines constants and structures that are useful when parsing 
 // DDS files.  DDS files were originally designed to use several structures
 // and constants that are native to DirectDraw and are defined in ddraw.h,
 // such as DDSURFACEDESC2 and DDSCAPS2.  This file defines similar 
@@ -11,6 +11,7 @@
 #define DDS_FOURCC 0x00000004 // DDPF_FOURCC
 #define DDS_RGB 0x00000040 // DDPF_RGB
 #define DDS_RGBA 0x00000041 // DDPF_RGB | DDPF_ALPHAPIXELS
+#define DDS_ALPHA       0x00000002  // DDPF_ALPHA
 #define MAKEFOURCC(ch0, ch1, ch2, ch3)                              \
                 ((DWORD)(BYTE)(ch0) | ((DWORD)(BYTE)(ch1) << 8) |   \
                 ((DWORD)(BYTE)(ch2) << 16) | ((DWORD)(BYTE)(ch3) << 24 ))
@@ -52,6 +53,9 @@ const DDS_PIXELFORMAT DDSPF_ATI1=
 { sizeof(DDS_PIXELFORMAT), DDS_FOURCC, MAKEFOURCC('A', 'T', 'I', '1'), 0, 0, 0, 0, 0 };
 const DDS_PIXELFORMAT DDSPF_ATI2 =
 { sizeof(DDS_PIXELFORMAT), DDS_FOURCC, MAKEFOURCC('A', 'T', 'I', '2'), 0, 0, 0, 0, 0 };
+
+const DDS_PIXELFORMAT DDSPF_A8 =
+	{ sizeof(DDS_PIXELFORMAT), DDS_ALPHA, 0, 8, 0, 0, 0, 0xff };
 
 const DDS_PIXELFORMAT DDSPF_A8R8G8B8 =
     { sizeof(DDS_PIXELFORMAT), DDS_RGBA, 0, 32, 0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000 };

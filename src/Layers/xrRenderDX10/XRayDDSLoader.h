@@ -32,6 +32,7 @@ public:
 	enum BearTexturePixelFormat
 	{
 		TPF_R8 = 0,
+		TPF_A8,
 		TPF_R8G8,
 		TPF_R8G8B8,
 		TPF_R8G8B8A8,
@@ -58,6 +59,9 @@ private:
 	{
 		switch (format)
 		{
+		case TPF_A8:
+			return 1;
+			break;
 		case TPF_R8:
 			return 1;
 			break;
@@ -90,6 +94,7 @@ private:
 	{
 		switch (format)
 		{
+		case TPF_A8:
 		case TPF_R8:
 		case TPF_R8G8:
 		case TPF_R8G8B8:
@@ -118,6 +123,9 @@ private:
 	{
 		switch (format)
 		{
+		case TPF_A8:
+			return 1;
+			break;
 		case TPF_R8:
 			return 1;
 			break;
@@ -185,6 +193,9 @@ private:
 		{
 		case TPF_R8:
 			return DXGI_FORMAT_R8_UNORM;
+			break;
+		case TPF_A8:
+			return DXGI_FORMAT_A8_UNORM;
 			break;
 		case TPF_R8G8:
 			return DXGI_FORMAT_R8G8_UNORM;

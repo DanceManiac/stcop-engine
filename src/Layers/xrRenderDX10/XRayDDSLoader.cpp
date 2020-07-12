@@ -74,6 +74,8 @@ int XRayDDSLoader::Load(IReader* F)
 				m_px = alpha ? TPF_R8G8B8A8 : TPF_R8G8B8;
 			else	if (header.ddspf.dwRBitMask && header.ddspf.dwGBitMask)
 				m_px = TPF_R8G8;
+			else if (header.ddspf.dwABitMask)
+				m_px = TPF_R8G8B8A8;
 			else
 				m_px = TPF_R8;
 			u8 coutComp = GetCountComp(m_px);
