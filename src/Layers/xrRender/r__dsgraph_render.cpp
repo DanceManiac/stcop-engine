@@ -284,7 +284,6 @@ void R_dsgraph_structure::r_dsgraph_render_graph	(u32	_priority, bool _clear)
 				mapNormalVS::TNode*	Nvs			= nrmVS[vs_id];
 				RCache.set_VS					(Nvs->key);
 
-#if defined(USE_DX10) || defined(USE_DX11)
 				//	GS setup
 				mapNormalGS&		gs			= Nvs->val;		gs.ssa	= 0;
 
@@ -296,9 +295,6 @@ void R_dsgraph_structure::r_dsgraph_render_graph	(u32	_priority, bool _clear)
 					RCache.set_GS					(Ngs->key);	
 
 					mapNormalPS&		ps			= Ngs->val;		ps.ssa	= 0;
-#else	//	USE_DX10
-					mapNormalPS&		ps			= Nvs->val;		ps.ssa	= 0;
-#endif	//	USE_DX10
 
 					ps.getANY_P						(nrmPS);
 					std::sort						(nrmPS.begin(), nrmPS.end(), cmp_ps_nrm);
@@ -306,13 +302,9 @@ void R_dsgraph_structure::r_dsgraph_render_graph	(u32	_priority, bool _clear)
 					{
 						mapNormalPS::TNode*	Nps			= nrmPS[ps_id];
 						RCache.set_PS					(Nps->key);	
-#ifdef USE_DX11
 						mapNormalCS&		cs			= Nps->val.mapCS;		cs.ssa	= 0;
 						RCache.set_HS(Nps->val.hs);
 						RCache.set_DS(Nps->val.ds);
-#else
-						mapNormalCS&		cs			= Nps->val;		cs.ssa	= 0;
-#endif
 						cs.getANY_P						(nrmCS);
 						std::sort						(nrmCS.begin(), nrmCS.end(), cmp_cs_nrm);
 						for (u32 cs_id=0; cs_id<nrmCS.size(); cs_id++)
@@ -353,11 +345,9 @@ void R_dsgraph_structure::r_dsgraph_render_graph	(u32	_priority, bool _clear)
 					}
 					nrmPS.clear				();
 					if(_clear) ps.clear		();
-#if defined(USE_DX10) || defined(USE_DX11)
 				}
 				nrmGS.clear				();
 				if(_clear) gs.clear		();
-#endif	//	USE_DX10
 			}
 			nrmVS.clear				();
 			if(_clear) vs.clear		();
@@ -377,8 +367,6 @@ void R_dsgraph_structure::r_dsgraph_render_graph	(u32	_priority, bool _clear)
 		for (u32 vs_id=0; vs_id<matVS.size(); vs_id++)	{
 			mapMatrixVS::TNode*	Nvs			= matVS[vs_id];
 			RCache.set_VS					(Nvs->key);	
-
-#if defined(USE_DX10) || defined(USE_DX11)
 			mapMatrixGS&		gs			= Nvs->val;		gs.ssa	= 0;
 
 			gs.getANY_P						(matGS);
@@ -389,9 +377,6 @@ void R_dsgraph_structure::r_dsgraph_render_graph	(u32	_priority, bool _clear)
 				RCache.set_GS					(Ngs->key);	
 
 				mapMatrixPS&		ps			= Ngs->val;		ps.ssa	= 0;
-#else	//	USE_DX10
-				mapMatrixPS&		ps			= Nvs->val;		ps.ssa	= 0;
-#endif	//	USE_DX10
 
 				ps.getANY_P						(matPS);
 				std::sort						(matPS.begin(), matPS.end(), cmp_ps_mat);
@@ -400,13 +385,9 @@ void R_dsgraph_structure::r_dsgraph_render_graph	(u32	_priority, bool _clear)
 					mapMatrixPS::TNode*	Nps			= matPS[ps_id];
 					RCache.set_PS					(Nps->key);	
 
-#ifdef USE_DX11
 					mapMatrixCS&		cs			= Nps->val.mapCS;		cs.ssa	= 0;
 					RCache.set_HS(Nps->val.hs);
 					RCache.set_DS(Nps->val.ds);
-#else
-					mapMatrixCS&		cs			= Nps->val;		cs.ssa	= 0;
-#endif
 					cs.getANY_P						(matCS);
 					std::sort						(matCS.begin(), matCS.end(), cmp_cs_mat);
 					for (u32 cs_id=0; cs_id<matCS.size(); cs_id++)
@@ -445,11 +426,9 @@ void R_dsgraph_structure::r_dsgraph_render_graph	(u32	_priority, bool _clear)
 				}
 				matPS.clear				();
 				if(_clear) ps.clear		();
-#if defined(USE_DX10) || defined(USE_DX11)
 			}
 			matGS.clear				();
 			if(_clear) gs.clear		();
-#endif	//	USE_DX10
 		}
 		matVS.clear				();
 		if(_clear) vs.clear		();
@@ -479,7 +458,7 @@ public:
 		//Vold = Device.mView;
 		//Device.mView.build_camera_dir(Fvector().set(0.f, 0.f, 0.f), Device.vCameraDirection, Device.vCameraTop);
 
-		Device.mProject.build_projection(deg2rad(psHUD_FOV * Device.fFOV /* *Device.fASPECT*/), Device.fASPECT,	0.05f, g_pGamePersistent->Environment().CurrentEnv->far_plane);
+		Device.mProject.build_projection(deg2rad(psHUD_FOV /* *Device.fASPECT*/), Device.fASPECT, VIEWPORT_NEAR_HUD, g_pGamePersistent->Environment().CurrentEnv->far_plane);
 
 		Device.mFullTransform.mul(Device.mProject, Device.mView);
 		//RCache.set_xform_view(Device.mView);

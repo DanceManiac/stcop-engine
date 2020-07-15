@@ -669,9 +669,8 @@ public:
 };
 
 
-ENGINE_API float psHUD_FOV_def = 0.45f; //--#SM+#--	Дефолтный HUD FOV (В % от Camera FOV) [default hud_fov (perc. of g_fov)]
+ENGINE_API float psHUD_FOV_def = 75.0f; //--#SM+#--	Дефолтный HUD FOV (В % от Camera FOV) [default hud_fov (perc. of g_fov)]
 ENGINE_API float psHUD_FOV = psHUD_FOV_def; //--#SM+#-- Текущий HUD FOV (В % от Camera FOV) [current hud_fov (perc. of g_fov)]
-ENGINE_API float VIEWPORT_NEAR = 0.2f; //--#SM+#-- (Old: 0.2f)
 
 ENGINE_API float hud_adj_delta_pos = 0.0005f;
 ENGINE_API float hud_adj_delta_rot = 0.05f;

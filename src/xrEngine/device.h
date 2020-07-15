@@ -16,7 +16,8 @@
 //#include "shader.h"
 //#include "R_Backend.h"
 
-extern ENGINE_API float VIEWPORT_NEAR;
+#define VIEWPORT_NEAR 0.2f
+#define VIEWPORT_NEAR_HUD 0.0005f
 
 enum ViewPort;
 
