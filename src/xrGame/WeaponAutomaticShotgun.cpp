@@ -12,10 +12,17 @@ CWeaponAutomaticShotgun::CWeaponAutomaticShotgun()
 	m_eSoundClose_2 = ESoundTypes(SOUND_TYPE_WEAPON_SHOOTING);
 	m_eSoundAddCartridge	= ESoundTypes(SOUND_TYPE_WEAPON_SHOOTING);
 	m_eSoundOpen = ESoundTypes(SOUND_TYPE_WEAPON_RECHARGING);
+	bNeedPumpAfterReload = false;
 }
 
 CWeaponAutomaticShotgun::~CWeaponAutomaticShotgun()
 {
+}
+
+bool CWeaponAutomaticShotgun::NeedPump()
+{
+	if (!m_bTriStateReload || !bNeedPumpAfterReload)
+		return false;
 }
 
 void CWeaponAutomaticShotgun::Load(LPCSTR section)
@@ -88,6 +95,9 @@ void CWeaponAutomaticShotgun::TriStateReload()
 {
 	if( m_magazine.size() == (u32)iMagazineSize || !HaveCartridgeInInventory(1) )return;
 	CWeapon::Reload		();
+
+	bNeedPumpAfterReload = m_magazine.size() == 0;
+
 	m_sub_state			= eSubstateReloadBegin;
 	SwitchState			(eReload);
 }
@@ -101,7 +111,7 @@ void CWeaponAutomaticShotgun::OnStateSwitch	(u32 S)
 
 	CWeapon::OnStateSwitch(S);
 
-	if( m_magazine.size() == (u32)iMagazineSize || !HaveCartridgeInInventory(1) ){
+	if( ( m_magazine.size() == (u32)iMagazineSize || !HaveCartridgeInInventory(1)) && NeedPump()){
 			switch2_EndReload		();
 			m_sub_state = eSubstateReloadEnd;
 			return;

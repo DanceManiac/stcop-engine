@@ -28,7 +28,8 @@ void CWeapon::OnZoomIn()
 
 	if (!m_zoom_params.m_bUseDynamicZoom)
 		SetZoomFactor(CurrentZoomFactor());
-	else SetZoomFactor(psActorFlags.test(AF_3DSCOPE_ENABLE) ? m_zoom_params.m_f3dZoomFactor : m_fRTZoomFactor);
+	else 
+		SetZoomFactor(psActorFlags.test(AF_3DSCOPE_ENABLE) ? m_zoom_params.m_f3dZoomFactor : m_fRTZoomFactor);
 
 	// Отключаем инерцию (Заменено GetInertionFactor())
 	// EnableHudInertion(FALSE);

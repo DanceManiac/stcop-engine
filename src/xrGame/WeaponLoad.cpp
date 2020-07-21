@@ -176,7 +176,6 @@ void CWeapon::Load(LPCSTR section)
 	m_fMinRadius = pSettings->r_float(section, "min_radius");
 	m_fMaxRadius = pSettings->r_float(section, "max_radius");
 
-
 	// информация о возможных апгрейдах и их визуализации в инвентаре
 	m_eScopeStatus = (ALife::EWeaponAddonStatus)pSettings->r_s32(section, "scope_status");
 	m_eSilencerStatus = (ALife::EWeaponAddonStatus)pSettings->r_s32(section, "silencer_status");
@@ -190,26 +189,7 @@ void CWeapon::Load(LPCSTR section)
 	m_zoom_params.m_sUseBinocularVision = 0;
 
 	LoadModParams(section);
-
-	bUseAltScope = !!bLoadAltScopesParams(section);
-
-	if (!bUseAltScope)
-		LoadOriginalScopesParams(section);
-
-	if (m_eSilencerStatus == ALife::eAddonAttachable)
-	{
-		m_sSilencerName = pSettings->r_string(section, "silencer_name");
-		m_iSilencerX = pSettings->r_s32(section, "silencer_x");
-		m_iSilencerY = pSettings->r_s32(section, "silencer_y");
-	}
-
-	if (m_eGrenadeLauncherStatus == ALife::eAddonAttachable)
-	{
-		m_sGrenadeLauncherName = pSettings->r_string(section, "grenade_launcher_name");
-		m_iGrenadeLauncherX = pSettings->r_s32(section, "grenade_launcher_x");
-		m_iGrenadeLauncherY = pSettings->r_s32(section, "grenade_launcher_y");
-	}
-	UpdateAltScope();
+	LoadOriginalScopesParams(section);
 	InitAddons();
 	if (pSettings->line_exist(section, "weapon_remove_time"))
 		m_dwWeaponRemoveTime = pSettings->r_u32(section, "weapon_remove_time");
@@ -331,7 +311,6 @@ void CWeapon::reload(LPCSTR section)
 	else
 		m_can_be_strapped = false;
 
-	bUseAltScope = !!bReloadSectionScope(section);
 
 	if (m_eScopeStatus == ALife::eAddonAttachable) {
 		m_addon_holder_range_modifier = READ_IF_EXISTS(pSettings, r_float, GetScopeName(), "holder_range_modifier", m_holder_range_modifier);
@@ -379,6 +358,8 @@ void createWpnScopeXML()
 	}
 }
 
+
+
 void CWeapon::LoadCurrentScopeParams(LPCSTR section)
 {
 	shared_str scope_tex_name = "none";
@@ -414,6 +395,8 @@ void CWeapon::LoadCurrentScopeParams(LPCSTR section)
 	{
 		bNVsecondVPavaible = false;
 		bNVsecondVPstatus = false;
+		m_zoom_params.m_fSecondVPFovFactor = 0.0f;
+		m_fSecondRTZoomFactor = -1.0f;
 	}
 
 	m_fScopeInertionFactor = READ_IF_EXISTS(pSettings, r_float, section, "scope_inertion_factor", m_fControlInertionFactor);
@@ -455,56 +438,19 @@ bool CWeapon::bReloadSectionScope(LPCSTR section)
 	return true;
 }
 
-bool CWeapon::bLoadAltScopesParams(LPCSTR section)
-{
-	if (!pSettings->line_exist(section, "scopes"))
-		return false;
-
-	if (pSettings->r_string(section, "scopes") == NULL)
-		return false;
-
-	if (xr_strcmp(pSettings->r_string(section, "scopes"), "none") == 0)
-		return false;
-
-	if (m_eScopeStatus == ALife::eAddonAttachable)
-	{
-		LPCSTR str = pSettings->r_string(section, "scopes");
-		for (int i = 0, count = _GetItemCount(str); i < count; ++i)
-		{
-			string128 scope_section;
-			_GetItem(str, i, scope_section);
-			m_addons_list.push_back(scope_section);
-		}
-	}
-	else if (m_eScopeStatus == ALife::eAddonPermanent)
-	{
-		LoadCurrentScopeParams(section);
-	}
-
-	return true;
-}
-
 void CWeapon::LoadOriginalScopesParams(LPCSTR section)
-{
-	if (m_eScopeStatus == ALife::eAddonAttachable)
+{	
+	if (!pSettings->line_exist(section, "addon_list")) 
+		return;
+
+	bVanillaStyleAddon = READ_IF_EXISTS(pSettings, r_bool, section, "addon_vanilla", false);
+
+	LPCSTR str = pSettings->r_string(section, "addon_list");
+	for (int i = 0, count = _GetItemCount(str); i < count; ++i)
 	{
-		if (pSettings->line_exist(section, "scopes_sect"))
-		{
-			LPCSTR str = pSettings->r_string(section, "scopes_sect");
-			for (int i = 0, count = _GetItemCount(str); i < count; ++i)
-			{
-				string128						scope_section;
-				_GetItem(str, i, scope_section);
-				m_addons_list.push_back(scope_section);
-			}
-		}
-		else
-		{
-			m_addons_list.push_back(section);
-		}
+		string128						scope_section;
+		_GetItem(str, i, scope_section);
+		m_addons_list.push_back(scope_section);
 	}
-	else if (m_eScopeStatus == ALife::eAddonPermanent)
-	{
-		LoadCurrentScopeParams(section);
-	}
+
 }

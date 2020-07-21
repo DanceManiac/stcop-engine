@@ -48,14 +48,16 @@ CWeapon::CWeapon()
 	m_set_next_ammoType_on_reload = undefined_ammo_type;
 	m_crosshair_inertion = 0.f;
 	m_activation_speed_is_overriden = false;
-	m_cur_scope = NULL;
+	m_cur_scope = 0;
+	m_cur_silencer = 0;
+	m_cur_glauncher = 0;
 	m_bRememberActorNVisnStatus = false;
 
 	//Mortan: new params
-	bUseAltScope = false;
 	bScopeIsHasTexture = false;
 	bNVsecondVPavaible = false;
 	bNVsecondVPstatus = false;
+	bVanillaStyleAddon = false;
 
 	m_nearwall_last_hud_fov = psHUD_FOV_def;
 	m_fZoomStepCount = 3.0f;

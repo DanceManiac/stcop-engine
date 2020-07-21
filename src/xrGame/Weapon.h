@@ -24,6 +24,14 @@ class CUIWindow;
 class CBinocularsVision;
 class CNightVisionEffector;
 
+class VisualAddonHelper
+{
+public:
+	IKinematics* m_model;
+	//runtime positioning
+	Fmatrix		 m_attach_offset;
+};
+
 class CWeapon : public CHudItemObject,
 	public CShootingObject
 {
@@ -35,11 +43,9 @@ public:
 	virtual					~CWeapon();
 
 public:
-	xr_vector<shared_str>	m_ammoTypes;
-
-	xr_vector<shared_str>	m_addons_list;      // All addons section list
-	xr_vector<shared_str>	m_addons_item_list; // Addon items
-	xr_vector<shared_str>	m_fakes_list;       // Fake skeletons for addons
+	xr_vector<shared_str>	m_ammoTypes;		// Are str types being used correctly for this stuff? I'm not sure ...
+	xr_vector<shared_str>	m_addons_list;   
+	xr_vector<shared_str>	m_addons_helpers;   // Fake addons for addons
 
 	u8						m_cur_scope;
 	u8						m_cur_silencer; // Silencer or soundmoderator
@@ -56,14 +62,13 @@ public:
 	float					m_fCurrentCartirdgeDisp;
 
 	// [FFT++]: аддоны и управление аддонами
-	bool			bUseAltScope;
 	bool			bScopeIsHasTexture;
 	bool            bNVsecondVPavaible;
 	bool            bNVsecondVPstatus;
+	bool            bVanillaStyleAddon;
 
 	virtual	bool	bInZoomRightNow() const { return m_zoom_params.m_fZoomRotationFactor > 0.05; }
 	IC		bool	bIsSecondVPZoomPresent() const { return GetSecondVPZoomFactor() > 0.000f; }
-	bool			bLoadAltScopesParams(LPCSTR section);
 	bool            bReloadSectionScope(LPCSTR section);
 	virtual	bool    bMarkCanShow() { return IsZoomed(); }
 	bool            bChangeNVSecondVPStatus();
@@ -71,14 +76,17 @@ public:
 	virtual void	UpdateAddonsTransform(bool for_hud = false); // FFT++
 	virtual void	UpdateAddonsHudParams(); // FFT++
 
+	virtual void    UpdateAddonVisibityVanilla(IKinematics* pWeaponVisual);
+	virtual void    UpdateHUDAddonsVisibilityVanilla();
+
 	virtual void	UpdateSecondVP(bool bInGrenade = false);
 	void			LoadModParams(LPCSTR section);
 	void			Load3DScopeParams(LPCSTR section);
+
 	void			LoadOriginalScopesParams(LPCSTR section);
 	void			LoadCurrentScopeParams(LPCSTR section);
 	void			GetZoomData(const float scope_factor, float& delta, float& min_zoom_factor);
 	void			ZoomDynamicMod(bool bIncrement, bool bForceLimit);
-	void			UpdateAltScope();
 
 	virtual float	GetControlInertionFactor() const;
 	IC		float	GetZRotatingFactor()    const { return m_zoom_params.m_fZoomRotationFactor; }
@@ -86,7 +94,6 @@ public:
 	float			GetHudFov();
 	float			GetSecondVPFov() const;
 
-	shared_str		GetNameWithAttachment();
 
 
 	float			m_fScopeInertionFactor;
@@ -230,14 +237,21 @@ public:
 	//для отоброажения иконок апгрейдов в интерфейсе
 	int GetScopeX();
 	int GetScopeY();
-	int	GetSilencerX() { return m_iSilencerX; }
-	int	GetSilencerY() { return m_iSilencerY; }
-	int	GetGrenadeLauncherX() { return m_iGrenadeLauncherX; }
-	int	GetGrenadeLauncherY() { return m_iGrenadeLauncherY; }
+	int	GetSilencerX();
+	int	GetSilencerY();
+	int	GetGrenadeLauncherX();
+	int	GetGrenadeLauncherY();
 
-	const shared_str& GetGrenadeLauncherName() const { return m_sGrenadeLauncherName; }
-	const shared_str GetScopeName() const;
-	const shared_str& GetSilencerName() const { return m_sSilencerName; }
+	int GetAddonIcon(u8 idx, bool x);
+
+	shared_str GetScopeAddon()    { return m_addons_list[m_cur_scope]; };
+	shared_str GetSilencerAddon() { return m_addons_list[m_cur_silencer]; };
+	shared_str GetLauncherAddon() { return m_addons_list[m_cur_glauncher]; };
+
+	shared_str GetAddonName(u8 idx) const;
+	shared_str& GetGrenadeLauncherName() const;
+	shared_str& GetScopeName() const;
+	shared_str& GetSilencerName() const;
 
 	IC void	ForceUpdateAmmo() { m_BriefInfo_CalcFrame = 0; }
 
@@ -256,11 +270,6 @@ protected:
 	shared_str		m_sScopeName;
 	shared_str		m_sSilencerName;
 	shared_str		m_sGrenadeLauncherName;
-
-	//смещение иконов апгрейдов в инвентаре
-	int	m_iScopeX, m_iScopeY;
-	int	m_iSilencerX, m_iSilencerY;
-	int	m_iGrenadeLauncherX, m_iGrenadeLauncherY;
 
 protected:
 

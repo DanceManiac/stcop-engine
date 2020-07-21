@@ -17,7 +17,7 @@
 //#include "R_Backend.h"
 
 #define VIEWPORT_NEAR 0.2f
-#define VIEWPORT_NEAR_HUD 0.0005f
+#define VIEWPORT_NEAR_HUD 0.005f
 
 enum ViewPort;
 

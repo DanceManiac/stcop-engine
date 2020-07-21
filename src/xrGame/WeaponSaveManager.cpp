@@ -8,6 +8,8 @@ void CWeapon::save(NET_Packet& output_packet)
 	inherited::save(output_packet);
 	save_data(iAmmoElapsed, output_packet);
 	save_data(m_cur_scope, output_packet);
+	save_data(m_cur_silencer, output_packet);
+	save_data(m_cur_glauncher, output_packet);
 	save_data(m_flagsAddOnState, output_packet);
 	save_data(m_ammoType, output_packet);
 	save_data(m_zoom_params.m_bIsZoomModeNow, output_packet);
@@ -21,6 +23,8 @@ void CWeapon::load(IReader& input_packet)
 	inherited::load(input_packet);
 	load_data(iAmmoElapsed, input_packet);
 	load_data(m_cur_scope, input_packet);
+	load_data(m_cur_silencer, input_packet);
+	load_data(m_cur_glauncher, input_packet);
 	load_data(m_flagsAddOnState, input_packet);
 	UpdateAddonsVisibility();
 	load_data(m_ammoType, input_packet);
@@ -47,8 +51,6 @@ BOOL CWeapon::net_Spawn(CSE_Abstract* DC)
 	iAmmoElapsed = E->a_elapsed;
 	m_flagsAddOnState = E->m_addon_flags.get();
 	m_ammoType = E->ammo_type;
-	if (E->cur_scope < m_addons_list.size() && m_addons_list.size()>1)
-		m_cur_scope = E->cur_scope;
 	SetState(E->wpn_state);
 	SetNextState(E->wpn_state);
 
@@ -60,7 +62,6 @@ BOOL CWeapon::net_Spawn(CSE_Abstract* DC)
 			m_magazine.push_back(m_DefaultCartridge);
 	}
 
-	UpdateAltScope();
 	UpdateAddonsVisibility();
 	InitAddons();
 
@@ -68,7 +69,6 @@ BOOL CWeapon::net_Spawn(CSE_Abstract* DC)
 
 	VERIFY((u32)iAmmoElapsed == m_magazine.size());
 	m_bAmmoWasSpawned = false;
-
 
 	return bResult;
 }
@@ -106,7 +106,6 @@ void CWeapon::net_Export(NET_Packet& P)
 	P.w_u8(m_ammoType);
 	P.w_u8((u8)GetState());
 	P.w_u8((u8)IsZoomed());
-	P.w_u8((u8)m_cur_scope);
 }
 
 void CWeapon::net_Import(NET_Packet& P)
@@ -136,10 +135,6 @@ void CWeapon::net_Import(NET_Packet& P)
 	u8 Zoom;
 	P.r_u8((u8)Zoom);
 
-	u8 scope;
-	P.r_u8(scope);
-
-	m_cur_scope = scope;
 
 	if (H_Parent() && H_Parent()->Remote())
 	{

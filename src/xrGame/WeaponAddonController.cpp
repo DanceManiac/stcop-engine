@@ -36,69 +36,66 @@ bool CWeapon::SilencerAttachable()
 	return (ALife::eAddonAttachable == m_eSilencerStatus);
 }
 
+int CWeapon::GetAddonIcon(u8 idx, bool x)
+{
+	if (m_addons_list.size() > idx && !m_addons_list.empty())
+		return READ_IF_EXISTS(pSettings, r_s32, m_addons_list[idx], x ? "icon_x" : "icon_y", 0);
+	else
+		return 0;
+}
+
 int CWeapon::GetScopeX()
 {
-	if (bUseAltScope)
-	{
-		if (m_eScopeStatus != ALife::eAddonPermanent && IsScopeAttached())
-		{
-			return pSettings->r_s32(GetNameWithAttachment(), "scope_x");
-		}
-		else
-		{
-			return 0;
-		}
-	}
-	else
-	{
-		return pSettings->r_s32(m_addons_list[m_cur_scope], "scope_x");
-	}
+	return GetAddonIcon(m_cur_scope, true);
 }
 
 int CWeapon::GetScopeY()
 {
-	if (bUseAltScope)
-	{
-		if (m_eScopeStatus != ALife::eAddonPermanent && IsScopeAttached())
-		{
-			return pSettings->r_s32(GetNameWithAttachment(), "scope_y");
-		}
-		else
-		{
-			return 0;
-		}
-	}
-	else
-	{
-		return pSettings->r_s32(m_addons_list[m_cur_scope], "scope_y");
-	}
+	return GetAddonIcon(m_cur_scope, false);
 }
 
-const shared_str CWeapon::GetScopeName() const
+int	CWeapon::GetSilencerX()
 {
-	if (bUseAltScope)
-	{
-		return m_addons_list[m_cur_scope];
-	}
-	else
-	{
-		return pSettings->r_string(m_addons_list[m_cur_scope], "scope_name");
-	}
+	return GetAddonIcon(m_cur_silencer, true);
+}
+int	CWeapon::GetSilencerY()
+{
+	return GetAddonIcon(m_cur_silencer, false);
+}
+int	CWeapon::GetGrenadeLauncherX()
+{
+	return GetAddonIcon(m_cur_glauncher, true);
 }
 
-shared_str CWeapon::GetNameWithAttachment()
+int	CWeapon::GetGrenadeLauncherY()
 {
-	string64 str;
-	if (pSettings->line_exist(m_section_id.c_str(), "parent_section"))
+	return GetAddonIcon(m_cur_glauncher, false);
+}
+
+shared_str CWeapon::GetAddonName(u8 idx) const
+{
+
+	if (m_addons_list.size() > idx && !m_addons_list.empty())
 	{
-		shared_str parent = pSettings->r_string(m_section_id.c_str(), "parent_section");
-		xr_sprintf(str, "%s_%s", parent.c_str(), GetScopeName().c_str());
+		return READ_IF_EXISTS(pSettings, r_string, m_addons_list[idx], "addon_name", m_addons_list[idx]);
 	}
 	else
-	{
-		xr_sprintf(str, "%s_%s", m_section_id.c_str(), GetScopeName().c_str());
-	}
-	return (shared_str)str;
+		return m_section_id;	
+}
+
+shared_str& CWeapon::GetScopeName() const
+{
+	return GetAddonName(m_cur_scope);
+}
+
+shared_str& CWeapon::GetSilencerName() const
+{
+	return GetAddonName(m_cur_silencer);
+}
+
+shared_str& CWeapon::GetGrenadeLauncherName() const
+{
+	return GetAddonName(m_cur_glauncher);
 }
 
 float CWeapon::Weight() const
@@ -107,7 +104,7 @@ float CWeapon::Weight() const
 	if (IsGrenadeLauncherAttached() && GetGrenadeLauncherName().size()) {
 		res += pSettings->r_float(GetGrenadeLauncherName(), "inv_weight");
 	}
-	if (IsScopeAttached() && m_addons_list.size()) {
+	if (IsScopeAttached() && GetScopeName().size()) {
 		res += pSettings->r_float(GetScopeName(), "inv_weight");
 	}
 	if (IsSilencerAttached() && GetSilencerName().size()) {
