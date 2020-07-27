@@ -443,7 +443,7 @@ void CWeapon::LoadOriginalScopesParams(LPCSTR section)
 	if (!pSettings->line_exist(section, "addon_list")) 
 		return;
 
-	bVanillaStyleAddon = READ_IF_EXISTS(pSettings, r_bool, section, "addon_vanilla", false);
+	bVanillaStyleAddon = READ_IF_EXISTS(pSettings, r_bool, section, "addon_vanilla", true);
 
 	LPCSTR str = pSettings->r_string(section, "addon_list");
 	for (int i = 0, count = _GetItemCount(str); i < count; ++i)

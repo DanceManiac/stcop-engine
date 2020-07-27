@@ -1900,9 +1900,6 @@
     <Filter Include="Core\Client\Objects\items &amp; weapons\Explosives">
       <UniqueIdentifier>{b7688ab2-2055-4da9-bb6c-d249ae0911bd}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Core\Client\Objects\items &amp; weapons\MPPlayersBag">
-      <UniqueIdentifier>{f67b84c1-a3e6-44b2-b1b1-b8659b40006d}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Core\Client\Objects\items &amp; weapons\MPAnticheat">
       <UniqueIdentifier>{1fdfed8b-07ff-4a81-971c-69867c8087b9}</UniqueIdentifier>
     </Filter>
@@ -2493,6 +2490,9 @@
     </Filter>
     <Filter Include="Core\Client\Objects\items &amp; weapons\Weapons\Custom Weapon\Weapon Generic\Refactored\Functors">
       <UniqueIdentifier>{ed7c89e6-7cf5-4d03-bd3b-6b64cf33228d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Core\Client\Objects\items &amp; weapons\MPAnticheat\MPPlayersBag">
+      <UniqueIdentifier>{f67b84c1-a3e6-44b2-b1b1-b8659b40006d}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -5977,7 +5977,7 @@
       <Filter>Core\Client\Objects\items &amp; weapons\Explosives</Filter>
     </ClInclude>
     <ClInclude Include="MPPlayersBag.h">
-      <Filter>Core\Client\Objects\items &amp; weapons\MPPlayersBag</Filter>
+      <Filter>Core\Client\Objects\items &amp; weapons\MPAnticheat\MPPlayersBag</Filter>
     </ClInclude>
     <ClInclude Include="anticheat_dumpable_object.h">
       <Filter>Core\Client\Objects\items &amp; weapons\MPAnticheat</Filter>
@@ -9544,7 +9544,7 @@
       <Filter>Core\Client\Objects\items &amp; weapons\Explosives</Filter>
     </ClCompile>
     <ClCompile Include="MPPlayersBag.cpp">
-      <Filter>Core\Client\Objects\items &amp; weapons\MPPlayersBag</Filter>
+      <Filter>Core\Client\Objects\items &amp; weapons\MPAnticheat\MPPlayersBag</Filter>
     </ClCompile>
     <ClCompile Include="mpactor_dump_impl.cpp">
       <Filter>Core\Client\Objects\items &amp; weapons\MPAnticheat</Filter>

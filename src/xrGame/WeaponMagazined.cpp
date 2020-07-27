@@ -1333,14 +1333,15 @@ void CWeaponMagazined::net_Export	(NET_Packet& P)
 {
 	inherited::net_Export (P);
 
-	P.w_u8(u8(m_iCurFireMode&0x00ff));
+	P.w_u8(u8(0));
 }
 
 void CWeaponMagazined::net_Import	(NET_Packet& P)
 {
 	inherited::net_Import (P);
 
-	m_iCurFireMode = P.r_u8();
+	//m_iCurFireMode = P.r_u8();
+	P.r_u8();
 	SetQueueSize(GetCurrentFireMode());
 }
 
