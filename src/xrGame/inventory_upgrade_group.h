@@ -34,6 +34,7 @@ public:
 				void		fill_root( Root* root );
 
 				UpgradeStateResult	can_install( CInventoryItem& item, UpgradeBase& test_upgrade, bool loading );
+			    void        clear_group_upgrades(CInventoryItem& item, UpgradeBase& test_upgrade, bool loading);
 				
 				void		highlight_up();
 				void		highlight_down();

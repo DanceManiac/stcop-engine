@@ -59,6 +59,22 @@ void CInventoryItem::add_upgrade( const shared_str& upgrade_id, bool loading )
 	}
 }
 
+void CInventoryItem::remove_upgrade(const shared_str& upgrade_id, bool loading)
+{
+	if (has_upgrade(upgrade_id))
+	{
+		m_upgrades.erase(std::remove_if(m_upgrades.begin(),	m_upgrades.end(),[&](const shared_str upgrade)-> bool { return upgrade == upgrade_id; }	),m_upgrades.end());
+
+		if (!loading)
+		{
+			NET_Packet					P;
+			CGameObject::u_EventGen(P, GE_UNINSTALL_UPGRADE, object_id());
+			P.w_stringZ(upgrade_id);
+			CGameObject::u_EventSend(P);
+		}
+	}
+}
+
 bool CInventoryItem::get_upgrades_str( string2048& res ) const
 {
 	int prop_count = 0;
@@ -142,17 +158,26 @@ void CInventoryItem::net_Spawn_install_upgrades( Upgrades_type saved_upgrades ) 
 	
 	ai().alife().inventory_upgrade_manager().init_install( *this ); // from pSettings
 
-	Upgrades_type::iterator ib = saved_upgrades.begin();
-	Upgrades_type::iterator ie = saved_upgrades.end();
-	for ( ; ib != ie ; ++ib )
+	for (auto upgrade : saved_upgrades)
 	{
-		ai().alife().inventory_upgrade_manager().upgrade_install( *this, (*ib), true );
+		ai().alife().inventory_upgrade_manager().upgrade_install( *this, (*upgrade), true );
 	}
 }
 
 bool CInventoryItem::install_upgrade( LPCSTR section )
 {
 	return install_upgrade_impl( section, false );
+}
+
+void CInventoryItem::reinstall_upgrades()
+{
+	Upgrades_type saved_upgrades = m_upgrades;
+	m_upgrades.clear();
+
+	for (auto upgrade : saved_upgrades)
+	{
+		ai().alife().inventory_upgrade_manager().upgrade_install(*this, (*upgrade), true);
+	}
 }
 
 bool CInventoryItem::verify_upgrade( LPCSTR section )

@@ -95,19 +95,19 @@ public:
 	
 	virtual void				OnEvent				(NET_Packet& P, u16 type);
 	
-	virtual bool				Useful				() const;									// !!! Переопределить. (см. в Inventory.cpp)
+	virtual bool				Useful				() const;									// !!! РџРµСЂРµРѕРїСЂРµРґРµР»РёС‚СЊ. (СЃРј. РІ Inventory.cpp)
 	virtual bool				Attach				(PIItem pIItem, bool b_send_event) {return false;}
 	virtual bool				Detach				(PIItem pIItem) {return false;}
-	//при детаче спаунится новая вещь при заданно названии секции
+	//РїСЂРё РґРµС‚Р°С‡Рµ СЃРїР°СѓРЅРёС‚СЃСЏ РЅРѕРІР°СЏ РІРµС‰СЊ РїСЂРё Р·Р°РґР°РЅРЅРѕ РЅР°Р·РІР°РЅРёРё СЃРµРєС†РёРё
 	virtual bool				Detach				(const char* item_section_name, bool b_spawn_item);
 	virtual bool				CanAttach			(PIItem pIItem) {return false;}
 	virtual bool				CanDetach			(LPCSTR item_section_name) {return false;}
 
 	virtual EHandDependence		HandDependence		()	const	{return hd1Hand;};
 	virtual bool				IsSingleHanded		()	const	{return true;};	
-	virtual bool				ActivateItem		();									// !!! Переопределить. (см. в Inventory.cpp)
-	virtual void				DeactivateItem		();								// !!! Переопределить. (см. в Inventory.cpp)
-	virtual bool				Action				(u16 cmd, u32 flags) {return false;}	// true если известная команда, иначе false
+	virtual bool				ActivateItem		();									// !!! РџРµСЂРµРѕРїСЂРµРґРµР»РёС‚СЊ. (СЃРј. РІ Inventory.cpp)
+	virtual void				DeactivateItem		();								// !!! РџРµСЂРµРѕРїСЂРµРґРµР»РёС‚СЊ. (СЃРј. РІ Inventory.cpp)
+	virtual bool				Action				(u16 cmd, u32 flags) {return false;}	// true РµСЃР»Рё РёР·РІРµСЃС‚РЅР°СЏ РєРѕРјР°РЅРґР°, РёРЅР°С‡Рµ false
 	virtual void				DiscardState		() {};
 
 	virtual void				OnH_B_Chield		();
@@ -277,12 +277,15 @@ public:
 	bool	has_upgrade					( const shared_str& upgrade_id );
 	bool	has_upgrade_group			( const shared_str& upgrade_group_id );
 	void	add_upgrade					( const shared_str& upgrade_id, bool loading );
+	void	remove_upgrade				( const shared_str& upgrade_id, bool loading );
 	bool	get_upgrades_str			( string2048& res ) const;
 
 	bool	equal_upgrades				( Upgrades_type const& other_upgrades ) const;
 
 	bool	verify_upgrade				( LPCSTR section );
 	bool	install_upgrade				( LPCSTR section );
+	void    reinstall_upgrades			();
+
 	void	pre_install_upgrade			();
 
 #ifdef DEBUG	

@@ -62,6 +62,7 @@ public:
 
 			bool					has_upgrade				(const shared_str& upgrade_id);
 			void					add_upgrade				(const shared_str& upgrade_id);
+			void					remove_upgrade			(const shared_str& upgrade_id);
 
 private:
 	bool							prev_freezed;

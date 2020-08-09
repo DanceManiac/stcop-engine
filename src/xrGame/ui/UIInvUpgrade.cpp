@@ -241,7 +241,7 @@ void UIUpgrade::OnFocusLost()
 
 void UIUpgrade::OnClick()
 {
-	if ( m_state == STATE_ENABLED || m_state == STATE_FOCUSED || m_state == STATE_TOUCHED )
+	if ( m_state == STATE_ENABLED || m_state == STATE_FOCUSED || m_state == STATE_TOUCHED || m_state == STATE_DISABLED_GROUP)
 	{
 		m_parent_wnd->AskUsing( make_string( "%s %s", CStringTable().translate( "st_upgrade_install" ).c_str(),
 			get_upgrade()->name() ).c_str(), get_upgrade()->id_str() );
