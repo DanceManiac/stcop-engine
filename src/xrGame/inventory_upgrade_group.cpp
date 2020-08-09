@@ -81,18 +81,33 @@ void Group::fill_root( Root* root )
 	}
 }
 
+void Group::clear_group_upgrades(CInventoryItem& item, UpgradeBase& test_upgrade, bool loading)
+{
+	if (m_included_upgrades.empty()) return;
+
+	for (auto child : m_included_upgrades)
+	{
+		if ((child) == &test_upgrade)
+		{
+			continue;
+		}
+		if (item.has_upgrade((child)->id()))
+		{
+			clear_group_upgrades(item, *child, loading);
+			item.remove_upgrade(child->id(), loading);
+		}
+	}
+}
 UpgradeStateResult Group::can_install( CInventoryItem& item, UpgradeBase& test_upgrade, bool loading )
 {
-	Upgrades_type::iterator ib = m_parent_upgrades.begin();
-	Upgrades_type::iterator ie = m_parent_upgrades.end();
-	for ( ; ib != ie ; ++ib )
+	for ( auto parent : m_parent_upgrades)
 	{
-		if ( (*ib)->is_root() )
+		if ( (parent)->is_root() )
 		{
 			continue;
 		}
 //		if ( !item.has_upgrade( (*ib)->id() ) )
-		Upgrade* U = smart_cast<Upgrade*>(*ib);
+		Upgrade* U = smart_cast<Upgrade*>(parent);
 		if ( !item.has_upgrade_group( U->parent_group_id() ) )
 		{
 			if ( loading )
@@ -104,15 +119,13 @@ UpgradeStateResult Group::can_install( CInventoryItem& item, UpgradeBase& test_u
 		}
 	}
 	
-	ib = m_included_upgrades.begin();
-	ie = m_included_upgrades.end();
-	for ( ; ib != ie ; ++ib )
+	for (auto child : m_included_upgrades)
 	{
-		if ( (*ib) == &test_upgrade )
+		if ( (child) == &test_upgrade )
 		{
 			continue;
 		}
-		if ( item.has_upgrade( (*ib)->id() ) )
+		if ( item.has_upgrade( (child)->id() ) )
 		{
 			if ( loading )
 			{

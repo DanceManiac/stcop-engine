@@ -339,7 +339,18 @@ bool Manager::upgrade_install( CInventoryItem& item, shared_str const& upgrade_i
 	Upgrade* upgrade = upgrade_verify( item.m_section_id, upgrade_id );
 	UpgradeStateResult res = upgrade->can_install( item, loading );
 	
-	if ( res == result_ok )
+	if (res == result_e_group)
+	{
+		if (!loading)
+		{
+			item.pre_install_upgrade();
+		}
+
+		upgrade->clear_group(item, *upgrade, loading);
+		upgrade_install(item, upgrade_id, loading);
+
+	}
+	else if ( res == result_ok )
 	{
 		if ( !loading )
 		{

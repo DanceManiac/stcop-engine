@@ -312,6 +312,13 @@ void CSE_ALifeInventoryItem::add_upgrade( const shared_str& upgrade_id )
 	}
 	FATAL( make_string( "Can`t add existent upgrade (%s)!", upgrade_id.c_str() ).c_str() );
 }
+void CSE_ALifeInventoryItem::remove_upgrade(const shared_str& upgrade_id)
+{
+	if (has_upgrade(upgrade_id))
+	{
+		m_upgrades.erase(std::remove_if(m_upgrades.begin(), m_upgrades.end(), [&](const shared_str upgrade)-> bool { return upgrade == upgrade_id; }), m_upgrades.end());
+	}
+}
 
 
 ////////////////////////////////////////////////////////////////////////////

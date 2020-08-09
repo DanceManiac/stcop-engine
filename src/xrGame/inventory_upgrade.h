@@ -1,8 +1,8 @@
 ////////////////////////////////////////////////////////////////////////////
 //	Module 		: inventory_upgrade.h
 //	Created 	: 01.11.2007
-//  Modified 	: 27.11.2007
-//	Author		: Evgeniy Sokolov
+//  Modified 	: 08.08.2020
+//	Author		: Evgeniy Sokolov, Mortan
 //	Description : inventory upgrade class
 ////////////////////////////////////////////////////////////////////////////
 
@@ -124,6 +124,7 @@ public:
 	virtual		void		fill_root_container( Root* root );
 
 	virtual		UpgradeStateResult		can_install( CInventoryItem& item, bool loading );
+				void		clear_group(CInventoryItem& item, UpgradeBase& test_upgrade, bool loading);
 				bool		check_scheme_index( const Ivector2& scheme_index );
 				void		set_highlight( bool value );
 				void		run_effects( bool loading );

@@ -149,6 +149,11 @@ void Upgrade::fill_root_container( Root* root )
 	inherited::fill_root_container( root );
 }
 
+void Upgrade::clear_group(CInventoryItem& item, UpgradeBase& test_upgrade, bool loading)
+{
+	m_parent_group->clear_group_upgrades(item, test_upgrade, loading);
+}
+
 UpgradeStateResult Upgrade::can_install( CInventoryItem& item, bool loading )
 {
 	UpgradeStateResult res = inherited::can_install( item, loading );
