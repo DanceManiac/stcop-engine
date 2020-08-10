@@ -237,8 +237,11 @@ public:
 		VERIFY				(T);
 		float	mtl			= T->m_material;
 
+		if (::Render->currentViewPort == SECONDARY_WEAPON_SCOPE)
+			bOverride = true;
+
 		if (bOverride) 
-			mtl = new_material * 3.785;
+			mtl = new_material * 3.785f;
 
 		if (override_material && (xr_strcmp(T->cName, d_texture_name) == 0))
 		{

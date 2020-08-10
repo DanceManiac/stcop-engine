@@ -681,7 +681,7 @@
     <ClInclude Include="DetailFormat.h" />
     <ClInclude Include="dx11HDAOCSBlender.h" />
     <ClInclude Include="dx11MinMaxSMBlender.h" />
-    <ClInclude Include="light.h" />
+    <ClInclude Include="..\xrRender\light.h" />
     <ClInclude Include="light_gi.h" />
     <ClInclude Include="Light_Render_Direct.h" />
     <ClInclude Include="light_smapvis.h" />
