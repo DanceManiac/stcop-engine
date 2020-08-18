@@ -44,11 +44,11 @@ public:
 	R_dsgraph::mapSorted_T										mapDistort;
 	R_dsgraph::mapHUD_T											mapHUDSorted;
 
-#if RENDER!=R_R1
 	R_dsgraph::mapSorted_T										mapWmark;			// sorted
 	R_dsgraph::mapSorted_T										mapEmissive;
 	R_dsgraph::mapSorted_T										mapHUDEmissive;
-#endif
+
+	R_dsgraph::map3D_static_T                                    map3D_UIStatic;
 
 	// Runtime structures 
 	xr_vector<R_dsgraph::mapNormalVS::TNode*,render_alloc<R_dsgraph::mapNormalVS::TNode*> >				nrmVS;
@@ -147,19 +147,19 @@ public:
 		mapLOD.destroy			();
 		mapDistort.destroy		();
 		mapHUDSorted.destroy    ();
-
-#if RENDER!=R_R1
+		map3D_UIStatic.destroy	();
 		mapWmark.destroy		();
 		mapEmissive.destroy		();
 		mapHUDEmissive.destroy  ();
-#endif
 	}
 
 	void		r_pmask											(bool _1, bool _2, bool _wm=false)				{ pmask[0]=_1; pmask[1]=_2;	pmask_wmark = _wm; }
 
 	void		r_dsgraph_insert_dynamic						(dxRender_Visual	*pVisual, Fvector& Center);
+	void		r_dsgraph_insert_3d_static						(dxRender_Visual	*pVisual, Fvector& Center);
 	void		r_dsgraph_insert_static							(dxRender_Visual	*pVisual);
 
+	void		r_dsgraph_render_3d_static						();
 	void		r_dsgraph_render_graph							(u32	_priority,	bool _clear=true);
 	void		r_dsgraph_render_hud							();
 	void		r_dsgraph_render_hud_ui							();

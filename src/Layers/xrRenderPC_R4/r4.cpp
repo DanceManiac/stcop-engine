@@ -44,6 +44,10 @@ ShaderElement*			CRender::rimp_select_sh_dynamic	(dxRender_Visual	*pVisual, floa
 	{
 		id = ((_sqrt(cdist_sq)-pVisual->vis.sphere.R)<r_dtex_range)?SE_R2_NORMAL_HQ:SE_R2_NORMAL_LQ;
 	}
+	else if (CRender::PHASE_UI == RImplementation.phase)
+	{
+		id = SE_R2_NORMAL_UI;
+	}
 	return pVisual->shader->E[id]._get();
 }
 //////////////////////////////////////////////////////////////////////////
@@ -610,12 +614,26 @@ BOOL					CRender::occ_visible			(sPoly& P)			{ return HOM.visible(P);								}
 BOOL					CRender::occ_visible			(Fbox& P)			{ return HOM.visible(P);								}
 
 void					CRender::add_Visual				(IRenderVisual*		V )	{ add_leafs_Dynamic((dxRender_Visual*)V, V->bIgnoreOpt);								}
+
+void                    CRender::add_3d_static			(IRenderVisual*		V ) { add_leaf_3d_static((dxRender_Visual*)V); };
+void                    CRender::render_3d_static()
+{
+	r_dsgraph_render_3d_static();
+}
 void					CRender::add_Geometry			(IRenderVisual*		V )	{ add_Static((dxRender_Visual*)V,View->getMask());					}
 void					CRender::add_StaticWallmark		(ref_shader& S, const Fvector& P, float s, CDB::TRI* T, Fvector* verts)
 {
 	if (T->suppress_wm)	return;
 	VERIFY2							(_valid(P) && _valid(s) && T && verts && (s>EPS_L), "Invalid static wallmark params");
 	Wallmarks->AddStaticWallmark	(T,verts,P,&*S,s);
+}
+
+void  CRender::add_torender(IRenderVisual* visual, Fmatrix& matrix)
+{
+	UIRenderModel* model = xr_new<UIRenderModel>();
+	model->visual = visual;
+	model->matrix = matrix;
+	renderable_ui_models.push_back(model);
 }
 
 void CRender::add_StaticWallmark			(IWallMarkArray *pArray, const Fvector& P, float s, CDB::TRI* T, Fvector* V)

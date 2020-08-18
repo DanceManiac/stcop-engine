@@ -27,18 +27,47 @@ CUIInventoryCellItem::CUIInventoryCellItem(CInventoryItem* itm)
 {
 	m_pData											= (void*)itm;
 
-	inherited::SetShader							(InventoryUtilities::GetEquipmentIconsShader());
+	//inherited::SetShader							(InventoryUtilities::GetEquipmentIconsShader());
 
+	UIItem3d = xr_new<CUI3dStatic>();
+	AttachChild(UIItem3d);
+	UIItem3d->SetAutoDelete(true);
 	m_grid_size.set									(itm->GetInvGridRect().rb);
 	Frect rect; 
-	rect.lt.set										(	INV_GRID_WIDTHF*itm->GetInvGridRect().x1, 
-														INV_GRID_HEIGHTF*itm->GetInvGridRect().y1 );
-
+	rect.lt.set										(	INV_GRID_WIDTHF*itm->GetInvGridRect().x1, 														INV_GRID_HEIGHTF*itm->GetInvGridRect().y1 );
 	rect.rb.set										(	rect.lt.x+INV_GRID_WIDTHF*m_grid_size.x, 
 														rect.lt.y+INV_GRID_HEIGHTF*m_grid_size.y);
 
 	inherited::SetTextureRect						(rect);
 	inherited::SetStretchTexture					(true);
+
+	Fvector2 b_p = GetWndPos();
+
+	int iGridWidth = itm->GetInvGridRect().width();
+	int iGridHeight = itm->GetInvGridRect().height();
+	Frect rect2 = { 0.0f,
+											0.0f,
+											float(iGridWidth * INV_GRID_WIDTH),
+											float(iGridHeight * INV_GRID_HEIGHT) };
+	Frect v_r;
+	if (rect2.width() > rect2.height())
+	{
+		v_r = { 0.f, 0.f, rect2.width(), rect2.width() };
+		b_p.x = b_p.x - rect2.width() / 2.f;
+		b_p.y = b_p.y - rect2.width() / 2.f;
+	}
+	else
+	{
+		v_r = { 0.f, 0.f, rect2.height(), rect2.height() };
+		b_p.x = b_p.x - rect2.height() / 2.f;
+		b_p.y = b_p.y - rect2.height() / 2.f;
+	}
+
+	UIItem3d->SetWndPos(b_p);
+	UIItem3d->SetWndSize(Fvector2().set(v_r.width(), v_r.height()));
+
+	CGameObject* GO = smart_cast<CGameObject*>(itm);
+	UIItem3d->SetGameObject(GO);
 }
 
 bool CUIInventoryCellItem::EqualTo(CUICellItem* itm)
@@ -253,6 +282,8 @@ void CUIWeaponCellItem::Draw()
 
 	if(m_upgrade && m_upgrade->IsShown())
 		m_upgrade->Draw();
+
+
 };
 
 void CUIWeaponCellItem::Update()

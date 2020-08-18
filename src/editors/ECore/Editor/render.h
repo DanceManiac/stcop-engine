@@ -75,6 +75,7 @@ public:
 
 	void					set_Transform	(Fmatrix* M);
 	void					add_Visual   	(IRenderVisual* visual);
+	virtual void            add_torender	(IRenderVisual* visual, Fmatrix& matrix);
 
 	virtual ref_shader		getShader		(int id);
 	CRenderTarget*			getTarget		(){return Target;}

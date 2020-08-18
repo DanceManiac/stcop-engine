@@ -76,6 +76,7 @@ const		u32					LUMINANCE_size		= 16	;
 #define		SE_R2_NORMAL_HQ		0	// high quality/detail
 #define		SE_R2_NORMAL_LQ		1	// low quality
 #define		SE_R2_SHADOW		2	// shadow generation
+#define		SE_R2_NORMAL_UI		3	//
 
 // spot
 #define		SE_L_FILL			0

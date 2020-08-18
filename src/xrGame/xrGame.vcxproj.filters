@@ -7357,6 +7357,9 @@
     <ClInclude Include="Weapon.h">
       <Filter>Core\Client\Objects\items &amp; weapons\Weapons\Custom Weapon\Weapon Generic\Refactored</Filter>
     </ClInclude>
+    <ClInclude Include="ui\UI3dStatic.h">
+      <Filter>UI\Common\ui-item-infos</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="damage_manager.cpp">
@@ -11022,6 +11025,9 @@
     </ClCompile>
     <ClCompile Include="WeaponSaveManager.cpp">
       <Filter>Core\Client\Objects\items &amp; weapons\Weapons\Custom Weapon\Weapon Generic\Refactored\Functors</Filter>
+    </ClCompile>
+    <ClCompile Include="ui\UI3dStatic.cpp">
+      <Filter>UI\Common\ui-item-infos</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

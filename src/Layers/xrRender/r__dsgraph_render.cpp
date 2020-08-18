@@ -78,6 +78,18 @@ void __fastcall sorted_L1		(mapSorted_Node *N)
 	V->Render						(calcLOD(N->key,V->vis.sphere.R));
 }
 
+void __fastcall sorted_3d(map3D_static_Node* N)
+{
+	VERIFY(N);
+	dxRender_Visual* V = N->val.pVisual;
+	VERIFY(V && V->shader._get());
+	RCache.set_Element(N->val.se);
+	RCache.set_xform_world(N->val.Matrix);
+	RImplementation.apply_object(N->val.pObject);
+	RImplementation.apply_lmaterial();
+	V->Render(calcLOD(N->key, V->vis.sphere.R));
+}
+
 IC	bool	cmp_vs_nrm			(mapNormalVS::TNode* N1, mapNormalVS::TNode* N2)
 {
 	return (N1->val.ssa > N2->val.ssa);
@@ -512,12 +524,11 @@ void R_dsgraph_structure::r_dsgraph_render_hud_ui()
 
 	hud_transform_helper helper;
 
-#if	RENDER!=R_R1
 	// Targets, use accumulator for temporary storage
 	const ref_rt	rt_null;
 	RCache.set_RT(0,	1);
 	RCache.set_RT(0,	2);
-#if	(RENDER==R_R3) || (RENDER==R_R4)
+
 	if( !RImplementation.o.dx10_msaa )
 	{
 		if (RImplementation.o.albedo_wo)	RImplementation.Target->u_setrt		(RImplementation.Target->rt_Accumulator,	rt_null,	rt_null,	HW.pBaseZB);
@@ -528,11 +539,6 @@ void R_dsgraph_structure::r_dsgraph_render_hud_ui()
 		if (RImplementation.o.albedo_wo)	RImplementation.Target->u_setrt		(RImplementation.Target->rt_Accumulator,	rt_null,	rt_null,	RImplementation.Target->rt_MSAADepth->pZRT);
 		else								RImplementation.Target->u_setrt		(RImplementation.Target->rt_Color,			rt_null,	rt_null,	RImplementation.Target->rt_MSAADepth->pZRT);
 	}
-#else // (RENDER==R_R3) || (RENDER==R_R4)
-	if (RImplementation.o.albedo_wo)	RImplementation.Target->u_setrt		(RImplementation.Target->rt_Accumulator,	rt_null,	rt_null,	HW.pBaseZB);
-	else								RImplementation.Target->u_setrt		(RImplementation.Target->rt_Color,			rt_null,	rt_null,	HW.pBaseZB);
-#endif // (RENDER==R_R3) || (RENDER==R_R4)
-#endif // RENDER!=R_R1
 
 	g_hud->RenderActiveItemUI	();
 }
@@ -555,6 +561,13 @@ void	R_dsgraph_structure::r_dsgraph_render_sorted	()
 		mapHUDSorted.clear();
 	}
 
+}
+
+void	R_dsgraph_structure::r_dsgraph_render_3d_static()
+{
+	Msg("3d statics count: %d", map3D_UIStatic.size());
+	map3D_UIStatic.traverseRL(sorted_3d);
+	map3D_UIStatic.clear();
 }
 
 void	R_dsgraph_structure::r_dsgraph_render_hud_sorted()

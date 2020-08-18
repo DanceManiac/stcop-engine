@@ -3,8 +3,7 @@
 #include "../xrRender/FBasicVisual.h"
 #include "../../xrEngine/customhud.h"
 #include "../../xrEngine/xr_object.h"
-#include "tbb/parallel_sort.h"
-#include "tbb/concurrent_vector.h"
+
 #include "../xrRender/QueryHelper.h"
 
 float CPU_wait_GPU_lastFrame_ = 0.f;
@@ -88,9 +87,6 @@ void CRender::render_main	(Fmatrix&	m_ViewProjection, bool _fportals)
 			}
 		}
 
-		tbb::concurrent_vector<IRenderable*> renderable_objects;
-		tbb::concurrent_vector<light*> renderable_lights;
-
 		for (size_t i = 0; i < lstRenderables.size(); ++i)
 		{
 			ISpatial* spatial = lstRenderables[i];
@@ -166,10 +162,24 @@ void CRender::render_main	(Fmatrix&	m_ViewProjection, bool _fportals)
 			set_Object(0);
 		}
 
+		for (size_t i = 0; i < renderable_ui_models.size(); i++)
+		{
+			//set_Object(renderable_ui_models[i]);
+			//renderable_ui_models[i]->renderable_Render();
+			//set_Object(0);
+			set_Transform(&renderable_ui_models[i]->matrix);
+			add_Visual(renderable_ui_models[i]->visual);
+			set_Object(0);
+		}
+		
 		for (size_t i = 0; i < renderable_lights.size(); i++)
 		{
 			Lights.add_light(renderable_lights[i]);
 		}
+
+		renderable_objects.clear();
+		renderable_ui_models.clear();
+		renderable_lights.clear();
 
 		if (g_pGameLevel && (phase==PHASE_NORMAL))	g_hud->Render_Last();		// HUD
 	}

@@ -93,7 +93,6 @@ void Group::clear_group_upgrades(CInventoryItem& item, UpgradeBase& test_upgrade
 		}
 		if (item.has_upgrade((child)->id()))
 		{
-			clear_group_upgrades(item, *child, loading);
 			item.remove_upgrade(child->id(), loading);
 		}
 	}

@@ -61,6 +61,9 @@ void CInventoryItem::add_upgrade( const shared_str& upgrade_id, bool loading )
 
 void CInventoryItem::remove_upgrade(const shared_str& upgrade_id, bool loading)
 {
+
+	Msg("Try to remove updgrade: %s", upgrade_id.c_str());
+
 	if (has_upgrade(upgrade_id))
 	{
 		m_upgrades.erase(std::remove_if(m_upgrades.begin(),	m_upgrades.end(),[&](const shared_str upgrade)-> bool { return upgrade == upgrade_id; }	),m_upgrades.end());

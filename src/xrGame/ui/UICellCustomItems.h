@@ -1,7 +1,7 @@
 #pragma once
 #include "UICellItem.h"
 #include "../Weapon.h"
-
+#include "UI3dStatic.h"
 
 class CUIInventoryCellItem :public CUICellItem
 {
@@ -16,6 +16,9 @@ public:
 				bool			IsHelperOrHasHelperChild	();
 				void			Update						();
 				CInventoryItem* object						() {return (CInventoryItem*)m_pData;}
+	
+				Fvector2			UIItem3dPos;
+				CUI3dStatic*		UIItem3d;
 };
 
 class CUIAmmoCellItem :public CUIInventoryCellItem

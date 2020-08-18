@@ -21,8 +21,20 @@
 
 #include "../../xrEngine/irenderable.h"
 #include "../../xrEngine/fmesh.h"
+#include "tbb/parallel_sort.h"
+#include "tbb/concurrent_vector.h"
 
 class dxRender_Visual;
+
+class UIRenderModel
+{
+public:
+	IRenderVisual* visual;
+	Fmatrix matrix;
+
+	 UIRenderModel() {};
+	~UIRenderModel() {};
+};
 
 // definition
 class CRender	:	public R_dsgraph_structure
@@ -32,6 +44,7 @@ public:
 	{
 		PHASE_NORMAL	= 0,	// E[0]
 		PHASE_SMAP		= 1,	// E[1]
+		PHASE_UI        = 2,    // E[2]
 	};
 
 	enum
@@ -144,6 +157,10 @@ public:
 
 	CRenderTarget*												Target;			// Render-target
 
+	tbb::concurrent_vector<IRenderable*>						renderable_objects;
+	tbb::concurrent_vector<UIRenderModel*>						renderable_ui_models;
+	tbb::concurrent_vector<light*>								renderable_lights;
+	virtual void												add_torender(IRenderVisual* visual, Fmatrix& matrix);
 	CLight_DB													Lights;
 	CLight_Compute_XFORM_and_VIS								LR;
 	xr_vector<light*>											Lights_LastFrame;
@@ -179,6 +196,7 @@ private:
 	void							add_Static					(dxRender_Visual*pVisual, u32 planes);
 	void                            add_StaticForCulling		(dxRender_Visual* pVisual, CSector* sector);
 	void							add_leafs_Dynamic			(dxRender_Visual*pVisual, bool bIgnoreOpt = false);	// if detected node's full visibility
+	void                            add_leaf_3d_static			(dxRender_Visual*pVisual);
 	void							add_leafs_Static			(dxRender_Visual*pVisual);					// if detected node's full visibility
 
 public:
@@ -193,7 +211,7 @@ public:
 	void							render_sun_filtered			();
 	void							render_menu					();
 	void							render_rain					();
-
+	virtual void                    render_3d_static();
 	void							render_sun_cascade			(u32 cascade_ind);
 	void							init_cacades				();
 	void							render_sun_cascades			();
@@ -302,6 +320,7 @@ public:
 	virtual void					set_Object					(IRenderable*		O	);
 	virtual	void					add_Occluder				(Fbox2&	bb_screenspace	);			// mask screen region as oclluded
 	virtual void					add_Visual					(IRenderVisual*	V	);			// add visual leaf	(no culling performed at all)
+	virtual void					add_3d_static				(IRenderVisual* V	);			// add visual for 3d models in UI, no culling
 	virtual void					add_Geometry				(IRenderVisual*	V	);			// add visual(s)	(all culling performed)
 
 	virtual bool					texture_is_exist(LPCSTR texture_name);

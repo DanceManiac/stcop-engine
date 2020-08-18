@@ -39,7 +39,55 @@ ICF    float    CalcHudSSA(float& distSQ, Fvector& C, dxRender_Visual* V)
 	return    R / distSQ;
 }
 
-void R_dsgraph_structure::r_dsgraph_insert_dynamic	(dxRender_Visual *pVisual, Fvector& Center)
+void R_dsgraph_structure::r_dsgraph_insert_3d_static(dxRender_Visual* pVisual, Fvector& Center)
+{
+	CRender& RI = RImplementation;
+
+	float distSQ;
+	float SSA;
+
+	//if (!RI.val_bHUD)
+	SSA = CalcSSA(distSQ, Center, pVisual);
+	//else
+		//SSA = CalcHudSSA(distSQ, Center, pVisual);
+
+	//if (SSA <= r_ssaDISCARD)		return;
+	RImplementation.phase = CRender::PHASE_UI;
+
+	VERIFY(pVisual->shader._get());
+	ShaderElement* sh_d = &*pVisual->shader->E[4];
+
+	// Select shader
+	ShaderElement* sh = RImplementation.rimp_select_sh_dynamic(pVisual, distSQ);
+	if (0 == sh)								return;
+	//if (!pmask[sh->flags.iPriority / 2])		return;
+	// Create common node
+	// NOTE: Invisible elements exist only in R1
+	//_MatrixItem		item = { SSA,RI.val_pObject,pVisual,*RI.val_pTransform };
+	// HUD rendering
+	
+	/*
+			N->val.pObject = RI.val_pObject;
+			N->val.pVisual = pVisual;
+			N->val.Matrix = *RI.val_pTransform;
+	*/
+
+	{
+		map3D_static_Node* N = map3D_UIStatic.insertInAnyWay(distSQ);
+		N->val.ssa = SSA;
+		//N->val.pObject = NULL;
+		//N->val.pVisual = pVisual;
+		//N->val.Matrix = Fidentity;
+		N->val.pObject = RI.val_pObject;
+		N->val.pVisual = pVisual;
+		N->val.Matrix = *RI.val_pTransform;
+
+		N->val.se = sh;
+		return;
+	}
+}
+
+void R_dsgraph_structure::r_dsgraph_insert_dynamic(dxRender_Visual *pVisual, Fvector& Center)
 {
 	CRender&	RI			=	RImplementation;
 
@@ -124,7 +172,6 @@ void R_dsgraph_structure::r_dsgraph_insert_dynamic	(dxRender_Visual *pVisual, Fv
 		return;
 	}
 
-#if RENDER!=R_R1
 	// Emissive geometry should be marked and R2 special-cases it
 	// a) Allow to skeep already lit pixels
 	// b) Allow to make them 100% lit and really bright
@@ -147,7 +194,6 @@ void R_dsgraph_structure::r_dsgraph_insert_dynamic	(dxRender_Visual *pVisual, Fv
 		N->val.se				= sh;							
 		return					;
 	}
-#endif
 
 	for ( u32 iPass = 0; iPass<sh->passes.size(); ++iPass)
 	{
@@ -464,6 +510,82 @@ void CRender::add_leafs_Dynamic	(dxRender_Visual *pVisual, bool bIgnoreOpt)
 			r_dsgraph_insert_dynamic		(pVisual,Tpos);
 		}
 		return;
+	}
+}
+
+void CRender::add_leaf_3d_static(dxRender_Visual* pVisual)
+{
+	if (0 == pVisual)				return;
+
+	// Visual is 100% visible - simply add it
+	xr_vector<dxRender_Visual*>::iterator I, E;	// it may be useful for 'hierrarhy' visual
+
+	switch (pVisual->Type) {
+	case MT_PARTICLE_GROUP:
+	{
+		if (phase == PHASE_SMAP)
+			return;
+		// Add all children, doesn't perform any tests
+
+		PS::CParticleGroup* pG = (PS::CParticleGroup*)pVisual;
+		for (auto& i_it : pG->items)
+		{
+			if (i_it._effect)add_leaf_3d_static(i_it._effect);
+			for (auto pit : i_it._children_related)	add_leaf_3d_static(pit);
+			for (auto pit : i_it._children_free) add_leaf_3d_static(pit);
+		}
+	}
+	return;
+	case MT_HIERRARHY:
+	{
+		// Add all children, doesn't perform any tests
+		FHierrarhyVisual* pV = (FHierrarhyVisual*)pVisual;
+		for (auto I : pV->children)
+		{
+			I->heat = pV->getHeatData();
+			add_leaf_3d_static(I);
+		}
+
+	}
+	return;
+	case MT_SKELETON_ANIM:
+	case MT_SKELETON_RIGID:
+	{
+		// Add all children, doesn't perform any tests
+		CKinematics* pV = (CKinematics*)pVisual;
+		BOOL	_use_lod = FALSE;
+		if (pV->m_lod)
+		{
+			Fvector							Tpos;	float		D;
+			val_pTransform->transform_tiny(Tpos, pV->vis.sphere.P);
+			float		ssa = CalcSSA(D, Tpos, pV->vis.sphere.R / 2.f);	// assume dynamics never consume full sphere
+			if (ssa < r_ssaLOD_A)	_use_lod = TRUE;
+		}
+		if (_use_lod)
+		{
+			add_leaf_3d_static(pV->m_lod);
+		}
+		else {
+			pV->CalculateBones(TRUE);
+			pV->CalculateWallmarks();		//. bug?
+
+			for (auto I : pV->children)
+			{
+				I->heat = pV->getHeatData();
+				add_leaf_3d_static(I);
+			}
+		}
+	}
+	return;
+	default:
+	{
+		// General type of visual
+		// Calculate distance to it's center
+		Fvector							Tpos;
+		val_pTransform->transform_tiny(Tpos, pVisual->vis.sphere.P);
+		r_dsgraph_insert_3d_static(pVisual, Tpos);
+	}
+	return;
 	}
 }
 

@@ -103,6 +103,7 @@ void CUIGameCustom::Render()
     }
     m_pMessagesWnd->Draw();
     DoRenderDialogs();
+    ::Render->render_3d_static();
 }
 
 StaticDrawableWrapper* CUIGameCustom::AddCustomStatic(const char* id, bool singleInstance)

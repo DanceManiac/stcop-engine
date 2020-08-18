@@ -1,6 +1,6 @@
 #pragma once
 #include "uiwindow.h"
-
+#include "UI3dStatic.h"
 
 class CInventoryItem;
 class CUIStatic;
@@ -66,6 +66,9 @@ public:
 	CUIOutfitInfo*			UIOutfitInfo;
 	CUIBoosterInfo*			UIBoosterInfo;
 
-	Fvector2			UIItemImageSize; 
-	CUIStatic*			UIItemImage;
+	//Fvector2			UIItemImageSize; 
+	//CUIStatic*			UIItemImage;
+
+	Fvector2			UIItem3dPos;
+	CUI3dStatic*		UIItem3d;
 };

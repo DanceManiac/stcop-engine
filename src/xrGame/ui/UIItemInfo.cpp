@@ -32,12 +32,13 @@ extern const LPCSTR g_inventory_upgrade_xml;
 
 CUIItemInfo::CUIItemInfo()
 {
-	UIItemImageSize.set			(0.0f,0.0f);
+	//UIItemImageSize.set			(0.0f,0.0f);
 	
 	UICost						= NULL;
 	UITradeTip					= NULL;
 	UIWeight					= NULL;
-	UIItemImage					= NULL;
+	//UIItemImage					= NULL;
+	UIItem3d					= NULL;
 	UIDesc						= NULL;
 //	UIConditionWnd				= NULL;
 	UIWpnParams					= NULL;
@@ -157,14 +158,28 @@ void CUIItemInfo::InitItemInfo(LPCSTR xml_name)
 
 	if (uiXml.NavigateToNode("image_static", 0))
 	{	
-		UIItemImage					= xr_new<CUIStatic>();	 
+		/*UIItemImage					= xr_new<CUIStatic>();	 
 		AttachChild					(UIItemImage);	
 		UIItemImage->SetAutoDelete	(true);
 		xml_init.InitStatic			(uiXml, "image_static", 0, UIItemImage);
 		UIItemImage->TextureOn		();
 
 		UIItemImage->TextureOff			();
-		UIItemImageSize.set				(UIItemImage->GetWidth(),UIItemImage->GetHeight());
+		UIItemImageSize.set				(UIItemImage->GetWidth(),UIItemImage->GetHeight());*/
+
+		UIItem3d = xr_new<CUI3dStatic>();
+		AttachChild(UIItem3d);
+		UIItem3d->SetAutoDelete(true);
+
+		float x = uiXml.ReadAttribFlt("image_static", 0, "x");
+		float y = uiXml.ReadAttribFlt("image_static", 0, "y");
+		float width = uiXml.ReadAttribFlt("image_static", 0, "width");
+		float height = uiXml.ReadAttribFlt("image_static", 0, "height");
+
+		UIItem3d->SetWndPos(Fvector2().set(x, y));
+		UIItem3d->SetWndSize(Fvector2().set(width, height));
+		//UIItem3d->Init(x, y, width, height);
+		UIItem3dPos.set(UIItem3d->GetWndPos());
 	}
 	if ( uiXml.NavigateToNode( "outfit_info", 0 ) )
 	{
@@ -321,9 +336,9 @@ void CUIItemInfo::InitItem(CUICellItem* pCellItem, CInventoryItem* pCompareItem,
 
 		UIDesc->ScrollToBegin				();
 	}
-	if(UIItemImage)
+	/*if(UIItemImage)
 	{
-		// Çàãðóæàåì êàðòèíêó
+		// Ð—Ð°Ð³Ñ€ÑƒÐ¶Ð°ÐµÐ¼ ÐºÐ°Ñ€Ñ‚Ð¸Ð½ÐºÑƒ
 		UIItemImage->SetShader				(InventoryUtilities::GetEquipmentIconsShader());
 
 		Irect item_grid_rect				= pInvItem->GetInvGridRect();
@@ -342,6 +357,37 @@ void CUIItemInfo::InitItem(CUICellItem* pCellItem, CInventoryItem* pCompareItem,
 		UIItemImage->GetUIStaticItem().SetSize	(v_r);
 		UIItemImage->SetWidth					(v_r.x);
 		UIItemImage->SetHeight					(v_r.y);
+	}*/
+	if (UIItem3d)
+	{
+		Fvector2 b_p = UIItem3dPos;
+
+		int iGridWidth = pInvItem->GetInvGridRect().width();
+		int iGridHeight = pInvItem->GetInvGridRect().height();
+		Frect rect = { 0.0f,
+												0.0f,
+												float(iGridWidth * INV_GRID_WIDTH),
+												float(iGridHeight * INV_GRID_HEIGHT) };
+
+		Frect v_r;
+		if (rect.width() > rect.height())
+		{
+			v_r = { 0.f, 0.f, rect.width(), rect.width() };
+			b_p.x = b_p.x - rect.width() / 2.f;
+			b_p.y = b_p.y - rect.width() / 2.f;
+		}
+		else
+		{
+			v_r = { 0.f, 0.f, rect.height(), rect.height() };
+			b_p.x = b_p.x - rect.height() / 2.f;
+			b_p.y = b_p.y - rect.height() / 2.f;
+		}
+
+		UIItem3d->SetWndPos(b_p);
+		UIItem3d->SetWndSize(Fvector2().set(v_r.width(), v_r.height()));
+
+		CGameObject* GO = smart_cast<CGameObject*>(pInvItem);
+		UIItem3d->SetGameObject(GO);
 	}
 }
 
