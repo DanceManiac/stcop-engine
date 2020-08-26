@@ -51,10 +51,9 @@ public:
 	IC			LPCSTR		id_str() const;
 	IC			bool		is_known() const;
 
-#ifdef DEBUG
 	virtual		void		log_hierarchy( LPCSTR nest );
+	virtual     void        clear_hierarchy(CInventoryItem& item);
 //	virtual		void		test_all_upgrades( CInventoryItem& item );
-#endif // DEBUG
 
 	virtual		bool		is_root();
 				bool		make_known();

@@ -1648,6 +1648,33 @@ public:
 	}
 };
 
+class CCC_InvUpgradesCurItem : public IConsole_Command
+{
+public:
+	CCC_InvUpgradesCurItem(LPCSTR N) : IConsole_Command(N) { bEmptyArgsHandled = TRUE; };
+	virtual void Execute(LPCSTR args)
+	{
+		if (!g_pGameLevel)
+		{
+			return;
+		}
+		CUIGameSP* ui_game_sp = smart_cast<CUIGameSP*>(CurrentGameUI());
+		if (!ui_game_sp)
+		{
+			return;
+		}
+		PIItem item = ui_game_sp->GetActorMenu().get_upgrade_item();
+		if (item)
+		{
+			item->log_upgrades();
+		}
+		else
+		{
+			Msg("- Current item in ActorMenu is unknown!");
+		}
+	}
+};
+#endif // DEBUG
 class CCC_InvUpgradesHierarchy : public IConsole_Command
 {
 public:
@@ -1660,33 +1687,6 @@ public:
 		}
 	}
 
-};
-
-class CCC_InvUpgradesCurItem : public IConsole_Command
-{
-public:
-	CCC_InvUpgradesCurItem(LPCSTR N) : IConsole_Command(N)	{ bEmptyArgsHandled = TRUE; };
-	virtual void Execute( LPCSTR args )
-	{
-		if ( !g_pGameLevel )
-		{
-			return;
-		}
-		CUIGameSP* ui_game_sp = smart_cast<CUIGameSP*>( CurrentGameUI() );
-		if ( !ui_game_sp )
-		{
-			return;
-		}
-		PIItem item = ui_game_sp->GetActorMenu().get_upgrade_item();
-		if ( item )
-		{
-			item->log_upgrades();
-		}
-		else
-		{
-			Msg( "- Current item in ActorMenu is unknown!" );
-		}
-	}
 };
 
 class CCC_InvDropAllItems : public IConsole_Command
@@ -1717,7 +1717,7 @@ public:
 	}
 }; // CCC_InvDropAllItems
 
-#endif // DEBUG
+
 
 class CCC_DumpObjects : public IConsole_Command {
 public:
@@ -2206,14 +2206,17 @@ CMD4(CCC_FloatBlock,		"dbg_text_height_scale",	&dbg_text_height_scale	,			0.2f	,
 	CMD4(CCC_Integer,	"show_wnd_rect_all",		&g_show_wnd_rect2, 0, 1);
 	CMD4(CCC_Integer,	"dbg_show_ani_info",		&g_ShowAnimationInfo,	0, 1)	;
 	CMD4(CCC_Integer,	"dbg_dump_physics_step",	&ph_console::g_bDebugDumpPhysicsStep, 0, 1);
+	extern BOOL dbg_moving_bones_snd_player;
+	CMD4(CCC_Integer, "dbg_bones_snd_player", &dbg_moving_bones_snd_player, FALSE, TRUE);
+#endif
 	CMD1(CCC_InvUpgradesHierarchy,	"inv_upgrades_hierarchy");
+#ifdef DEBUG
 	CMD1(CCC_InvUpgradesCurItem,	"inv_upgrades_cur_item");
 	CMD4(CCC_Integer,	"inv_upgrades_log",	&g_upgrades_log, 0, 1);
+#endif
 	CMD1(CCC_InvDropAllItems,	"inv_drop_all_items");
 
-extern BOOL dbg_moving_bones_snd_player;
-	CMD4(CCC_Integer,   "dbg_bones_snd_player",		&dbg_moving_bones_snd_player, FALSE, TRUE );
-#endif
+
 	CMD4(CCC_Float,		"con_sensitive",			&g_console_sensitive,	0.01f, 1.0f );
 	CMD4(CCC_Integer,	"wpn_aim_toggle",			&b_toggle_weapon_aim, 0, 1);
 //	CMD4(CCC_Integer,	"hud_old_style",			&g_old_style_ui_hud, 0, 1);

@@ -52,7 +52,7 @@ void UpgradeBase::add_dependent_groups( LPCSTR groups_str, Manager& manager_r )
 	}
 }
 
-#ifdef DEBUG
+
 
 void UpgradeBase::log_hierarchy( LPCSTR nest )
 {
@@ -63,6 +63,18 @@ void UpgradeBase::log_hierarchy( LPCSTR nest )
 		(*ib)->log_hierarchy( nest );
 	}
 }
+
+void UpgradeBase::clear_hierarchy(CInventoryItem& item)
+{
+	Groups_type::iterator ib = m_depended_groups.begin();
+	Groups_type::iterator ie = m_depended_groups.end();
+	for (; ib != ie; ++ib)
+	{
+		(*ib)->clear_hierarchy(item);
+	}
+}
+
+#ifdef DEBUG
 /*
 void UpgradeBase::test_all_upgrades( CInventoryItem& item )
 {

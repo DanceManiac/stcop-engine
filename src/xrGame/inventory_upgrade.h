@@ -117,14 +117,12 @@ public:
 	IC	shared_str const&	get_property_name(u8 index=0) const;
 	IC	Ivector2 const&		get_scheme_index() const;
 
-#ifdef DEBUG
 	virtual		void		log_hierarchy( LPCSTR nest );
-#endif // DEBUG
-
+	virtual     void        clear_hierarchy(CInventoryItem& item);
+	virtual     void        clear_hierarchy2(CInventoryItem& item);
 	virtual		void		fill_root_container( Root* root );
 
 	virtual		UpgradeStateResult		can_install( CInventoryItem& item, bool loading );
-				void		clear_group(CInventoryItem& item, UpgradeBase& test_upgrade, bool loading);
 				bool		check_scheme_index( const Ivector2& scheme_index );
 				void		set_highlight( bool value );
 				void		run_effects( bool loading );

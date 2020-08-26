@@ -51,7 +51,6 @@ void Group::add_parent_upgrade( UpgradeBase& parent_upgrade )
 	}
 }
 
-#ifdef DEBUG
 
 void Group::log_hierarchy( LPCSTR nest )
 {
@@ -69,7 +68,6 @@ void Group::log_hierarchy( LPCSTR nest )
 	}
 }
 
-#endif // DEBUG
 
 void Group::fill_root( Root* root )
 {
@@ -81,21 +79,13 @@ void Group::fill_root( Root* root )
 	}
 }
 
-void Group::clear_group_upgrades(CInventoryItem& item, UpgradeBase& test_upgrade, bool loading)
+void Group::clear_hierarchy(CInventoryItem& item)
 {
-	if (m_included_upgrades.empty()) return;
-
-	for (auto child : m_included_upgrades)
+	Upgrades_type::iterator ib = m_included_upgrades.begin();
+	Upgrades_type::iterator ie = m_included_upgrades.end();
+	for (; ib != ie; ++ib)
 	{
-		if ((child) == &test_upgrade)
-		{
-			continue;
-		}
-		if (item.has_upgrade((child)->id()))
-		{
-			clear_group_upgrades(item, *child, loading);
-			item.remove_upgrade(child->id(), loading);
-		}
+		(*ib)->clear_hierarchy(item);
 	}
 }
 UpgradeStateResult Group::can_install( CInventoryItem& item, UpgradeBase& test_upgrade, bool loading )
@@ -132,6 +122,9 @@ UpgradeStateResult Group::can_install( CInventoryItem& item, UpgradeBase& test_u
 				FATAL( make_string( "Loading item: Upgrade <%s> of inventory item [%s] (id = %d) can`t be installed! Error = result_e_group",
 					test_upgrade.id_str(), item.m_section_id.c_str(), item.object_id() ).c_str() );
 			}
+
+			Msg("Has %s", (child)->id().c_str());
+
 			return result_e_group;
 		}
 	}
