@@ -27,14 +27,12 @@ public:
 	IC	 const	shared_str& id() const;
 	IC			LPCSTR		id_str() const;
 
-#ifdef DEBUG
 				void		log_hierarchy( LPCSTR nesting );
-#endif // DEBUG
 
 				void		fill_root( Root* root );
 
 				UpgradeStateResult	can_install( CInventoryItem& item, UpgradeBase& test_upgrade, bool loading );
-			    void        clear_group_upgrades(CInventoryItem& item, UpgradeBase& test_upgrade, bool loading);
+				void        clear_hierarchy(CInventoryItem& item);
 				
 				void		highlight_up();
 				void		highlight_down();

@@ -72,8 +72,9 @@ public:
 			LPCSTR		get_item_scheme ( CInventoryItem& item );
 			LPCSTR		get_upgrade_by_index( CInventoryItem& item, Ivector2 const& index );
 
-#ifdef DEBUG
+
 			void		log_hierarchy	();
+#ifdef DEBUG
 			void		test_all_upgrades( CInventoryItem& item );
 #endif // DEBUG
 			
