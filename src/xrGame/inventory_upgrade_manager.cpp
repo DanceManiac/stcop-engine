@@ -216,7 +216,7 @@ void Manager::load_all_properties()
 
 //---------------------------------------------------------------------------------------
 
-#ifdef DEBUG
+
 
 void Manager::log_hierarchy()
 {
@@ -271,7 +271,7 @@ void Manager::log_hierarchy()
 	
 	Msg( "- ----- ----- ----- inventory upgrades hierarchy: end   ----- ----- -----" );
 }
-
+#ifdef DEBUG
 void Manager::test_all_upgrades( CInventoryItem& item )
 {
 	Root* root_p = get_root( item.m_section_id );
@@ -346,9 +346,9 @@ bool Manager::upgrade_install( CInventoryItem& item, shared_str const& upgrade_i
 			item.pre_install_upgrade();
 		}
 
-		upgrade->clear_group(item, *upgrade, loading);
+		//upgrade->clear_group(item, *upgrade, loading);
+		upgrade->clear_hierarchy2(item);
 		upgrade_install(item, upgrade_id, loading);
-
 	}
 	else if ( res == result_ok )
 	{

@@ -28,41 +28,7 @@ void	light::vis_prepare			()
 	u32	frame	= Device.dwFrame;
 	if (frame	<	vis.frame2test)		return;
 
-	if (devfloat1) // If the GPU is causing Main thread to wait it, don't try to do even more work on it - skip the GPU occ testing, to avoid frame rate spikings
-	{
-		if (occTemporaryDisabled_)
-		{
-			if (CPU_wait_GPU_lastFrame_ > GPU_MAX_WAIT) // prolong disabling, if gpu is still striving its ass off
-				occDisabledUntil_ = frame + DISABLE_TIME;
-
-			if (occDisabledUntil_ > frame) // if we are still disabled - postpone the test and make light visible
-			{
-				vis.visible = true;
-				vis.pending = false;
-
-				vis.frame2test = frame + ::Random.randI(500, 600);
-
-				return;
-			}
-			else
-				occTemporaryDisabled_ = false; // enable the GPU occ testing, if we passed the "disabled" time without gpu slowdowns
-		}
-		else if (CPU_wait_GPU_lastFrame_ > GPU_MAX_WAIT) // Postpone the test and disable gpu light occ for some time
-		{
-			vis.visible = true;
-			vis.pending = false;
-
-			vis.frame2test = frame + ::Random.randI(500, 600);
-
-			// Temporary disable occ, to avoid frame rate spikes
-			occTemporaryDisabled_ = true;
-			occDisabledUntil_ = frame + DISABLE_TIME;
-
-			return;
-		}
-	}
-
-
+	
 	float	safe_area					= VIEWPORT_NEAR;
 	{
 		float	a0	= deg2rad(Device.fFOV*Device.fASPECT/2.f);

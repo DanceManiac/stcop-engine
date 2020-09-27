@@ -127,8 +127,6 @@ void Upgrade::construct( const shared_str& upgrade_id, Group& parental_group, Ma
 	m_highlight = false;
 } // Upgrade()
 
-#ifdef DEBUG
-
 void Upgrade::log_hierarchy( LPCSTR nest )
 {
 	u32 sz =  (xr_strlen(nest) + 4) * sizeof(char);
@@ -139,19 +137,28 @@ void Upgrade::log_hierarchy( LPCSTR nest )
 
 	inherited::log_hierarchy( nest2 );
 }
+void Upgrade::clear_hierarchy(CInventoryItem& item)
+{
+	Msg("Try to remove updgrade: %s", id().c_str());
 
-#endif // DEBUG
+	if (item.has_upgrade(id()))
+	{
+		item.remove_upgrade(id(), false);
+	}
+
+	inherited::clear_hierarchy(item);
+}
+
+void Upgrade::clear_hierarchy2(CInventoryItem& item)
+{
+	m_parent_group->clear_hierarchy(item);
+}
 
 void Upgrade::fill_root_container( Root* root )
 {
 	R_ASSERT( root );
 	root->add_upgrade( this );
 	inherited::fill_root_container( root );
-}
-
-void Upgrade::clear_group(CInventoryItem& item, UpgradeBase& test_upgrade, bool loading)
-{
-	m_parent_group->clear_group_upgrades(item, test_upgrade, loading);
 }
 
 UpgradeStateResult Upgrade::can_install( CInventoryItem& item, bool loading )
