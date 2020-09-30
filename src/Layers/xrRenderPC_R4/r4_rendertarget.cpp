@@ -15,7 +15,9 @@
 #include "../xrRenderDX10/msaa/dx10MSAABlender.h"
 #include "../xrRenderDX10/DX10 Rain/dx10RainBlender.h"
 
+//FFT blenders
 #include "blender_cut.h"
+#include "blender_gasmask.h"
 
 #include "../xrRender/dxRenderDeviceRender.h"
 
@@ -305,7 +307,12 @@ CRenderTarget::CRenderTarget		()
 	dxRenderDeviceRender::Instance().Resources->Evict			();
 
 	// Blenders
+	
+	//FFT
 	b_cut					= xr_new<CBlender_cut>					(); //New
+	b_gasmask				= xr_new<CBlender_gasmask>				(); //New
+	
+	
 	b_occq					= xr_new<CBlender_light_occq>			();
 	b_accum_mask			= xr_new<CBlender_accum_direct_mask>	();
 	b_accum_direct			= xr_new<CBlender_accum_direct>			();
@@ -403,11 +410,13 @@ CRenderTarget::CRenderTarget		()
 		rt_Generic_0.create		(r2_RT_generic0, vp_params_main_secondary,D3DFMT_A8R8G8B8, 1		);
 		rt_Generic_1.create		(r2_RT_generic1, vp_params_main_secondary,D3DFMT_A8R8G8B8, 1		);
 		rt_secondVP.create(r2_RT_secondVP, RtCreationParams(Device.m_SecondViewport.screenWidth, Device.m_SecondViewport.screenHeight, MAIN_VIEWPORT), D3DFMT_A8R8G8B8, 1); //--#SM+#-- +SecondVP+
+
+		rt_Generic.create		      (r2_RT_generic,		vp_params_main_secondary,   D3DFMT_A8R8G8B8, 1		); //LV: Ku msaa(((
+
 		if( RImplementation.o.dx10_msaa )
 		{
 			rt_Generic_0_r.create			(r2_RT_generic0_r, vp_params_main_secondary,D3DFMT_A8R8G8B8, SampleCount	);
 			rt_Generic_1_r.create			(r2_RT_generic1_r, vp_params_main_secondary,D3DFMT_A8R8G8B8, SampleCount		);
-			rt_Generic.create		      (r2_RT_generic,		vp_params_main_secondary,   D3DFMT_A8R8G8B8, 1		);
 		}
 		//	Igor: for volumetric lights
 		//rt_Generic_2.create			(r2_RT_generic2,w,h,D3DFMT_A8R8G8B8		);
@@ -577,10 +586,16 @@ CRenderTarget::CRenderTarget		()
 		}
 	}
 
+	//SVP cut shader
 	{
 		s_cut.create(b_cut, "r4\\cut");
 	}
 
+	//Gasmask shader
+	{
+		s_gasmask.create(b_gasmask, "r4\\gasmask");
+	}	
+	
 	// BLOOM
 	{
 		D3DFORMAT	fmt				= D3DFMT_A8R8G8B8;			//;		// D3DFMT_X8R8G8B8
@@ -1089,13 +1104,16 @@ CRenderTarget::~CRenderTarget	()
 	  }
    }
 	xr_delete					(b_accum_mask			);
-	xr_delete					(b_cut					);
+
 	xr_delete					(b_occq					);
 	xr_delete					(b_hdao_cs				);
 	if( RImplementation.o.dx10_msaa )
 	{
         xr_delete( b_hdao_msaa_cs );
     }
+	
+	xr_delete					(b_cut					);
+	xr_delete					(b_gasmask				);	
 }
 
 void CRenderTarget::reset_light_marker( bool bResetStencil)

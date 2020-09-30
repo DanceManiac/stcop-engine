@@ -51,6 +51,7 @@ public:
 	IBlender*					b_ssao_msaa[8];
 
 	IBlender*					b_cut;
+	IBlender*					b_gasmask;
 
     // compute shader for hdao
     IBlender*                   b_hdao_cs;
@@ -145,6 +146,7 @@ private:
 	ref_shader					s_accum_volume;
 
 	ref_shader					s_cut;
+	ref_shader					s_gasmask;
 
 	//	generate min/max
 	ref_shader					s_create_minmax_sm;
@@ -276,8 +278,10 @@ public:
 	void						phase_accumulator		();
 	void						phase_vol_accumulator	();
 	void						shadow_direct			(light* L, u32 dls_phase);
+	
 	void						phase_cut();
-
+	void						phase_gasmask();
+	
 	void						SwitchViewPort(ViewPort vp);
 	//	Generates min/max sm
 	void						create_minmax_SM();

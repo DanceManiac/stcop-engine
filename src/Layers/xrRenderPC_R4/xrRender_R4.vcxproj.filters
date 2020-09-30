@@ -750,6 +750,9 @@
     <ClInclude Include="..\xrRender\light.h">
       <Filter>Lights</Filter>
     </ClInclude>
+    <ClInclude Include="blender_gasmask.h">
+      <Filter>Shading templates</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -1363,6 +1366,12 @@
     </ClCompile>
     <ClCompile Include="..\xrRenderDX10\XRayDDSLoader.cpp">
       <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="r4_rendertarget_phase_gasmask.cpp">
+      <Filter>Core_Target</Filter>
+    </ClCompile>
+    <ClCompile Include="blender_gasmask.cpp">
+      <Filter>Shading templates</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
