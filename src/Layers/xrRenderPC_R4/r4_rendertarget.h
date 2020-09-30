@@ -52,7 +52,8 @@ public:
 
 	IBlender*					b_cut;
 	IBlender*					b_gasmask;
-
+	IBlender*					b_nightvision;
+	
     // compute shader for hdao
     IBlender*                   b_hdao_cs;
     IBlender*                   b_hdao_msaa_cs;
@@ -147,7 +148,8 @@ private:
 
 	ref_shader					s_cut;
 	ref_shader					s_gasmask;
-
+	ref_shader					s_nightvision;
+	
 	//	generate min/max
 	ref_shader					s_create_minmax_sm;
 
@@ -281,6 +283,7 @@ public:
 	
 	void						phase_cut();
 	void						phase_gasmask();
+	void						phase_nightvision();
 	
 	void						SwitchViewPort(ViewPort vp);
 	//	Generates min/max sm

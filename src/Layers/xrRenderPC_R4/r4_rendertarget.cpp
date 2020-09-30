@@ -18,6 +18,7 @@
 //FFT blenders
 #include "blender_cut.h"
 #include "blender_gasmask.h"
+#include "blender_nightvision.h"
 
 #include "../xrRender/dxRenderDeviceRender.h"
 
@@ -311,7 +312,8 @@ CRenderTarget::CRenderTarget		()
 	//FFT
 	b_cut					= xr_new<CBlender_cut>					(); //New
 	b_gasmask				= xr_new<CBlender_gasmask>				(); //New
-	
+	b_nightvision			= xr_new<CBlender_nightvision>			(); //New
+		
 	
 	b_occq					= xr_new<CBlender_light_occq>			();
 	b_accum_mask			= xr_new<CBlender_accum_direct_mask>	();
@@ -595,7 +597,12 @@ CRenderTarget::CRenderTarget		()
 	{
 		s_gasmask.create(b_gasmask, "r4\\gasmask");
 	}	
-	
+
+	//Nightvision shader
+	{
+		s_nightvision.create(b_nightvision, "r4\\nightvision");
+	}	
+		
 	// BLOOM
 	{
 		D3DFORMAT	fmt				= D3DFMT_A8R8G8B8;			//;		// D3DFMT_X8R8G8B8
@@ -1114,6 +1121,7 @@ CRenderTarget::~CRenderTarget	()
 	
 	xr_delete					(b_cut					);
 	xr_delete					(b_gasmask				);	
+	xr_delete					(b_nightvision			);		
 }
 
 void CRenderTarget::reset_light_marker( bool bResetStencil)

@@ -227,6 +227,7 @@ int			ps_r3_dyn_wet_surf_sm_res	= 256;				// 256
 
 //FFT
 int			pp_gasmask_state = 0;
+int			pp_nightvision_state = 0;
 
 //AVO: detail draw radius
 Flags32 ps_common_flags = { 0 }; // r1-only
@@ -923,7 +924,8 @@ void		xrRender_initconsole	()
 
 	//FFT
 	CMD4(CCC_Integer, "r__gasmask", &pp_gasmask_state, 0, 5);
-	
+	CMD4(CCC_Integer, "r__nightvision", &pp_nightvision_state, 0, 3);
+		
 
 	//	Allow real-time fog config reload
 #if	(RENDER == R_R3) || (RENDER == R_R4)
