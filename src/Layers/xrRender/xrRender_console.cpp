@@ -225,6 +225,9 @@ float		ps_r3_dyn_wet_surf_near		= 10.f;				// 10.0f
 float		ps_r3_dyn_wet_surf_far		= 30.f;				// 30.0f
 int			ps_r3_dyn_wet_surf_sm_res	= 256;				// 256
 
+//FFT
+int			pp_gasmask_state = 0;
+
 //AVO: detail draw radius
 Flags32 ps_common_flags = { 0 }; // r1-only
 u32 ps_steep_parallax = 0;
@@ -918,7 +921,9 @@ void		xrRender_initconsole	()
 	CMD3(CCC_Token,		"r3_msaa_alphatest",			&ps_r3_msaa_atest,			qmsaa__atest_token);
 	//CMD3(CCC_Token,		"r3_minmax_sm",					&ps_r3_minmax_sm,			qminmax_sm_token);
 
-
+	//FFT
+	CMD4(CCC_Integer, "r__gasmask", &pp_gasmask_state, 0, 5);
+	
 
 	//	Allow real-time fog config reload
 #if	(RENDER == R_R3) || (RENDER == R_R4)
