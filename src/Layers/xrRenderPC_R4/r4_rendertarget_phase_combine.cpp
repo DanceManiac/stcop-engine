@@ -339,6 +339,10 @@ void	CRenderTarget::phase_combine	()
 	if(pp_gasmask_state > 0)
 		phase_gasmask();
 
+	//Nighvision shader
+	if(pp_nightvision_state > 0)
+		phase_nightvision();
+
 	// PP enabled ?
 	//	Render to RT texture to be able to copy RT even in windowed mode.
 	BOOL	PP_Complex		= u_need_PP	() | (BOOL)RImplementation.m_bMakeAsyncSS;

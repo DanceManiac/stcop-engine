@@ -137,6 +137,7 @@ extern ECORE_API int			ps_r3_dyn_wet_surf_sm_res;	// 256
 
 //FFT
 extern ECORE_API int			pp_gasmask_state; 
+extern ECORE_API int			pp_nightvision_state; 
 
 enum
 {
