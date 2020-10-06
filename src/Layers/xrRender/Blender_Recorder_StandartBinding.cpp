@@ -185,7 +185,7 @@ class cl_fog_color	: public R_constant_setup {
 	virtual void setup	(R_constant* C)	{
 		if (marker!=Device.dwFrame)	{
 			CEnvDescriptor&	desc	= *g_pGamePersistent->Environment().CurrentEnv;
-			result.set				(desc.fog_color.x,	desc.fog_color.y, desc.fog_color.z,	0);
+			result.set (desc.fog_color.x,	desc.fog_color.y, desc.fog_color.z,	desc.fog_density);
 		}
 		RCache.set_c	(C,result);
 	}
