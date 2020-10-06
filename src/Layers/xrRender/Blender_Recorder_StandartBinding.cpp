@@ -325,6 +325,18 @@ static class cl_spv_screen_res : public R_constant_setup //--#SM+#--
 	virtual void setup(R_constant* C) { RCache.set_c(C, (float)Device.m_SecondViewport.screenWidth, (float)Device.m_SecondViewport.screenHeight, 0, 0); }
 } binder_spv_screen_res;
 
+static class cl_inv_v : public R_constant_setup //LV, inverted view matrix (v2w)
+{
+	u32	marker;
+	Fmatrix	result;
+
+	virtual void setup(R_constant* C)
+	{
+		result.invert(Device.mView);
+		RCache.set_c(C, result);
+	}
+} binder_inv_v;
+
 
 // Standart constant-binding
 void	CBlender_Compile::SetMapping	()
@@ -336,16 +348,17 @@ void	CBlender_Compile::SetMapping	()
 	r_Constant				("svp_screen_res",  &binder_spv_screen_res);
 
 	// matrices
-	r_Constant				("m_W",				&binder_w);
-	r_Constant				("m_invW",			&binder_invw);
-	r_Constant				("m_V",				&binder_v);
-	r_Constant				("m_P",				&binder_p);
-	r_Constant				("m_WV",			&binder_wv);
-	r_Constant				("m_VP",			&binder_vp);
-	r_Constant				("m_WVP",			&binder_wvp);
+	r_Constant				("m_W",				&binder_w);				//World matrix
+	r_Constant				("m_invW",			&binder_invw);			//Inverted world matrix
+	r_Constant				("m_V",				&binder_v);				//View matrix
+	r_Constant				("m_invV",			&binder_inv_v);			//Inverted view matrix
+	r_Constant				("m_P",				&binder_p);				//Projection matrix
+	r_Constant				("m_WV",			&binder_wv);			//Vertex->World->View matrix
+	r_Constant				("m_VP",			&binder_vp);			//World->View->Projection matrix
+	r_Constant				("m_WVP",			&binder_wvp);			//Vertex->View->Projection matrix
 
-	r_Constant				("m_xform_v",		&tree_binder_m_xform_v);
-	r_Constant				("m_xform",			&tree_binder_m_xform);
+	r_Constant				("m_xform_v",		&tree_binder_m_xform_v);//XForm view matrix
+	r_Constant				("m_xform",			&tree_binder_m_xform);	//XForm world matrix
 	r_Constant				("consts",			&tree_binder_consts);
 	r_Constant				("wave",			&tree_binder_wave);
 	r_Constant				("wind",			&tree_binder_wind);
