@@ -30,6 +30,7 @@ void	CBlender_accum_spot::Compile(CBlender_Compile& C)
 		C.r_dx10Texture		("s_diffuse",		r2_RT_albedo);	
 		C.r_dx10Texture		("s_misc",			r2_RT_M);			
 		C.r_dx10Texture		("s_material",		r2_material);
+		C.r_dx10Texture		("s_ggx_lut", "fft_shaders\\lighting\\ggx_lut");
 		C.r_dx10Texture		("s_lmap",			C.L_textures[0]);
 		C.r_dx10Texture		("s_accumulator",	r2_RT_accum		);
 
@@ -47,6 +48,7 @@ void	CBlender_accum_spot::Compile(CBlender_Compile& C)
 		C.r_dx10Texture		("s_diffuse",		r2_RT_albedo);	
 		C.r_dx10Texture		("s_misc",			r2_RT_M);			
 		C.r_dx10Texture		("s_material",		r2_material);
+		C.r_dx10Texture		("s_ggx_lut", "fft_shaders\\lighting\\ggx_lut");
 		C.r_dx10Texture		("s_lmap",			C.L_textures[0]);
 		C.r_dx10Texture		("s_smap",			r2_RT_smap_depth);
 		C.r_dx10Texture		("s_accumulator",	r2_RT_accum);
@@ -67,6 +69,7 @@ void	CBlender_accum_spot::Compile(CBlender_Compile& C)
 		C.r_dx10Texture		("s_diffuse",		r2_RT_albedo);	
 		C.r_dx10Texture		("s_misc",			r2_RT_M);	
 		C.r_dx10Texture		("s_material",		r2_material);
+		C.r_dx10Texture		("s_ggx_lut", "fft_shaders\\lighting\\ggx_lut");
 		C.r_dx10Texture		("s_lmap",			C.L_textures[0]);
 		C.r_dx10Texture		("s_smap",			r2_RT_smap_depth);
 		C.r_dx10Texture		("s_accumulator",	r2_RT_accum);
@@ -86,6 +89,7 @@ void	CBlender_accum_spot::Compile(CBlender_Compile& C)
 		C.r_dx10Texture		("s_diffuse",		r2_RT_albedo);
 		C.r_dx10Texture		("s_misc",			r2_RT_M);			
 		C.r_dx10Texture		("s_material",		r2_material);
+		C.r_dx10Texture		("s_ggx_lut", "fft_shaders\\lighting\\ggx_lut");
 		C.r_dx10Texture		("s_lmap",			C.L_textures[0]);
 		C.r_dx10Texture		("s_smap",			r2_RT_smap_depth);
 		C.r_dx10Texture		("s_accumulator",	r2_RT_accum);
@@ -132,6 +136,7 @@ void	CBlender_accum_spot_msaa::Compile(CBlender_Compile& C)
 		C.r_dx10Texture		("s_diffuse",		r2_RT_albedo);	
 		C.r_dx10Texture		("s_misc",			r2_RT_M);			
 		C.r_dx10Texture		("s_material",		r2_material);
+		C.r_dx10Texture		("s_ggx_lut", "fft_shaders\\lighting\\ggx_lut");
 		C.r_dx10Texture		("s_lmap",			C.L_textures[0]);
 		C.r_dx10Texture		("s_accumulator",	r2_RT_accum		);
 
@@ -149,6 +154,7 @@ void	CBlender_accum_spot_msaa::Compile(CBlender_Compile& C)
 		C.r_dx10Texture		("s_diffuse",		r2_RT_albedo);	
 		C.r_dx10Texture		("s_misc",			r2_RT_M);			
 		C.r_dx10Texture		("s_material",		r2_material);
+		C.r_dx10Texture		("s_ggx_lut", "fft_shaders\\lighting\\ggx_lut");
 		C.r_dx10Texture		("s_lmap",			C.L_textures[0]);
 		C.r_dx10Texture		("s_smap",			r2_RT_smap_depth);
 		C.r_dx10Texture		("s_accumulator",	r2_RT_accum);
@@ -169,6 +175,7 @@ void	CBlender_accum_spot_msaa::Compile(CBlender_Compile& C)
 		C.r_dx10Texture		("s_diffuse",		r2_RT_albedo);
 		C.r_dx10Texture		("s_misc",			r2_RT_M);			
 		C.r_dx10Texture		("s_material",		r2_material);
+		C.r_dx10Texture		("s_ggx_lut", "fft_shaders\\lighting\\ggx_lut");
 		C.r_dx10Texture		("s_lmap",			C.L_textures[0]);
 		C.r_dx10Texture		("s_smap",			r2_RT_smap_depth);
 		C.r_dx10Texture		("s_accumulator",	r2_RT_accum);
@@ -188,6 +195,7 @@ void	CBlender_accum_spot_msaa::Compile(CBlender_Compile& C)
 		C.r_dx10Texture		("s_diffuse",		r2_RT_albedo);	
 		C.r_dx10Texture		("s_misc",			r2_RT_M);			
 		C.r_dx10Texture		("s_material",		r2_material);
+		C.r_dx10Texture		("s_ggx_lut", "fft_shaders\\lighting\\ggx_lut");
 		C.r_dx10Texture		("s_lmap",			C.L_textures[0]);
 		C.r_dx10Texture		("s_smap",			r2_RT_smap_depth);
 		C.r_dx10Texture		("s_accumulator",	r2_RT_accum);
