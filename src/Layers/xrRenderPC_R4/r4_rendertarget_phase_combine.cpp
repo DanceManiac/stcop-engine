@@ -62,6 +62,8 @@ void	CRenderTarget::phase_combine	()
 		t_LUM_dest->surface_set		(rt_LUM_pool[gpu_id*2+1]->pSurface);
 	}
 
+
+	//LV: Perform custom SSDO pass here.
     if( RImplementation.o.ssao_hdao && RImplementation.o.ssao_ultra)
     {
         if( ps_r_ssao > 0 )
@@ -245,6 +247,9 @@ void	CRenderTarget::phase_combine	()
       }  
    }
 
+	//LV: Todo: Save frame(rt_gen_temp)
+	
+
 	// Forward rendering
 	{
 		PIX_EVENT(Forward_rendering);
@@ -328,6 +333,8 @@ void	CRenderTarget::phase_combine	()
    PP_Complex = TRUE;
 
 	// Combine everything + perform AA
+	
+	//LV: Find reason why it's resolved like that
    if( RImplementation.o.dx10_msaa )
    {
 	   if		(PP_Complex)	u_setrt		( rt_Generic,0,0,HW.pBaseZB );			// LDR RT
@@ -338,12 +345,12 @@ void	CRenderTarget::phase_combine	()
       if		(PP_Complex)	u_setrt		( rt_Color,0,0,HW.pBaseZB );			// LDR RT
       else					   u_setrt		( Device.dwWidth,Device.dwHeight,HW.pBaseRT,NULL,NULL,HW.pBaseZB);
    }
-	//. u_setrt				( Device.dwWidth,Device.dwHeight,HW.pBaseRT,NULL,NULL,HW.pBaseZB);
+
 	RCache.set_CullMode		( CULL_NONE )	;
 	RCache.set_Stencil		( FALSE		)	;
 
 
-	if (1)	
+	if (1)	//LV: Remove fake AA
 	{
 		PIX_EVENT(combine_2);
 		// 
@@ -488,6 +495,7 @@ void CRenderTarget::phase_combine_volumetric()
 	PIX_EVENT(phase_combine_volumetric);
 	u32			Offset					= 0;
 
+	//LV: We can change it to perform volumetric scattering fog - let's do that in future!
 	//	TODO: DX10: Remove half pixel offset here
 	if( !RImplementation.o.dx10_msaa )
 		u_setrt(rt_Generic_0,rt_Generic_1,0,HW.pBaseZB );
