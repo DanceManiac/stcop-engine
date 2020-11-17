@@ -16,9 +16,9 @@
 //#include "shader.h"
 //#include "R_Backend.h"
 
-//#define VIEWPORT_NEAR 0.2f
+#define VIEWPORT_NEAR 0.2f
 #define VIEWPORT_NEAR_HUD 0.01f
-extern ENGINE_API float VIEWPORT_NEAR;
+//extern ENGINE_API float VIEWPORT_NEAR;
 extern ENGINE_API int psSVPFrameDelay;
 
 enum ViewPort;
