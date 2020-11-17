@@ -17,7 +17,6 @@ IC CInventoryItem::Upgrades_type const& CInventoryItem::upgardes() const
 {
 	return m_upgrades;
 }
-
 template <typename T>
 IC bool CInventoryItem::process_if_exists( LPCSTR section, LPCSTR name, T (CInifile::*method)(LPCSTR, LPCSTR) const, T& value, bool test )
 {

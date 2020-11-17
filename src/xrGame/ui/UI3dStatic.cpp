@@ -7,7 +7,8 @@
 #include "../gameobject.h"
 #include "../HUDManager.h"
 #include "../Include/xrRender/RenderVisual.h"
-
+#include "xrEngine/CustomHUD.h"
+#include "UIGameCustom.h"
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
@@ -36,11 +37,10 @@ void CUI3dStatic::FromScreenToItem(int x_screen, int y_screen,
 		int x = x_screen;
 		int y = y_screen;
 
-
         int halfwidth  = Device.dwWidth/2;
         int halfheight = Device.dwHeight/2;
 
-	    float size_y = VIEWPORT_NEAR * tanf( deg2rad( Device.fFOV ) * 0.5f);
+	    float size_y = VIEWPORT_NEAR * tanf( deg2rad(Device.fFOV) * 0.5f);
         float size_x = size_y / (Device.fASPECT);
 
         float r_pt      = float(x-halfwidth) * size_x / (float) halfwidth;
@@ -50,19 +50,52 @@ void CUI3dStatic::FromScreenToItem(int x_screen, int y_screen,
 		y_item = u_pt * DIST / VIEWPORT_NEAR;
 }
 
+void MouseRayFromPoint(Fvector& start, Fvector& direction, const Ivector2& point)
+{
+	int halfwidth = Device.dwWidth * 0.5f;
+	int halfheight = Device.dwHeight * 0.5f;
+
+	if (!halfwidth || !halfheight) return;
+
+	Ivector2 point2;
+	point2.set(point.x - halfwidth, halfheight - point.y);
+
+	start.set(Device.vCameraPosition);
+
+	float size_y = VIEWPORT_NEAR * tan(deg2rad(Device.fFOV) * 0.5f);
+	float size_x = size_y / Device.fASPECT;
+
+	float r_pt = float(point2.x) * size_x / (float)halfwidth;
+	float u_pt = float(point2.y) * size_y / (float)halfheight;
+
+	direction.mul(Device.mView.k, VIEWPORT_NEAR);
+	direction.mad(direction, Device.mView.j, u_pt);
+	direction.mad(direction, Device.mView.i, r_pt);
+	direction.normalize();
+}
 
 //прорисовка
 void  CUI3dStatic::Draw()
 {
 	if(m_pCurrentItem)
 	{
+		//SetHeight(Device.dwHeight);
+		//SetWidth(Device.dwWidth);
+
+		//SetWndPos(Fvector2().set(0.0f, 0.0f));
+
 		Frect rect;
-		GetAbsoluteRect(rect);
+		//GetAbsoluteRect(rect);
+		HUD().GetGameUI()->GetWindow().GetAbsoluteRect(rect);
 		// Apply scale
-		rect.top	= static_cast<int>(rect.top * GetScaleY());
-		rect.left	= static_cast<int>(rect.left * GetScaleX());
-		rect.bottom	= static_cast<int>(rect.bottom * GetScaleY());
-		rect.right	= static_cast<int>(rect.right * GetScaleX());
+		//rect.top	= static_cast<int>(rect.top * GetScaleY());
+		rect.top	= static_cast<int>(rect.top);
+		//rect.left	= static_cast<int>(rect.left * GetScaleX());
+		rect.left	= static_cast<int>(rect.left);
+		//rect.bottom	= static_cast<int>(rect.bottom * GetScaleY());
+		rect.bottom	= static_cast<int>(rect.bottom);
+		//rect.right	= static_cast<int>(rect.right * GetScaleX());
+		rect.right	= static_cast<int>(rect.right);
 
 		Fmatrix translate_matrix;
 		Fmatrix scale_matrix;
@@ -121,10 +154,12 @@ void  CUI3dStatic::Draw()
 		
 		///////////////////////////////	
 		
-		FromScreenToItem(rect.left + iFloor(GetWidth()/2 * GetScaleX()),
+		/*FromScreenToItem(rect.left + iFloor(GetWidth()/2 * GetScaleX()),
 						 rect.top + iFloor(GetHeight()/2 * GetScaleY()), 
+						 right_item_offset, up_item_offset);*/
+		FromScreenToItem(rect.left,
+						 rect.top, 
 						 right_item_offset, up_item_offset);
-
 
 		translate_matrix.identity();
 		translate_matrix.translate(right_item_offset,
@@ -135,20 +170,35 @@ void  CUI3dStatic::Draw()
 
 		Fmatrix camera_matrix;
 		camera_matrix.identity();
-
-		Fmatrix Vold = Device.mView;
-		//Vold.build_camera_dir(Fvector().set(0.f, 0.f, 0.f), Device.vCameraDirection, Device.vCameraTop);
-
-		if(devfloat1)
-			Vold.c.sub(Device.vCameraPosition);
-
-		camera_matrix = Vold;
+		camera_matrix = Device.mView;
 		camera_matrix.invert();
+
+
 
 		matrix.mulA_44(camera_matrix);
 
+
+		Fmatrix	M = Fidentity;
+		Fmatrix	S;
+		S.scale(0.04f, 0.04f, 0.04f);
+		M.mulB_44(S);
+
+		Fvector start, dir;
+		Ivector2 pt;
+
+		static int _wh = 50;
+		static float _kl = 1.0f;
+
+		pt.x = _wh;
+		pt.y = iFloor(Device.dwHeight - _wh);
+
+		MouseRayFromPoint(M.c, dir, pt);
+		M.c.mad(dir, _kl);
+
+		M.mulA_44(camera_matrix);
+
 		::Render->set_Object(NULL); 
-		::Render->set_Transform(&matrix);
+		::Render->set_Transform(&M);
 		::Render->add_3d_static(m_pCurrentItem->Visual());
 	}
 }

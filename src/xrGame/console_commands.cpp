@@ -1863,7 +1863,7 @@ void CCC_RegisterCommands()
 	CMD3(CCC_Mask,				"hud_crosshair",		&psHUD_Flags,	HUD_CROSSHAIR);
 	CMD3(CCC_Mask,				"hud_crosshair_dist",	&psHUD_Flags,	HUD_CROSSHAIR_DIST);
 
-	//CMD4(CCC_Float,				"hud_fov_f",			&psHUD_FOV_def,	0.1f,	200.0f); // [FFT++]: У нас будет круче - искажение не зависит от FOV'a
+	CMD4(CCC_Float,				"hud_fov_f",			&psHUD_FOV_def,	0.1f,	200.0f); // [FFT++]: У нас будет круче - искажение не зависит от FOV'a
 	CMD4(CCC_Float,				"fov",					&g_fov,			5.0f,	180.0f);
 
 	CMD1(CCC_Spawn_to_inventory, "g_spawn_to_inventory");

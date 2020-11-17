@@ -69,8 +69,12 @@ public:
 			void		init_install	( CInventoryItem& item );
 
 			bool		compute_range	( LPCSTR parameter, float& low, float& high );
-			LPCSTR		get_item_scheme ( CInventoryItem& item );
+			LPCSTR		get_item_scheme ( CInventoryItem& item );			
 			LPCSTR		get_upgrade_by_index( CInventoryItem& item, Ivector2 const& index );
+
+			// FFT: addon manager based on updgrades
+			bool		addon_check(CInventoryItem& item, shared_str addon_name,bool install);
+
 
 
 			void		log_hierarchy	();

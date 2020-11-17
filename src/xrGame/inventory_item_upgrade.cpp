@@ -34,6 +34,14 @@ bool CInventoryItem::has_upgrade_group( const shared_str& upgrade_group_id )
 	return false;
 }
 
+bool CInventoryItem::upgrade_addon_check(shared_str addon_name, bool install)
+{
+	return ai().alife().inventory_upgrade_manager().addon_check(*this, addon_name, install);
+}
+shared_str CInventoryItem::get_upgrade_name_by_addon(shared_str addon_name)
+{
+	
+}
 bool CInventoryItem::has_upgrade( const shared_str& upgrade_id )
 {
 	if ( m_section_id == upgrade_id )
@@ -59,23 +67,17 @@ void CInventoryItem::add_upgrade( const shared_str& upgrade_id, bool loading )
 	}
 }
 
-void CInventoryItem::remove_upgrade(const shared_str& upgrade_id, bool loading)
+void CInventoryItem::remove_upgrade(const shared_str& upgrade_id, bool loading, bool spawn_item)
 {
 
 	Msg("Try to remove updgrade: %s", upgrade_id.c_str());
-
-	inventory::upgrade::Upgrade* upgr = ai().alife().inventory_upgrade_manager().get_upgrade(upgrade_id);
-
-	inventory::upgrade::UpgradeBase * up = upgr;
-
-	if (up)
-	{
-		
-	}
-
+	
 	if (has_upgrade(upgrade_id))
 	{
 		m_upgrades.erase(std::remove_if(m_upgrades.begin(),	m_upgrades.end(),[&](const shared_str upgrade)-> bool { return upgrade == upgrade_id; }	),m_upgrades.end());
+
+		if (spawn_item)
+			Detach(ai().alife().inventory_upgrade_manager().get_upgrade(upgrade_id)->get_detachable_addon().c_str(), true);
 
 		if (!loading)
 		{
@@ -255,7 +257,7 @@ void CInventoryItem::pre_install_upgrade()
 		}
 	}
 
-	CWeapon* weapon = smart_cast<CWeapon*>( this );
+	/*CWeapon* weapon = smart_cast<CWeapon*>( this );
 	if ( weapon )
 	{
 		if ( weapon->ScopeAttachable() && weapon->IsScopeAttached() )
@@ -270,7 +272,7 @@ void CInventoryItem::pre_install_upgrade()
 		{
 			weapon->Detach( weapon->GetGrenadeLauncherName().c_str(), true );
 		}
-	}
+	}*/
 
 
 }

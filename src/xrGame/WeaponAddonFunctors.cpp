@@ -19,9 +19,3 @@ void CWeapon::UpdateAddonsHudParams()
 {
 
 }
-
-
-void CWeapon::UpdateAddonsTransform(bool for_hud)
-{
-
-}

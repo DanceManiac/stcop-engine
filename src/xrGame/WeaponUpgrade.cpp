@@ -26,10 +26,13 @@ bool CWeapon::install_upgrade_impl( LPCSTR section, bool test )
 	//inherited::install_upgrade( section );
 	bool result = CInventoryItemObject::install_upgrade_impl( section, test );
 	
-	result |= install_upgrade_ammo_class( section, test );
-	result |= install_upgrade_disp      ( section, test );
-	result |= install_upgrade_hit       ( section, test );
-	result |= install_upgrade_addon_old ( section, test );
+	result |= install_upgrade_ammo_class	( section, test );
+	result |= install_upgrade_disp			( section, test );
+	result |= install_upgrade_hit			( section, test );
+	result |= install_upgrade_addon			( section, test );
+	result |= install_upgrade_addon_scope	( section, test );
+	result |= install_upgrade_addon_silencer( section, test );
+	result |= install_upgrade_addon_launcher( section, test );
 	return result;
 }
 
@@ -195,11 +198,38 @@ bool CWeapon::install_upgrade_hit( LPCSTR section, bool test )
 	return result;
 }
 
+bool CWeapon::install_upgrade_addon_scope(LPCSTR section, bool test)
+{
+	return false;
+}
+
+bool CWeapon::install_upgrade_addon_silencer(LPCSTR section, bool test)
+{
+	return false;
+}
+
+bool CWeapon::install_upgrade_addon_launcher(LPCSTR section, bool test)
+{
+	return false;
+}
+
 bool CWeapon::install_upgrade_addon(LPCSTR section, bool test)
 {
 	bool result = false;
 
-	//upgardes()
+	shared_str sect;
+
+	result |= process_if_exists_set(section, "mesh_section", &CInifile::r_string_wb, sect, test);
+
+	if (result)
+	{		
+		VisualAddonHelper* addon;
+
+		addon->create_and_attach_to_parent(sect, m_attaches);		
+		result |= addon != NULL;
+	}
+
+	return result;
 }
 
 bool CWeapon::install_upgrade_addon_old( LPCSTR section, bool test )

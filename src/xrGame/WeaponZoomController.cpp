@@ -98,7 +98,14 @@ CUIWindow* CWeapon::ZoomTexture()
 	else
 		return NULL;
 }
+void CWeapon::DefaultZoomParams(LPCSTR section)
+{	
+	m_zoom_params.m_fScopeZoomFactor = pSettings->r_float(section, "scope_zoom_factor");
+	m_zoom_params.m_bZoomEnabled = !!pSettings->r_bool(section, "zoom_enabled");
+	m_zoom_params.m_fZoomRotateTime = pSettings->r_float(section, "zoom_rotate_time");
 
+	m_zoom_params.m_fIronSightZoomFactor = READ_IF_EXISTS(pSettings, r_float, cNameSect(), "ironsight_zoom_factor", g_fov);
+}
 void CWeapon::ZoomDynamicMod(bool bIncrement, bool bForceLimit)
 {
 	if (!IsScopeAttached())

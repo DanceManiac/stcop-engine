@@ -80,7 +80,7 @@ public:
 	virtual			~CWeaponMagazined	();
 
 	virtual void	Load			(LPCSTR section);
-			void	LoadSilencerKoeffs();
+	virtual bool	LoadSilencerKoeffs(LPCSTR section,bool test);
 	virtual CWeaponMagazined*cast_weapon_magazined	()		 {return this;}
 	virtual bool    UseScopeTexture ();
 	virtual void	SetDefaults		();
@@ -103,9 +103,6 @@ public:
 	bool			DetachScope		(const char* item_section_name, bool b_spawn_item) {}; // Не используется, выпилить потом
 	virtual bool	CanAttach		(PIItem pIItem);
 	virtual bool	CanDetach		(const char* item_section_name);
-
-	virtual bool    CheckCompatibility(PIItem pIItem, bool index_update);
-
 	virtual void	InitAddons		();
 
 	
@@ -165,7 +162,9 @@ public:
 
 protected:
 	virtual bool	install_upgrade_impl( LPCSTR section, bool test );
-
+	virtual bool	install_upgrade_addon_scope(LPCSTR section, bool test);
+	virtual bool	install_upgrade_addon_silencer(LPCSTR section, bool test);
+	virtual bool	install_upgrade_addon_launcher(LPCSTR section, bool test);
 protected:
 	virtual bool	AllowFireWhileWorking() {return false;}
 

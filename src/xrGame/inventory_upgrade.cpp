@@ -38,6 +38,9 @@ void Upgrade::construct( const shared_str& upgrade_id, Group& parental_group, Ma
 	// name : StringTable(); icon; description;
 	m_name        = CStringTable().translate( pSettings->r_string(id(), "name") );
 	m_description = CStringTable().translate( pSettings->r_string(id(), "description") );
+	m_addon_name  = READ_IF_EXISTS(pSettings, r_string, id(), "addon_item", NULL);
+	m_b_can_detachable = READ_IF_EXISTS(pSettings, r_bool, id(), "can_detach", false);
+	//m_addon_name  = pSettings->r_string(id(), "addon_item");
 	m_icon._set( pSettings->r_string(id(), "icon") );
 
 	// section --------------------------------------------------------------------------
@@ -143,7 +146,7 @@ void Upgrade::clear_hierarchy(CInventoryItem& item)
 
 	if (item.has_upgrade(id()))
 	{
-		item.remove_upgrade(id(), false);
+		item.remove_upgrade(id(), false, true);		
 	}
 
 	inherited::clear_hierarchy(item);
@@ -159,6 +162,22 @@ void Upgrade::fill_root_container( Root* root )
 	R_ASSERT( root );
 	root->add_upgrade( this );
 	inherited::fill_root_container( root );
+}
+
+bool Upgrade::can_uninstall(CInventoryItem& item, bool loading)
+{
+	UpgradeStateResult res = inherited::can_install(item, loading);
+
+	return res == result_e_installed && get_detachable_addon() != NULL;
+		
+}
+
+shared_str const& Upgrade::get_detachable_addon() const 
+{ 
+	if (get_can_detach()) 
+		return m_addon_name;
+	else
+		return NULL;
 }
 
 UpgradeStateResult Upgrade::can_install( CInventoryItem& item, bool loading )

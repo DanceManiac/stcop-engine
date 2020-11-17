@@ -142,20 +142,22 @@ Fvector& attachable_hud_item::hands_offset_rot()
 	u8 idx	= m_parent_hud_item->GetCurrentHudOffsetIdx();
 	return m_measures.m_hands_offset[1][idx];
 }
+void attachable_hud_item::set_bone_visible(const u16 bone_id, BOOL bVisibility)
+{
+	if (bone_id == BI_NONE) return;
 
+	if (m_model->LL_GetBoneVisible(bone_id) != bVisibility)
+		m_model->LL_SetBoneVisible(bone_id, bVisibility, TRUE);
+}
 void attachable_hud_item::set_bone_visible(const shared_str& bone_name, BOOL bVisibility, BOOL bSilent)
 {
-	u16  bone_id;
-	BOOL bVisibleNow;
-	bone_id			= m_model->LL_BoneID			(bone_name);
-	if(bone_id==BI_NONE)
+	if(m_model->LL_BoneID(bone_name)==BI_NONE)
 	{
 		if(bSilent)	return;
-		R_ASSERT2	(0,			make_string("model [%s] has no bone [%s]",pSettings->r_string(m_sect_name, "item_visual"), bone_name.c_str()).c_str());
+		R_ASSERT2	(0,	make_string("model [%s] has no bone [%s]",pSettings->r_string(m_sect_name, "item_visual"), bone_name.c_str()).c_str());
 	}
-	bVisibleNow		= m_model->LL_GetBoneVisible	(bone_id);
-	if(bVisibleNow!=bVisibility)
-		m_model->LL_SetBoneVisible	(bone_id,bVisibility, TRUE);
+	else
+		set_bone_visible(m_model->LL_BoneID(bone_name), bVisibility);
 }
 
 void attachable_hud_item::update(bool bForce)
@@ -171,7 +173,14 @@ void attachable_hud_item::update(bool bForce)
 	m_attach_offset.setHPB			(ypr.x,ypr.y,ypr.z);
 	m_attach_offset.translate_over	(m_measures.m_item_attach[0]);
 
+	if (m_parent->m_attachToWeapon)
+	{
+
+	}
+		//m_item_transform.mul(m_parent->m_transformCamera, m_attach_offset);
+	//else
 	m_parent->calc_transform		(m_attach_place_idx, m_attach_offset, m_item_transform);
+	
 	m_parent_hud_item->UpdateAddonsTransform(true); // FFT++
 	m_upd_firedeps_frame			= Device.dwFrame;
 
@@ -487,6 +496,8 @@ void player_hud::load(const shared_str& player_hud_sect)
 	const shared_str& model_name= pSettings->r_string(player_hud_sect, "visual");
 	m_model						= smart_cast<IKinematicsAnimated*>(::Render->model_Create(model_name.c_str()));
 
+	m_attachToWeapon = READ_IF_EXISTS(pSettings,r_bool, player_hud_sect,"use_weapon_bone",false);
+
 	CInifile::Sect& _sect		= pSettings->r_section(player_hud_sect);
 	CInifile::SectCIt _b		= _sect.Data.begin();
 	CInifile::SectCIt _e		= _sect.Data.end();
@@ -607,16 +618,16 @@ const Fvector& player_hud::attach_pos() const
 
 void player_hud::update(const Fmatrix& cam_trans)
 {
-	Fmatrix	trans					= cam_trans;
+	m_transformCamera				= cam_trans;
 
-	update_inertion					(trans);
-	update_additional				(trans);
+	update_inertion					(m_transformCamera);
+	update_additional				(m_transformCamera);
 
 	Fvector ypr						= attach_rot();
 	ypr.mul							(PI/180.f);
 	m_attach_offset.setHPB			(ypr.x,ypr.y,ypr.z);
 	m_attach_offset.translate_over	(attach_pos());
-	m_transform.mul					(trans, m_attach_offset);
+	m_transform.mul					(m_transformCamera, m_attach_offset);
 	// insert inertion here
 
 	m_model->UpdateTracks				();
@@ -878,6 +889,11 @@ void player_hud::detach_item(CHudItem* item)
 
 void player_hud::calc_transform(u16 attach_slot_idx, const Fmatrix& offset, Fmatrix& result)
 {
+	if (BI_NONE == m_ancors[attach_slot_idx])
+	{
+		result.mul(m_transformCamera, offset);
+		return;
+	}
 	Fmatrix ancor_m			= m_model->dcast_PKinematics()->LL_GetTransform(m_ancors[attach_slot_idx]);
 	result.mul				(m_transform, ancor_m);
 	result.mulB_43			(offset);

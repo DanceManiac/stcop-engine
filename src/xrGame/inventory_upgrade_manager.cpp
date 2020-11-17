@@ -435,6 +435,19 @@ LPCSTR Manager::get_upgrade_by_index( CInventoryItem& item, Ivector2 const& inde
 	return NULL;
 }
 
+bool Manager::addon_check(CInventoryItem& item, shared_str addon_name, bool install)
+{
+	Root* root_p = get_root(item.m_section_id);
+	if (root_p)
+	{
+		shared_str up = root_p->get_upgrade_name_by_addon(item, addon_name);
+		if(up != NULL)
+			return install ? upgrade_install(item, up, false) : true;
+	}
+	else
+		return false;
+}
+
 // -------------------------------------------------------------------------------------------------
 
 bool Manager::compute_range( LPCSTR parameter, float& low, float& high )

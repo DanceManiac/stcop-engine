@@ -135,11 +135,25 @@ bool CWeapon::need_renderable()
 	return Render->currentViewPort == MAIN_VIEWPORT && !(IsZoomed() && ZoomTexture() && !IsRotatingToZoom());
 }
 
+void CWeapon::UpdateAddonsTransform(bool for_hud)
+{
+	for (auto& mesh : m_attaches)
+	{
+		if(for_hud)
+			mesh->UpdateRenderPos(HudItemData()->m_model->dcast_RenderVisual(), for_hud, HudItemData()->m_item_transform);
+		else
+			mesh->UpdateRenderPos(Visual(), for_hud, XFORM());
+	}
+}
+
 void CWeapon::renderable_Render()
 {
 	UpdateXForm();
 
 	//нарисовать подсветку
+
+	for(auto mesh : m_attaches)
+		mesh->Render(false);
 
 	RenderLight();
 
@@ -211,6 +225,9 @@ void CWeapon::render_item_ui()
 
 void CWeapon::render_hud_mode()
 {
+	for(auto mesh : m_attaches)
+		mesh->Render(true);
+
 	RenderLight();
 }
 
@@ -224,12 +241,6 @@ void CWeapon::UpdateAddonsVisibility()
 
 	UpdateHUDAddonsVisibility();
 
-	if (bVanillaStyleAddon)
-	{
-		pWeaponVisual->CalculateBones_Invalidate();
-		UpdateAddonVisibityVanilla(pWeaponVisual);
-	}
-	
 	pWeaponVisual->CalculateBones_Invalidate();
 	pWeaponVisual->CalculateBones(TRUE);
 }
@@ -237,70 +248,101 @@ void CWeapon::UpdateAddonsVisibility()
 void CWeapon::UpdateHUDAddonsVisibility()
 {
 	if (!GetHUDmode()) return;
-
-	if(bVanillaStyleAddon) UpdateHUDAddonsVisibilityVanilla();
 }
 
-void CWeapon::UpdateHUDAddonsVisibilityVanilla()
+VisualAddonHelper::VisualAddonHelper()
 {
-	u16 bone_id = HudItemData()->m_model->LL_BoneID(wpn_scope);
-
-	if (bone_id != BI_NONE)
-	{
-		HudItemData()->set_bone_visible(wpn_scope, IsScopeAttached());
-	}
-
-	bone_id = HudItemData()->m_model->LL_BoneID(wpn_silencer);
-
-	if (bone_id != BI_NONE)
-	{
-		HudItemData()->set_bone_visible(wpn_silencer, IsSilencerAttached());
-	}
-
-	bone_id = HudItemData()->m_model->LL_BoneID(wpn_grenade_launcher);
-
-	if (bone_id != BI_NONE)
-	{
-		HudItemData()->set_bone_visible(wpn_grenade_launcher, IsGrenadeLauncherAttached());
-	}
+	hud_model = NULL;
+	world_model = NULL;
+	m_boneName = NULL;
+	m_sectionId = NULL;
+	m_meshName = NULL;
+	m_meshHUDName = NULL;
+	m_renderPos.identity();
+	isRoot = false;
 }
 
-void CWeapon::UpdateAddonVisibityVanilla(IKinematics* pWeaponVisual)
+void VisualAddonHelper::UpdateRenderPos(IRenderVisual* model, bool hud, Fmatrix parent)
 {
-	u16 bone_id = pWeaponVisual->LL_BoneID(wpn_scope);
-	if (IsScopeAttached())
+	if(!model) return;
+
+	u16 bone_id = model->dcast_PKinematics()->LL_BoneID(m_boneName);
+	Fmatrix bone_trans = model->dcast_PKinematics()->LL_GetTransform(bone_id);
+	m_renderPos.identity();
+	m_renderPos.mul(parent, bone_trans);
+}
+
+void VisualAddonHelper::PrepareRender(bool hud)
+{
+	if(hud && !hud_model)
+		hud_model = ::Render->model_Create(m_meshHUDName.c_str());
+	else if (!hud && !world_model)
+		world_model = ::Render->model_Create(m_meshName.c_str());
+	for (auto& child : m_childs)
+		child->PrepareRender(hud);
+}
+
+void VisualAddonHelper::Render(bool hud)
+{
+	if((hud && !hud_model) || (!hud && !world_model))
+		PrepareRender(hud);
+		
+	::Render->set_Transform(&m_renderPos);
+	::Render->add_Visual(hud? hud_model: world_model);
+
+	for (auto& child : m_childs)
+		child->UpdateRenderPos(hud ? hud_model : world_model, hud, m_renderPos);//child->UpdateRenderPos(hud ? hud_model : world_model, hud);
+
+	for (auto& child : m_childs)
+		child->Render(hud);
+}
+
+void VisualAddonHelper::Load(shared_str &section)
+{
+	m_sectionId		= section;
+	m_boneName		= READ_IF_EXISTS(pSettings,r_string, section,"bone_slot","wpn_body");
+	m_sectionParent = READ_IF_EXISTS(pSettings,r_string, section,"mesh_require",NULL);
+	isRoot			= READ_IF_EXISTS(pSettings, r_bool, section, "is_root", false);
+	m_meshName		= pSettings->r_string(section,"visual");
+	m_meshHUDName	= pSettings->r_string(section,"hud_visual");
+}
+
+VisualAddonHelper* VisualAddonHelper::create_and_attach_to_parent(shared_str sect, xr_vector<VisualAddonHelper*>& m_attaches)
+{
+	VisualAddonHelper* addon = xr_new<VisualAddonHelper>();
+	addon->Load(sect);
+
+	if (addon->m_sectionParent != NULL)
 	{
-		if (!pWeaponVisual->LL_GetBoneVisible(bone_id) && bone_id != BI_NONE)
-			pWeaponVisual->LL_SetBoneVisible(bone_id, TRUE, TRUE);
+		if (!FindParentAndAttach(addon->m_sectionParent, m_attaches))
+		{
+			VisualAddonHelper* parent = create_and_attach_to_parent(addon->m_sectionParent, m_attaches);
+			if (parent)
+				parent->m_childs.push_back(addon);
+		}
 	}
-	else 
+	else
 	{
-		if (pWeaponVisual->LL_GetBoneVisible(bone_id) && bone_id != BI_NONE)
-			pWeaponVisual->LL_SetBoneVisible(bone_id, FALSE, TRUE);
+		m_attaches.push_back(addon);
 	}
 
-	bone_id = pWeaponVisual->LL_BoneID(wpn_silencer);
-	if (IsSilencerAttached()) 
+	return addon;
+}
+
+bool VisualAddonHelper::FindParentAndAttach(shared_str section, xr_vector<VisualAddonHelper*>& m_attaches)
+{
+	for (auto& it : m_attaches)
 	{
-		if (!pWeaponVisual->LL_GetBoneVisible(bone_id) && bone_id != BI_NONE)
-			pWeaponVisual->LL_SetBoneVisible(bone_id, TRUE, TRUE);
-	}
-	else 
-	{
-		if (pWeaponVisual->LL_GetBoneVisible(bone_id) && bone_id != BI_NONE)
-			pWeaponVisual->LL_SetBoneVisible(bone_id, FALSE, TRUE);
+		if (it->m_sectionId == section)
+		{
+			it->m_childs.push_back(this);
+			return true;
+		}
+		else
+		{
+			return FindParentAndAttach(section, it->m_childs);
+		}
 	}
 
-	bone_id = pWeaponVisual->LL_BoneID(wpn_grenade_launcher);
-	if (IsGrenadeLauncherAttached())
-	{
-		if (!pWeaponVisual->LL_GetBoneVisible(bone_id) && bone_id != BI_NONE)
-			pWeaponVisual->LL_SetBoneVisible(bone_id, TRUE, TRUE);
-	}
-	else 
-	{
-		if (pWeaponVisual->LL_GetBoneVisible(bone_id) && bone_id != BI_NONE)
-			pWeaponVisual->LL_SetBoneVisible(bone_id, FALSE, TRUE);
-	}
-
+	return false;
 }

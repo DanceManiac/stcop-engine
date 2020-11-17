@@ -98,6 +98,7 @@ struct attachable_hud_item
 	bool render_item_ui_query		();
 	bool need_renderable			();
 	void set_bone_visible			(const shared_str& bone_name, BOOL bVisibility, BOOL bSilent=FALSE);
+	void set_bone_visible			(const u16 bone_id, BOOL bVisibility);
 	void debug_draw_firedeps		();
 
 	//hands bind position
@@ -161,11 +162,14 @@ private:
 	Fmatrix								m_attach_offset;
 
 	Fmatrix								m_transform;
+
 	IKinematicsAnimated*				m_model;
 	xr_vector<u16>						m_ancors;
 	attachable_hud_item*				m_attached_items[2];
 	xr_vector<attachable_hud_item*>		m_pool;
-
+public:
+	Fmatrix								m_transformCamera;
+	bool                                m_attachToWeapon;
 };
 
 extern player_hud* g_player_hud;

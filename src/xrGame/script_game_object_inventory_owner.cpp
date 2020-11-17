@@ -1001,7 +1001,7 @@ int CScriptGameObject::Weapon_GrenadeLauncher_Status()
 		ai().script_engine().script_log		(ScriptStorage::eLuaMessageTypeError,"CWeapon : cannot access class member Weapon_GrenadeLauncher_Status!");
 		return								(false);
 	}
-	return (int)weapon->get_GrenadeLauncherStatus();
+	return (int)0;
 }
 
 int CScriptGameObject::Weapon_Scope_Status()
@@ -1012,7 +1012,7 @@ int CScriptGameObject::Weapon_Scope_Status()
 		ai().script_engine().script_log		(ScriptStorage::eLuaMessageTypeError,"CWeapon : cannot access class member Weapon_Scope_Status!");
 		return								(false);
 	}
-	return (int)weapon->get_ScopeStatus();
+	return (int)0;
 }
 
 int CScriptGameObject::Weapon_Silencer_Status()
@@ -1023,7 +1023,7 @@ int CScriptGameObject::Weapon_Silencer_Status()
 		ai().script_engine().script_log		(ScriptStorage::eLuaMessageTypeError,"CWeapon : cannot access class member Weapon_Silencer_Status!");
 		return								(false);
 	}
-	return (int)weapon->get_SilencerStatus();
+	return (int)0;
 }
 
 bool CScriptGameObject::Weapon_IsGrenadeLauncherAttached()

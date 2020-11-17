@@ -100,6 +100,7 @@ public:
     virtual void Render();
     virtual void _BCL OnFrame() override;
     IC CUIActorMenu& GetActorMenu() const { return *ActorMenu; }
+    IC CUIWindow& GetWindow() const { return *Window; }
     IC CUIPdaWnd& GetPdaMenu() const { return *PdaMenu; }
     bool ShowActorMenu();
     void HideActorMenu();

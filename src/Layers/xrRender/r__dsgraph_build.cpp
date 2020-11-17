@@ -45,39 +45,17 @@ void R_dsgraph_structure::r_dsgraph_insert_3d_static(dxRender_Visual* pVisual, F
 
 	float distSQ;
 	float SSA;
-
-	//if (!RI.val_bHUD)
 	SSA = CalcSSA(distSQ, Center, pVisual);
-	//else
-		//SSA = CalcHudSSA(distSQ, Center, pVisual);
-
-	//if (SSA <= r_ssaDISCARD)		return;
-	RImplementation.phase = CRender::PHASE_UI;
-
 	VERIFY(pVisual->shader._get());
 	ShaderElement* sh_d = &*pVisual->shader->E[4];
 
 	// Select shader
-	ShaderElement* sh = RImplementation.rimp_select_sh_dynamic(pVisual, distSQ);
+	ShaderElement* sh =  pVisual->shader->E[SE_R2_NORMAL_UI]._get();
 	if (0 == sh)								return;
-	//if (!pmask[sh->flags.iPriority / 2])		return;
-	// Create common node
-	// NOTE: Invisible elements exist only in R1
-	//_MatrixItem		item = { SSA,RI.val_pObject,pVisual,*RI.val_pTransform };
-	// HUD rendering
-	
-	/*
-			N->val.pObject = RI.val_pObject;
-			N->val.pVisual = pVisual;
-			N->val.Matrix = *RI.val_pTransform;
-	*/
 
 	{
 		map3D_static_Node* N = map3D_UIStatic.insertInAnyWay(distSQ);
 		N->val.ssa = SSA;
-		//N->val.pObject = NULL;
-		//N->val.pVisual = pVisual;
-		//N->val.Matrix = Fidentity;
 		N->val.pObject = RI.val_pObject;
 		N->val.pVisual = pVisual;
 		N->val.Matrix = *RI.val_pTransform;

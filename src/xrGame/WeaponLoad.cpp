@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "Weapon.h"
+#include "actor.h"
 #include "ui/UIWindow.h"
 #include "ui/UIXmlInit.h"
 
@@ -176,11 +177,6 @@ void CWeapon::Load(LPCSTR section)
 	m_fMinRadius = pSettings->r_float(section, "min_radius");
 	m_fMaxRadius = pSettings->r_float(section, "max_radius");
 
-	// информация о возможных апгрейдах и их визуализации в инвентаре
-	m_eScopeStatus = (ALife::EWeaponAddonStatus)pSettings->r_s32(section, "scope_status");
-	m_eSilencerStatus = (ALife::EWeaponAddonStatus)pSettings->r_s32(section, "silencer_status");
-	m_eGrenadeLauncherStatus = (ALife::EWeaponAddonStatus)pSettings->r_s32(section, "grenade_launcher_status");
-
 	m_zoom_params.m_bZoomEnabled = !!pSettings->r_bool(section, "zoom_enabled");
 	m_zoom_params.m_fZoomRotateTime = pSettings->r_float(section, "zoom_rotate_time");
 
@@ -189,8 +185,8 @@ void CWeapon::Load(LPCSTR section)
 	m_zoom_params.m_sUseBinocularVision = 0;
 
 	LoadModParams(section);
-	LoadOriginalScopesParams(section);
-	InitAddons();
+	DefaultZoomParams(section);
+
 	if (pSettings->line_exist(section, "weapon_remove_time"))
 		m_dwWeaponRemoveTime = pSettings->r_u32(section, "weapon_remove_time");
 	else
@@ -223,6 +219,7 @@ void CWeapon::Load(LPCSTR section)
 
 void CWeapon::LoadFireParams(LPCSTR section)
 {
+	// TODO переместить в апгрейды!!!
 	cam_recoil.Dispersion = deg2rad(pSettings->r_float(section, "cam_dispersion"));
 	cam_recoil.DispersionInc = 0.0f;
 
@@ -311,19 +308,21 @@ void CWeapon::reload(LPCSTR section)
 	else
 		m_can_be_strapped = false;
 
-
-	if (m_eScopeStatus == ALife::eAddonAttachable) {
+	
+	/*if (m_eScopeStatus == ALife::eAddonAttachable) {
 		m_addon_holder_range_modifier = READ_IF_EXISTS(pSettings, r_float, GetScopeName(), "holder_range_modifier", m_holder_range_modifier);
 		m_addon_holder_fov_modifier = READ_IF_EXISTS(pSettings, r_float, GetScopeName(), "holder_fov_modifier", m_holder_fov_modifier);
 	}
 	else {
 		m_addon_holder_range_modifier = m_holder_range_modifier;
 		m_addon_holder_fov_modifier = m_holder_fov_modifier;
-	}
+	}*/
 
+	m_addon_holder_range_modifier = m_holder_range_modifier;
+	m_addon_holder_fov_modifier = m_holder_fov_modifier;
 
 	{
-		Fvector				pos, ypr;
+		Fvector	pos, ypr;
 		pos = pSettings->r_fvector3(section, "position");
 		ypr = pSettings->r_fvector3(section, "orientation");
 		ypr.mul(PI / 180.f);
@@ -358,50 +357,30 @@ void createWpnScopeXML()
 	}
 }
 
-
-
-void CWeapon::LoadCurrentScopeParams(LPCSTR section)
+bool CWeapon::LoadCurrentScopeParams(LPCSTR section, bool test)
 {
-	shared_str scope_tex_name = "none";
-	bScopeIsHasTexture = false;
-	if (pSettings->line_exist(section, "scope_texture"))
+	bool result = false;
+
+	result |= process_if_exists_set(section, "3d_fov", &CInifile::r_float, m_zoom_params.m_fSecondVPFovFactor, test);
+	result |= process_if_exists_set(section, "3d_zoom_factor", &CInifile::r_float, m_zoom_params.m_f3dZoomFactor, test);
+	result |= process_if_exists_set(section, "scope_nightvision", &CInifile::r_string_wb, m_zoom_params.m_sUseZoomPostprocess, test);
+	result |= process_if_exists_set(section, "scope_alive_detector", &CInifile::r_string_wb, m_zoom_params.m_sUseBinocularVision, test);
+	result |= process_if_exists_set(section, "scope_dynamic_zoom", &CInifile::r_bool, m_zoom_params.m_bUseDynamicZoom, test);
+
+	m_zoom_params.m_fIronSightZoomFactor = g_fov;
+
+	if(!test) bNVsecondVPavaible = !!pSettings->line_exist(section, "scope_nightvision");
+		
+	if (m_zoom_params.m_bUseDynamicZoom)
 	{
-		scope_tex_name = pSettings->r_string(section, "scope_texture");
-		if (xr_strcmp(scope_tex_name, "none") != 0)
-			bScopeIsHasTexture = true;
+		result |= process_if_exists_set(section, "scope_zoom_steps", &CInifile::r_u8, m_fZoomStepCount, test);
+		result |= process_if_exists_set(section, "min_zoom_k", &CInifile::r_float, m_fZoomMinKoeff, test);
 	}
 
-	Load3DScopeParams(section);
+	shared_str scope_tex_name = NULL;
+	result |= process_if_exists_set(section, "scope_texture", &CInifile::r_string_wb, scope_tex_name, test);
 
-	m_zoom_params.m_fScopeZoomFactor = pSettings->r_float(section, "scope_zoom_factor");
-
-	if (bScopeIsHasTexture || bIsSecondVPZoomPresent())
-	{
-		if (bIsSecondVPZoomPresent())
-			bNVsecondVPavaible = !!pSettings->line_exist(section, "scope_nightvision");
-
-		m_zoom_params.m_sUseZoomPostprocess = READ_IF_EXISTS(pSettings, r_string, section, "scope_nightvision", 0);
-		m_zoom_params.m_bUseDynamicZoom = READ_IF_EXISTS(pSettings, r_bool, section, "scope_dynamic_zoom", FALSE);
-
-		if (m_zoom_params.m_bUseDynamicZoom)
-		{
-			m_fZoomStepCount = READ_IF_EXISTS(pSettings, r_u8, section, "scope_zoom_steps", 3.0f);
-			m_fZoomMinKoeff = READ_IF_EXISTS(pSettings, r_float, section, "min_zoom_k", 0.3f);
-		}
-
-		m_zoom_params.m_sUseBinocularVision = READ_IF_EXISTS(pSettings, r_string, section, "scope_alive_detector", 0);
-	}
-	else
-	{
-		bNVsecondVPavaible = false;
-		bNVsecondVPstatus = false;
-		m_zoom_params.m_fSecondVPFovFactor = 0.0f;
-		m_fSecondRTZoomFactor = -1.0f;
-	}
-
-	m_fScopeInertionFactor = READ_IF_EXISTS(pSettings, r_float, section, "scope_inertion_factor", m_fControlInertionFactor);
-
-	m_fRTZoomFactor = m_zoom_params.m_fScopeZoomFactor;
+	bScopeIsHasTexture = scope_tex_name != NULL;
 
 	if (m_UIScope)
 	{
@@ -414,43 +393,6 @@ void CWeapon::LoadCurrentScopeParams(LPCSTR section)
 		createWpnScopeXML();
 		CUIXmlInit::InitWindow(*pWpnScopeXml, scope_tex_name.c_str(), 0, m_UIScope);
 	}
-}
 
-void CWeapon::Load3DScopeParams(LPCSTR section)
-{
-	m_zoom_params.m_fSecondVPFovFactor = READ_IF_EXISTS(pSettings, r_float, section, "3d_fov", 0.0f);
-	m_zoom_params.m_f3dZoomFactor = READ_IF_EXISTS(pSettings, r_float, section, "3d_zoom_factor", 100.0f);
-}
-
-
-
-bool CWeapon::bReloadSectionScope(LPCSTR section)
-{
-	if (!pSettings->line_exist(section, "scopes"))
-		return false;
-
-	if (pSettings->r_string(section, "scopes") == NULL)
-		return false;
-
-	if (xr_strcmp(pSettings->r_string(section, "scopes"), "none") == 0)
-		return false;
-
-	return true;
-}
-
-void CWeapon::LoadOriginalScopesParams(LPCSTR section)
-{	
-	if (!pSettings->line_exist(section, "addon_list")) 
-		return;
-
-	bVanillaStyleAddon = READ_IF_EXISTS(pSettings, r_bool, section, "addon_vanilla", true);
-
-	LPCSTR str = pSettings->r_string(section, "addon_list");
-	for (int i = 0, count = _GetItemCount(str); i < count; ++i)
-	{
-		string128						scope_section;
-		_GetItem(str, i, scope_section);
-		m_addons_list.push_back(scope_section);
-	}
-
+	return result;
 }

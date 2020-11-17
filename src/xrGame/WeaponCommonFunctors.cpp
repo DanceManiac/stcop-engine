@@ -112,7 +112,6 @@ void CWeapon::SetDefaults()
 
 	m_flags.set(FUsingCondition, TRUE);
 	bMisfire = false;
-	m_flagsAddOnState = 0;
 	m_zoom_params.m_bIsZoomModeNow = false;
 }
 

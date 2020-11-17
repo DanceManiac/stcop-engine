@@ -16,6 +16,9 @@
 #include "UIMainIngameWnd.h"
 #include "UIGameCustom.h"
 #include "eatable_item_object.h"
+#include "../alife_simulator.h"
+#include "../inventory_upgrade_manager.h"
+#include "../inventory_upgrade.h"
 
 #include "../silencer.h"
 #include "../scope.h"
@@ -36,6 +39,7 @@
 
 #include "../actor_defs.h"
 
+typedef inventory::upgrade::Upgrade* Upgr;
 
 void move_item_from_to(u16 from_id, u16 to_id, u16 what_id);
 
@@ -849,7 +853,7 @@ void CUIActorMenu::PropertiesBoxForSlots( PIItem item, bool& b_show )
 	CHelmet* pHelmet		= smart_cast<CHelmet*>		( item );
 	CInventory&  inv		= m_pActorInvOwner->inventory();
 
-	// Флаг-признак для невлючения пункта контекстного меню: Dreess Outfit, если костюм уже надет
+	// Р¤Р»Р°Рі-РїСЂРёР·РЅР°Рє РґР»СЏ РЅРµРІР»СЋС‡РµРЅРёСЏ РїСѓРЅРєС‚Р° РєРѕРЅС‚РµРєСЃС‚РЅРѕРіРѕ РјРµРЅСЋ: Dreess Outfit, РµСЃР»Рё РєРѕСЃС‚СЋРј СѓР¶Рµ РЅР°РґРµС‚
 	bool bAlreadyDressed	= false;
 	u16 cur_slot			= item->BaseSlot();
 
@@ -898,49 +902,28 @@ void CUIActorMenu::PropertiesBoxForSlots( PIItem item, bool& b_show )
 		b_show			= true;
 	}
 }
-
+#include "../string_table.h"
 void CUIActorMenu::PropertiesBoxForWeapon( CUICellItem* cell_item, PIItem item, bool& b_show )
 {
-	//отсоединение аддонов от вещи
+	//РѕС‚СЃРѕРµРґРёРЅРµРЅРёРµ Р°РґРґРѕРЅРѕРІ РѕС‚ РІРµС‰Рё
 	CWeapon*	pWeapon = smart_cast<CWeapon*>( item );
 	if ( !pWeapon )
 	{
 		return;
 	}
 
-	if ( pWeapon->GrenadeLauncherAttachable() )
+	for (auto& it : pWeapon->upgardes())
 	{
-		if ( pWeapon->IsGrenadeLauncherAttached() )
+		Upgr upgrade = ai().alife().inventory_upgrade_manager().get_upgrade(*it);
+		if (upgrade->get_detachable_addon() != NULL)
 		{
-			m_UIPropertiesBox->AddItem( "st_detach_gl",  NULL, INVENTORY_DETACH_GRENADE_LAUNCHER_ADDON );
-			b_show			= true;
-		}
-		else
-		{
+			shared_str str = CStringTable().translate("st_detach");			
+			str.printf("%s %s", str.c_str(), upgrade->get_detachable_addon().c_str());
+			m_UIPropertiesBox->AddItem(str.c_str(), (void*)upgrade, INVENTORY_DETACH_UPGRADE);
+			b_show = true;
 		}
 	}
-	if ( pWeapon->ScopeAttachable() )
-	{
-		if ( pWeapon->IsScopeAttached() )
-		{
-			m_UIPropertiesBox->AddItem( "st_detach_scope",  NULL, INVENTORY_DETACH_SCOPE_ADDON );
-			b_show			= true;
-		}
-		else
-		{
-		}
-	}
-	if ( pWeapon->SilencerAttachable() )
-	{
-		if ( pWeapon->IsSilencerAttached() )
-		{
-			m_UIPropertiesBox->AddItem( "st_detach_silencer",  NULL, INVENTORY_DETACH_SILENCER_ADDON );
-			b_show			= true;
-		}
-		else
-		{
-		}
-	}
+	
 	if ( smart_cast<CWeaponMagazined*>(pWeapon) && IsGameTypeSingle() )
 	{
 		bool b = ( pWeapon->GetAmmoElapsed() !=0 );
@@ -963,10 +946,10 @@ void CUIActorMenu::PropertiesBoxForWeapon( CUICellItem* cell_item, PIItem item, 
 		}
 	}
 }
-#include "../string_table.h"
+
 void CUIActorMenu::PropertiesBoxForAddon( PIItem item, bool& b_show )
 {
-	//присоединение аддонов к активному слоту (2 или 3)
+	//РїСЂРёСЃРѕРµРґРёРЅРµРЅРёРµ Р°РґРґРѕРЅРѕРІ Рє Р°РєС‚РёРІРЅРѕРјСѓ СЃР»РѕС‚Сѓ (2 РёР»Рё 3)
 
 	CScope*				pScope				= smart_cast<CScope*>			(item);
 	CSilencer*			pSilencer			= smart_cast<CSilencer*>		(item);
@@ -1160,7 +1143,7 @@ void CUIActorMenu::ProcessPropertiesBoxClicked( CUIWindow* w, void* d )
 	case INVENTORY_DETACH_SCOPE_ADDON:
 		if ( weapon )
 		{
-			DetachAddon( weapon->GetScopeName().c_str() );
+			/*DetachAddon( weapon->GetScopeName().c_str() );
 			for ( u32 i = 0; i < cell_item->ChildsCount(); ++i )
 			{
 				CUICellItem*	child_itm	= cell_item->Child(i);
@@ -1170,13 +1153,13 @@ void CUIActorMenu::ProcessPropertiesBoxClicked( CUIWindow* w, void* d )
 				{
 					DetachAddon(wpn->GetScopeName().c_str(), child_iitm);
 				}
-			}
+			}*/
 		}
 		break;
 	case INVENTORY_DETACH_SILENCER_ADDON:
 		if ( weapon )
 		{
-			DetachAddon( weapon->GetSilencerName().c_str() );
+			/*DetachAddon( weapon->GetSilencerName().c_str() );
 			for ( u32 i = 0; i < cell_item->ChildsCount(); ++i )
 			{
 				CUICellItem*	child_itm	= cell_item->Child(i);
@@ -1186,13 +1169,13 @@ void CUIActorMenu::ProcessPropertiesBoxClicked( CUIWindow* w, void* d )
 				{
 					DetachAddon(wpn->GetSilencerName().c_str(), child_iitm);
 				}
-			}
+			}*/
 		}
 		break;
 	case INVENTORY_DETACH_GRENADE_LAUNCHER_ADDON:
 		if ( weapon )
 		{
-			DetachAddon( weapon->GetGrenadeLauncherName().c_str() );
+			/*DetachAddon( weapon->GetGrenadeLauncherName().c_str() );
 			for ( u32 i = 0; i < cell_item->ChildsCount(); ++i )
 			{
 				CUICellItem*	child_itm	= cell_item->Child(i);
@@ -1202,13 +1185,20 @@ void CUIActorMenu::ProcessPropertiesBoxClicked( CUIWindow* w, void* d )
 				{
 					DetachAddon(wpn->GetGrenadeLauncherName().c_str(), child_iitm);
 				}
-			}
+			}*/
 		}
 		break;
 	case INVENTORY_RELOAD_MAGAZINE:
 		if ( weapon )
 		{
 			weapon->Action( kWPN_RELOAD, CMD_START );
+		}
+		break;
+	case INVENTORY_DETACH_UPGRADE:
+		if (weapon)
+		{
+			Upgr up = (Upgr)m_UIPropertiesBox->GetClickedItem()->GetData();
+			weapon->remove_upgrade(up->id(),false,true);
 		}
 		break;
 	case INVENTORY_UNLOAD_MAGAZINE:

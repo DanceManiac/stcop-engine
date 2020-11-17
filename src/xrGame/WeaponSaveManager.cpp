@@ -7,10 +7,10 @@ void CWeapon::save(NET_Packet& output_packet)
 {
 	inherited::save(output_packet);
 	save_data(iAmmoElapsed, output_packet);
-	save_data(m_cur_scope, output_packet);
+	/*save_data(m_cur_scope, output_packet);
 	save_data(m_cur_silencer, output_packet);
 	save_data(m_cur_glauncher, output_packet);
-	save_data(m_flagsAddOnState, output_packet);
+	save_data(m_flagsAddOnState, output_packet);*/
 	save_data(m_ammoType, output_packet);
 	save_data(m_zoom_params.m_bIsZoomModeNow, output_packet);
 	save_data(m_bRememberActorNVisnStatus, output_packet);
@@ -22,10 +22,10 @@ void CWeapon::load(IReader& input_packet)
 {
 	inherited::load(input_packet);
 	load_data(iAmmoElapsed, input_packet);
-	load_data(m_cur_scope, input_packet);
+	/*load_data(m_cur_scope, input_packet);
 	load_data(m_cur_silencer, input_packet);
 	load_data(m_cur_glauncher, input_packet);
-	load_data(m_flagsAddOnState, input_packet);
+	load_data(m_flagsAddOnState, input_packet);*/
 	UpdateAddonsVisibility();
 	load_data(m_ammoType, input_packet);
 	load_data(m_zoom_params.m_bIsZoomModeNow, input_packet);
@@ -49,7 +49,7 @@ BOOL CWeapon::net_Spawn(CSE_Abstract* DC)
 
 	//iAmmoCurrent					= E->a_current;
 	iAmmoElapsed = E->a_elapsed;
-	m_flagsAddOnState = E->m_addon_flags.get();
+	//m_flagsAddOnState = E->m_addon_flags.get();
 	m_ammoType = E->ammo_type;
 	SetState(E->wpn_state);
 	SetNextState(E->wpn_state);
@@ -102,7 +102,7 @@ void CWeapon::net_Export(NET_Packet& P)
 	u8 need_upd = IsUpdating() ? 1 : 0;
 	P.w_u8(need_upd);
 	P.w_u16(u16(iAmmoElapsed));
-	P.w_u8(m_flagsAddOnState);
+	P.w_u8(0);
 	P.w_u8(m_ammoType);
 	P.w_u8((u8)GetState());
 	P.w_u8((u8)IsZoomed());
@@ -122,10 +122,9 @@ void CWeapon::net_Import(NET_Packet& P)
 	u16 ammo_elapsed = 0;
 	P.r_u16(ammo_elapsed);
 
-	u8						NewAddonState;
-	P.r_u8(NewAddonState);
+	u8 NewAddonState;
+	P.r_u8();
 
-	m_flagsAddOnState = NewAddonState;
 	UpdateAddonsVisibility();
 
 	u8 ammoType, wstate;

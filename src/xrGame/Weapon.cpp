@@ -48,16 +48,12 @@ CWeapon::CWeapon()
 	m_set_next_ammoType_on_reload = undefined_ammo_type;
 	m_crosshair_inertion = 0.f;
 	m_activation_speed_is_overriden = false;
-	m_cur_scope = 0;
-	m_cur_silencer = 0;
-	m_cur_glauncher = 0;
 	m_bRememberActorNVisnStatus = false;
 
 	//Mortan: new params
 	bScopeIsHasTexture = false;
 	bNVsecondVPavaible = false;
 	bNVsecondVPstatus = false;
-	bVanillaStyleAddon = false;
 
 	m_nearwall_last_hud_fov = psHUD_FOV_def;
 	m_fZoomStepCount = 3.0f;
@@ -66,17 +62,15 @@ CWeapon::CWeapon()
 	m_fLR_CameraFactor = 0.f;
 	m_fLR_InertiaFactor = 0.f;
 	m_fUD_InertiaFactor = 0.f;
-
+	addonsFlags = {};
 	m_zoom_params.m_f3dZoomFactor = 0.0f;
 	m_zoom_params.m_fSecondVPFovFactor = 0.0f;
 
 	m_fSecondRTZoomFactor = -1.0f;
-
 	NeedUpdateHudParams = false;
 }
 
 CWeapon::~CWeapon()
 {
 	xr_delete(m_UIScope);
-	delete_data(m_addons_list);
 }

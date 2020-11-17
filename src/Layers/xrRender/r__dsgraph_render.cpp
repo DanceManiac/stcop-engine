@@ -87,7 +87,7 @@ void __fastcall sorted_3d(map3D_static_Node* N)
 	RCache.set_xform_world(N->val.Matrix);
 	RImplementation.apply_object(N->val.pObject);
 	RImplementation.apply_lmaterial();
-	V->Render(calcLOD(N->key, V->vis.sphere.R));
+	V->Render(0);
 }
 
 IC	bool	cmp_vs_nrm			(mapNormalVS::TNode* N1, mapNormalVS::TNode* N2)
@@ -492,6 +492,48 @@ public:
 	}
 };
 
+/*
+Предназначен для установки режима отрисовки HUD и возврата оригинального после отрисовки.
+*/
+class ui3d_transform_helper
+{
+	Fmatrix Pold;
+	Fmatrix FTold;
+	float FoV;
+	Fmatrix Vold;
+
+public:
+	ui3d_transform_helper()
+	{
+		// Change projection
+		Pold = Device.mProject;
+		FTold = Device.mFullTransform;
+
+		Vold = Device.mView;
+		Device.mView.build_camera_dir(Fvector().set(0.f, 0.f, 0.f), Device.vCameraDirection, Device.vCameraTop);
+
+		Device.mProject.build_projection(deg2rad(5.0f), Device.fASPECT, 0.05f, g_pGamePersistent->Environment().CurrentEnv->far_plane);
+
+		Device.mFullTransform.mul(Device.mProject, Device.mView);
+		RCache.set_xform_view(Device.mView);
+		RCache.set_xform_project(Device.mProject);
+
+		RImplementation.rmNear();
+	}
+
+	~ui3d_transform_helper()
+	{
+		RImplementation.rmNormal();
+
+		// Restore projection
+		Device.mProject = Pold;
+		Device.mFullTransform = FTold;
+		Device.mView = Vold;
+		RCache.set_xform_view(Device.mView);
+		RCache.set_xform_project(Device.mProject);
+	}
+};
+
 template <class T> IC bool cmp_first_l(const T &lhs, const T &rhs) { return (lhs.first < rhs.first); }
 template <class T> IC bool cmp_first_h(const T &lhs, const T &rhs) { return (lhs.first > rhs.first); }
 
@@ -565,7 +607,11 @@ void	R_dsgraph_structure::r_dsgraph_render_sorted	()
 
 void	R_dsgraph_structure::r_dsgraph_render_3d_static()
 {
-	Msg("3d statics count: %d", map3D_UIStatic.size());
+	if(devfloat4)
+		Msg("3d statics count: %d", map3D_UIStatic.size());
+	if(devfloat2)
+		ui3d_transform_helper helper;
+
 	map3D_UIStatic.traverseRL(sorted_3d);
 	map3D_UIStatic.clear();
 }

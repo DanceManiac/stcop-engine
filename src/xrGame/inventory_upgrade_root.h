@@ -43,6 +43,8 @@ public:
 				void		highlight_hierarchy( shared_str const& upgrade_id );
 				void		reset_highlight();
 
+	virtual     shared_str const& get_upgrade_name_by_addon(CInventoryItem& item, shared_str const& addon_name) const;
+
 protected:
 	shared_str				m_upgrade_scheme;
 	Upgrades_vec			m_contained_upgrades;

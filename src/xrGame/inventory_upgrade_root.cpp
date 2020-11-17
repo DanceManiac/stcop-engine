@@ -61,11 +61,14 @@ void Root::add_upgrade( Upgrade* upgr )
 		}
 	}
 
+
+	// Вот тут возможно стоит убрать эту проверку, вероятно нам она не пригодится но пока оставлю
 	Ivector2  scheme_index = upgr->get_scheme_index();
 	VERIFY2( verify_scheme_index( scheme_index ),
 		make_string( "in upgrade <%s> for item <%s> scheme index [%d, %d] is duplicated !",
 		upgr->id_str(), id_str(), scheme_index.x, scheme_index.y )
 		);
+
 	m_contained_upgrades.push_back( upgr );
 }
 
@@ -120,6 +123,22 @@ bool Root::contain_upgrade( const shared_str& upgrade_id )
 		}
 	}
 	return false;
+}
+
+shared_str const& Root::get_upgrade_name_by_addon(CInventoryItem& item, shared_str const& addon_name) const
+{
+	for (auto* it : m_contained_upgrades)
+	{
+		if (xr_strcmp(it->get_addon_name().c_str(), addon_name.c_str()) == 0)
+		{
+			UpgradeStateResult res = it->can_install(item, false);
+			if (res == result_ok || res == result_e_group)
+			{
+				return it->id();
+			}
+		}
+	}
+	return NULL;		
 }
 
 bool Root::verify_scheme_index( const Ivector2& scheme_index )

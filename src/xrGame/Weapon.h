@@ -24,12 +24,36 @@ class CUIWindow;
 class CBinocularsVision;
 class CNightVisionEffector;
 
+typedef xr_vector<float> ZoomMod;
+
 class VisualAddonHelper
 {
 public:
-	IKinematics* m_model;
-	//runtime positioning
-	Fmatrix		 m_attach_offset;
+	VisualAddonHelper();
+	~VisualAddonHelper() {};
+	IRenderVisual* hud_model;
+	IRenderVisual* world_model;
+	Fmatrix		   m_renderPos;	  //Текущая позиция для рендеринга
+	
+	xr_vector<VisualAddonHelper*> m_childs;
+
+	shared_str	 m_boneName;	  //позиция кости которая будет использоваться для аттача, если пусто то аттач будет происходит к кости LeadGun
+	shared_str   m_meshHUDName;      //путь до меша
+	shared_str   m_meshName;      //путь до меша
+	shared_str   m_sectionId;	  //название секции
+	shared_str   m_sectionParent; //название секции-родителя, если пусто то будет использоваться основная модель худа 
+
+	bool isRoot;
+
+	VisualAddonHelper* create_and_attach_to_parent(shared_str sect, xr_vector<VisualAddonHelper*>& m_attaches);
+	bool FindParentAndAttach(shared_str section, xr_vector<VisualAddonHelper*> &m_attaches);
+
+	void UpdateRenderPos(IRenderVisual* model, bool hud, Fmatrix parent);
+	void PrepareRender(bool hud);
+	void Load(shared_str &section);
+	void Render(bool hud);
+
+
 };
 
 class CWeapon : public CHudItemObject,
@@ -43,13 +67,15 @@ public:
 	virtual					~CWeapon();
 
 public:
-	xr_vector<shared_str>	m_ammoTypes;		// Are str types being used correctly for this stuff? I'm not sure ...
-	xr_vector<shared_str>	m_addons_list;   
-	xr_vector<shared_str>	m_addons_helpers;   // Fake addons for addons
+	xr_vector<shared_str>		  m_ammoTypes;		// Are str types being used correctly for this stuff? I'm not sure ...
+	xr_vector<VisualAddonHelper*> m_attaches;
+	//xr_vector<shared_str>	m_addons_list;
+	//xr_vector<shared_str>	m_addons_helpers;   // Fake addons for addons
 
-	u8						m_cur_scope;
-	u8						m_cur_silencer; // Silencer or soundmoderator
-	u8						m_cur_glauncher;
+	// TODO: delete this garbage
+	//u8						m_cur_scope;
+	//u8						m_cur_silencer; // Silencer or soundmoderator
+	//u8						m_cur_glauncher;
 
 	CWeaponAmmo*			m_pCurrentAmmo;
 	u8						m_ammoType;
@@ -62,29 +88,33 @@ public:
 	float					m_fCurrentCartirdgeDisp;
 
 	// [FFT++]: аддоны и управление аддонами
+	Flags32			addonsFlags;
 	bool			bScopeIsHasTexture;
 	bool            bNVsecondVPavaible;
 	bool            bNVsecondVPstatus;
-	bool            bVanillaStyleAddon;
+
+	enum {
+		ADDON_SCOPE	   = (1 << 0),
+		ADDON_SIL	   = (1 << 1),
+		ADDON_LAUNCHER = (1 << 2),
+
+	};
 
 	virtual	bool	bInZoomRightNow() const { return m_zoom_params.m_fZoomRotationFactor > 0.05; }
 	IC		bool	bIsSecondVPZoomPresent() const { return GetSecondVPZoomFactor() > 0.000f; }
-	bool            bReloadSectionScope(LPCSTR section);
 	virtual	bool    bMarkCanShow() { return IsZoomed(); }
 	bool            bChangeNVSecondVPStatus();
 
 	virtual void	UpdateAddonsTransform(bool for_hud = false); // FFT++
 	virtual void	UpdateAddonsHudParams(); // FFT++
 
-	virtual void    UpdateAddonVisibityVanilla(IKinematics* pWeaponVisual);
-	virtual void    UpdateHUDAddonsVisibilityVanilla();
+	// for addons
+	
 
 	virtual void	UpdateSecondVP(bool bInGrenade = false);
 	void			LoadModParams(LPCSTR section);
-	void			Load3DScopeParams(LPCSTR section);
+	bool			LoadCurrentScopeParams(LPCSTR section, bool test);
 
-	void			LoadOriginalScopesParams(LPCSTR section);
-	void			LoadCurrentScopeParams(LPCSTR section);
 	void			GetZoomData(const float scope_factor, float& delta, float& min_zoom_factor);
 	void			ZoomDynamicMod(bool bIncrement, bool bForceLimit);
 
@@ -97,7 +127,7 @@ public:
 
 
 	float			m_fScopeInertionFactor;
-	float           m_fZoomStepCount;
+	u8				m_fZoomStepCount;
 	float           m_fZoomMinKoeff;
 	// SWM3.0 hud collision
 	float			m_hud_fov_add_mod;
@@ -214,17 +244,17 @@ protected:
 	BOOL					m_bAutoSpawnAmmo;
 	virtual bool			AllowBore();
 public:
-	bool IsGrenadeLauncherAttached() const;
-	bool IsScopeAttached() const;
-	bool IsSilencerAttached() const;
+	bool IsScopeAttached()				const { return addonsFlags.test(ADDON_SCOPE);	};
+	bool IsSilencerAttached()			const { return addonsFlags.test(ADDON_SIL); };
+	bool IsGrenadeLauncherAttached()	const { return addonsFlags.test(ADDON_LAUNCHER); };
 
-	virtual bool GrenadeLauncherAttachable();
+	/*virtual bool GrenadeLauncherAttachable();
 	virtual bool ScopeAttachable();
 	virtual bool SilencerAttachable();
 
 	ALife::EWeaponAddonStatus	get_GrenadeLauncherStatus() const { return m_eGrenadeLauncherStatus; }
 	ALife::EWeaponAddonStatus	get_ScopeStatus() const { return m_eScopeStatus; }
-	ALife::EWeaponAddonStatus	get_SilencerStatus() const { return m_eSilencerStatus; }
+	ALife::EWeaponAddonStatus	get_SilencerStatus() const { return m_eSilencerStatus; }*/
 
 	virtual bool UseScopeTexture() { return bScopeIsHasTexture; };
 
@@ -235,29 +265,29 @@ public:
 	virtual void InitAddons();
 
 	//для отоброажения иконок апгрейдов в интерфейсе
-	int GetScopeX();
-	int GetScopeY();
-	int	GetSilencerX();
-	int	GetSilencerY();
-	int	GetGrenadeLauncherX();
-	int	GetGrenadeLauncherY();
+	//int	GetScopeX();
+	//int   GetScopeY();
+	//int	GetSilencerX();
+	//int	GetSilencerY();
+	//int	GetGrenadeLauncherX();
+	//int	GetGrenadeLauncherY();
 
-	int GetAddonIcon(u8 idx, bool x);
+	//int GetAddonIcon(u8 idx, bool x);
 
-	shared_str GetScopeAddon()    { return m_addons_list[m_cur_scope]; };
-	shared_str GetSilencerAddon() { return m_addons_list[m_cur_silencer]; };
-	shared_str GetLauncherAddon() { return m_addons_list[m_cur_glauncher]; };
+	//shared_str GetScopeAddon()    { return m_addons_list[m_cur_scope]; };
+	//shared_str GetSilencerAddon() { return m_addons_list[m_cur_silencer]; };
+	//shared_str GetLauncherAddon() { return m_addons_list[m_cur_glauncher]; };
 
-	shared_str GetAddonName(u8 idx) const;
-	shared_str& GetGrenadeLauncherName() const;
-	shared_str& GetScopeName() const;
-	shared_str& GetSilencerName() const;
+	//shared_str GetAddonName(u8 idx) const;
+	//shared_str& GetGrenadeLauncherName() const;
+	//shared_str& GetScopeName() const;
+	//shared_str& GetSilencerName() const;
 
 	IC void	ForceUpdateAmmo() { m_BriefInfo_CalcFrame = 0; }
 
-	u8		GetAddonsState()		const { return m_flagsAddOnState; };
-	void	SetAddonsState(u8 st) { m_flagsAddOnState = st; }//dont use!!! for buy menu only!!!
-protected:
+	u8		GetAddonsState()		const { return 0;/*m_flagsAddOnState;*/ };
+	void	SetAddonsState(u8 st) { /*m_flagsAddOnState = st;*/ }//dont use!!! for buy menu only!!!
+/*protected:
 	//состояние подключенных аддонов
 	u8 m_flagsAddOnState;
 
@@ -269,7 +299,7 @@ protected:
 	//названия секций подключаемых аддонов
 	shared_str		m_sScopeName;
 	shared_str		m_sSilencerName;
-	shared_str		m_sGrenadeLauncherName;
+	shared_str		m_sGrenadeLauncherName;*/
 
 protected:
 
@@ -277,19 +307,14 @@ protected:
 	{
 		bool			m_bZoomEnabled;			//разрешение режима приближения
 		bool			m_bHideCrosshairInZoom;
-		//		bool			m_bZoomDofEnabled;
-
 		bool			m_bIsZoomModeNow;		//когда режим приближения включен
+
 		float			m_fCurrentZoomFactor;	//текущий фактор приближения
 		float			m_fZoomRotateTime;		//время приближения
-
 		float			m_fIronSightZoomFactor;	//коэффициент увеличения прицеливания
 		float			m_fScopeZoomFactor;		//коэффициент увеличения прицела
-
 		float           m_f3dZoomFactor;        //коэффициент мирового зума при использовании второго вьюпорта
-
 		float			m_fZoomRotationFactor;
-
 		float           m_fSecondVPFovFactor;
 
 		//		Fvector			m_ZoomDof;
@@ -306,8 +331,8 @@ protected:
 	float           m_fSecondRTZoomFactor;  //текущий зум для 3д прицела
 	CUIWindow* m_UIScope;
 public:
-
-	IC bool					IsZoomEnabled()	const { return m_zoom_params.m_bZoomEnabled; }
+	
+	IC bool					IsZoomEnabled()	const { return m_zoom_params.m_bZoomEnabled;	}
 	virtual	void			ZoomInc();
 	virtual	void			ZoomDec();
 	virtual void			OnZoomIn();
@@ -316,7 +341,9 @@ public:
 	CUIWindow* ZoomTexture();
 
 
-	bool			ZoomHideCrosshair();
+	bool					ZoomHideCrosshair();
+
+	void					DefaultZoomParams(LPCSTR section);
 
 	IC float				GetZoomFactor() const { return m_zoom_params.m_fCurrentZoomFactor; }
 	IC void					SetZoomFactor(float f) { m_zoom_params.m_fCurrentZoomFactor = f; }
@@ -532,10 +559,15 @@ public:
 
 private:
 	virtual	bool			install_upgrade_ammo_class(LPCSTR section, bool test);
+
 	bool					install_upgrade_disp(LPCSTR section, bool test);
 	bool					install_upgrade_hit(LPCSTR section, bool test);
 	bool					install_upgrade_addon_old(LPCSTR section, bool test);
-	bool					install_upgrade_addon(LPCSTR section, bool test);
+
+	virtual bool			install_upgrade_addon(LPCSTR section, bool test);
+	virtual bool			install_upgrade_addon_scope(LPCSTR section, bool test);
+	virtual bool			install_upgrade_addon_silencer(LPCSTR section, bool test);
+	virtual bool			install_upgrade_addon_launcher(LPCSTR section, bool test);
 protected:
 	virtual bool			install_upgrade_impl(LPCSTR section, bool test);
 

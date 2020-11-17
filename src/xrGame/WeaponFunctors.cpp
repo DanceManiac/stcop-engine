@@ -101,7 +101,8 @@ void CWeapon::OnEvent(NET_Packet& P, u16 type)
 	{
 	case GE_ADDON_CHANGE:
 	{
-		P.r_u8(m_flagsAddOnState);
+		//P.r_u8(m_flagsAddOnState);
+		P.r_u8();
 		InitAddons();
 		UpdateAddonsVisibility();
 	}break;

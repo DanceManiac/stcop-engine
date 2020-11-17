@@ -110,7 +110,9 @@ public:
 	IC			LPCSTR		icon_name() const;
 	IC			LPCSTR		name() const;
 	IC			LPCSTR		description_text() const;
-
+	IC shared_str const&	get_addon_name() const { return m_addon_name; }
+	IC shared_str const&    get_detachable_addon() const;
+	IC          bool        get_can_detach() const { return m_b_can_detachable;   }
 				LPCSTR		get_prerequisites();
 		UpgradeStateResult	get_preconditions();
 	IC			bool		get_highlight() const;
@@ -123,6 +125,7 @@ public:
 	virtual		void		fill_root_container( Root* root );
 
 	virtual		UpgradeStateResult		can_install( CInventoryItem& item, bool loading );
+	virtual		bool					can_uninstall( CInventoryItem& item, bool loading );
 				bool		check_scheme_index( const Ivector2& scheme_index );
 				void		set_highlight( bool value );
 				void		run_effects( bool loading );
@@ -150,6 +153,9 @@ protected:
 	shared_str				m_description;
 	shared_str				m_icon;
 	shared_str				m_properties[max_properties_count];
+
+	shared_str              m_addon_name;		// Секция аддона который будет вываливаться в инвентарь при снятии апгрейда
+	bool                    m_b_can_detachable; // Нужно для запрета снимать аддоны без техника, да и чтобы визуальный вид оружки не портился
 
 	IntFunctor				m_preconditions;
 	VoidFunctor3			m_effects;

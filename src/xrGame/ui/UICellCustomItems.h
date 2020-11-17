@@ -17,8 +17,8 @@ public:
 				void			Update						();
 				CInventoryItem* object						() {return (CInventoryItem*)m_pData;}
 	
-				Fvector2			UIItem3dPos;
-				CUI3dStatic*		UIItem3d;
+				//Fvector2			UIItem3dPos;
+				//CUI3dStatic*		UIItem3d;
 };
 
 class CUIAmmoCellItem :public CUIInventoryCellItem
