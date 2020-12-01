@@ -407,6 +407,13 @@ public:
 	void dbg_DrawLINE				(Fmatrix& T, Fvector& p1, Fvector& p2, u32 C);
 	void dbg_DrawEllipse			(Fmatrix& T, u32 C);
 
+	// Debug Draw
+	void InitializeDebugDraw();
+	void DestroyDebugDraw();
+
+	ref_geom vs_L;
+	ref_geom vs_TL;
+
 	CBackend()						{	Invalidate(); };
 
 #if defined(USE_DX10) || defined(USE_DX11)

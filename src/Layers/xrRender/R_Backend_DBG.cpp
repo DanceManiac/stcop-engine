@@ -1,6 +1,18 @@
 #include "stdafx.h"
 #pragma hdrstop
 
+void CBackend::InitializeDebugDraw()
+{
+	vs_L.create(FVF::F_L, RCache.Vertex.Buffer(), RCache.Index.Buffer());
+	vs_TL.create(FVF::F_TL, RCache.Vertex.Buffer(), RCache.Index.Buffer());
+}
+
+void CBackend::DestroyDebugDraw()
+{
+	vs_L.destroy();
+	vs_TL.destroy();
+}
+
 void CBackend::dbg_DP(D3DPRIMITIVETYPE pt, ref_geom geom, u32 vBase, u32 pc)
 {
 	RCache.set_Geometry		(geom);
@@ -16,28 +28,47 @@ void CBackend::dbg_DIP(D3DPRIMITIVETYPE pt, ref_geom geom, u32 baseV, u32 startV
 
 void CBackend::dbg_Draw			(D3DPRIMITIVETYPE T, FVF::L* pVerts, int vcnt, u16* pIdx, int pcnt)
 {
-#if defined(USE_DX10) || defined(USE_DX11)
-	//	TODO: DX10: implement
-	//VERIFY(!"CBackend::dbg_Draw not implemented.");
-#else	//	USE_DX10
-	OnFrameEnd					();
-	CHK_DX(HW.pDevice->SetFVF	(FVF::F_L));
-	CHK_DX(HW.pDevice->DrawIndexedPrimitiveUP(T, 0, vcnt, pcnt,
-		pIdx, D3DFMT_INDEX16,
-		pVerts, sizeof(FVF::L)
-		));
-#endif	//	USE_DX10
+	u32 vBase;
+	{
+		FVF::L* pv = (FVF::L*)Vertex.Lock(vcnt, vs_L->vb_stride, vBase);
+		for (size_t i = 0; i < vcnt; i++)
+		{
+			pv[i] = pVerts[i];
+		}
+		Vertex.Unlock(vcnt, vs_L->vb_stride);
+	}
+
+	u32 iBase;
+	{
+		const size_t count = GetIndexCount(T, pcnt);
+		u16* indices = Index.Lock(count, iBase);
+		for (size_t i = 0; i < count; i++)
+			indices[i] = pIdx[i];
+		Index.Unlock(count);
+	}
+	set_Geometry(vs_L);
+	set_RT(HW.pBaseRT);
+	RImplementation.rmNormal();
+	set_Stencil(FALSE);
+	Render(T, vBase, 0, vcnt, iBase, pcnt);
 }
 void CBackend::dbg_Draw			(D3DPRIMITIVETYPE T, FVF::L* pVerts, int pcnt)
 {
-#if defined(USE_DX10) || defined(USE_DX11)
-	//	TODO: DX10: implement
-	//VERIFY(!"CBackend::dbg_Draw not implemented.");
-#else	//	USE_DX10
-	OnFrameEnd					();
-	CHK_DX(HW.pDevice->SetFVF	(FVF::F_L));
-	CHK_DX(HW.pDevice->DrawPrimitiveUP(T, pcnt, pVerts, sizeof(FVF::L)	));
-#endif	//	USE_DX10
+	u32 vBase;
+	{
+		const size_t count = GetIndexCount(T, pcnt);
+		FVF::L* pv = (FVF::L*)Vertex.Lock(count, vs_L->vb_stride, vBase);
+		for (size_t i = 0; i < count; i++)
+		{
+			pv[i] = pVerts[i];
+		}
+		Vertex.Unlock(count, vs_L->vb_stride);
+	}
+	set_Geometry(vs_L);
+	set_RT(HW.pBaseRT);
+	RImplementation.rmFar();
+	set_Stencil(FALSE);
+	Render(T, vBase, pcnt);
 }
 
 #define RGBA_GETALPHA(rgb)      ((rgb) >> 24)
@@ -61,6 +92,10 @@ void CBackend::dbg_DrawOBB		(Fmatrix& T, Fvector& half_dim, u32 C)
 	u16		aabb_id[12*2] = {
 		0,1,  1,2,  2,3,  3,0,  4,5,  5,6,  6,7,  7,4,  1,5,  2,6,  3,7,  0,4
 	};
+
+	RCache.set_c("tfactor", float(color_get_R(C)) / 255.f, float(color_get_G(C)) / 255.f, \
+		float(color_get_B(C)) / 255.f, float(color_get_A(C)) / 255.f);
+
 	set_xform_world	(mL2W_Transform);
 	dbg_Draw(D3DPT_LINELIST,aabb,8,aabb_id,12);
 }
