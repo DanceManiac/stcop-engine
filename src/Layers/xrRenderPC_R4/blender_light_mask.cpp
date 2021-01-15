@@ -34,8 +34,7 @@ void	CBlender_accum_direct_mask::Compile(CBlender_Compile& C)
 		//C.r_Pass			("null",			"accum_sun_mask",	false,	FALSE,FALSE,TRUE,D3DBLEND_ZERO,D3DBLEND_ONE,TRUE,1);
 		//C.r_Pass			("stub_notransform","accum_sun_mask",	false,	FALSE,FALSE,TRUE,D3DBLEND_ZERO,D3DBLEND_ONE,TRUE,1);
 		C.r_Pass			("stub_notransform_t","accum_sun_mask_nomsaa",	false,	FALSE,FALSE,TRUE,D3DBLEND_ZERO,D3DBLEND_ONE,TRUE,1);
-		//C.r_Sampler_rtf		("s_normal",		r2_RT_N);
-      C.r_dx10Texture		("s_normal",		r2_RT_N);
+
       C.r_dx10Texture		("s_position",		r2_RT_P);
 		C.r_dx10Sampler		("smp_nofilter");
 		C.r_ColorWriteEnable(false, false, false, false);
@@ -107,8 +106,7 @@ void	CBlender_accum_direct_mask_msaa::Compile(CBlender_Compile& C)
 		//C.r_Pass			("null",			"accum_sun_mask",	false,	FALSE,FALSE,TRUE,D3DBLEND_ZERO,D3DBLEND_ONE,TRUE,1);
 		//C.r_Pass			("stub_notransform","accum_sun_mask",	false,	FALSE,FALSE,TRUE,D3DBLEND_ZERO,D3DBLEND_ONE,TRUE,1);
 		C.r_Pass			("stub_notransform_t","accum_sun_mask_msaa",	false,	FALSE,FALSE,TRUE,D3DBLEND_ZERO,D3DBLEND_ONE,TRUE,1);
-		//C.r_Sampler_rtf		("s_normal",		r2_RT_N);
-      C.r_dx10Texture		("s_normal",		r2_RT_N);
+
       C.r_dx10Texture		("s_position",		r2_RT_P);
 		C.r_dx10Sampler		("smp_nofilter");
 		C.r_ColorWriteEnable(false, false, false, false);
