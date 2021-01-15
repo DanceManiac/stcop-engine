@@ -429,8 +429,8 @@ CRenderTarget::CRenderTarget		()
 			rt_Generic_2.create			(r2_RT_generic2, vp_params_main_secondary,D3DFMT_A16B16G16R16F, SampleCount );
 		
 		//FFT Rendertargets
-		rt_smaa_edgetex.create(r2_RT_smaa_edgetex, w, h, D3DFMT_A8R8G8B8);
-		rt_smaa_blendtex.create(r2_RT_smaa_blendtex, w, h, D3DFMT_A8R8G8B8);		
+		rt_smaa_edgetex.create(r2_RT_smaa_edgetex, vp_params_main_secondary, D3DFMT_A8R8G8B8);
+		rt_smaa_blendtex.create(r2_RT_smaa_blendtex, vp_params_main_secondary, D3DFMT_A8R8G8B8);		
 	}
 
 	// OCCLUSION
