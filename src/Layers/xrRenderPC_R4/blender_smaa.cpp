@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "blender_nightvision.h"
+#include "blender_smaa.h"
 
 void CBlender_smaa::Compile(CBlender_Compile& C)
 {
