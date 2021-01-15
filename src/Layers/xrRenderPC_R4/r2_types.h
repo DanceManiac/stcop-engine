@@ -54,6 +54,9 @@
 #define     r2_RT_temp          "$user$temp"
 #define     r2_RT_temp_without_samples          "$user$temp_ws"
 
+#define		r2_RT_smaa_edgetex	"$user$smaa_edgetex"
+#define		r2_RT_smaa_blendtex	"$user$smaa_blendtex"
+
 #define		JITTER(a) r2_jitter #a
 
 const		float				SMAP_near_plane		= .1f	;

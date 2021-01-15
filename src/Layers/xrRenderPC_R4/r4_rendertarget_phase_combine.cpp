@@ -315,7 +315,7 @@ void	CRenderTarget::phase_combine	()
 		}
 	}
 
-	
+
 	//Gasmask overlay shader
 	if(pp_gasmask_state > 0)
 		phase_gasmask();
@@ -324,6 +324,10 @@ void	CRenderTarget::phase_combine	()
 	if(pp_nightvision_state > 0)
 		phase_nightvision();
 
+	//SMAA shader
+	if(ps_r2_ls_flags.test(R2FLAG_SMAA))
+		phase_smaa();
+	
 	// PP enabled ?
 	//	Render to RT texture to be able to copy RT even in windowed mode.
 	BOOL	PP_Complex		= u_need_PP	() | (BOOL)RImplementation.m_bMakeAsyncSS;
@@ -388,13 +392,11 @@ void	CRenderTarget::phase_combine	()
 		// Draw COLOR
       if( !RImplementation.o.dx10_msaa )
       {
-		   if (ps_r2_ls_flags.test(R2FLAG_AA))			RCache.set_Element	(s_combine->E[bDistort?3:1]);	// look at blender_combine.cpp
-		   else										RCache.set_Element	(s_combine->E[bDistort?4:2]);	// look at blender_combine.cpp
+		RCache.set_Element	(s_combine->E[bDistort?4:2]);	// look at blender_combine.cpp
       }
       else
       {
-         if (ps_r2_ls_flags.test(R2FLAG_AA))			RCache.set_Element	(s_combine_msaa[0]->E[bDistort?3:1]);	// look at blender_combine.cpp
-         else										RCache.set_Element	(s_combine_msaa[0]->E[bDistort?4:2]);	// look at blender_combine.cpp
+		RCache.set_Element	(s_combine_msaa[0]->E[bDistort?4:2]);	// look at blender_combine.cpp
       }
 		RCache.set_c				("e_barrier",	ps_r2_aa_barier.x,	ps_r2_aa_barier.y,	ps_r2_aa_barier.z,	0);
 		RCache.set_c				("e_weights",	ps_r2_aa_weight.x,	ps_r2_aa_weight.y,	ps_r2_aa_weight.z,	0);

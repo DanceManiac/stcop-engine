@@ -838,7 +838,7 @@ void		xrRender_initconsole	()
 	CMD4(CCC_Float,		"r2_sun_lumscale_hemi",	&ps_r2_sun_lumscale_hemi,	0.0,	+3.0	);
 	CMD4(CCC_Float,		"r2_sun_lumscale_amb",	&ps_r2_sun_lumscale_amb,	0.0,	+3.0	);
 
-	CMD3(CCC_Mask,		"r2_aa",				&ps_r2_ls_flags,			R2FLAG_AA);
+
 	CMD4(CCC_Float,		"r2_aa_kernel",			&ps_r2_aa_kernel,			0.3f,	0.7f	);
 	CMD4(CCC_Float,		"r2_mblur",				&ps_r2_mblur,				0.0f,	1.0f	);
 
@@ -925,7 +925,7 @@ void		xrRender_initconsole	()
 	//FFT
 	CMD4(CCC_Integer, "r__gasmask", &pp_gasmask_state, 0, 5);
 	CMD4(CCC_Integer, "r__nightvision", &pp_nightvision_state, 0, 3);
-		
+	CMD3(CCC_Mask, "r__smaa", &ps_r2_ls_flags, R2FLAG_SMAA);		
 
 	//	Allow real-time fog config reload
 #if	(RENDER == R_R3) || (RENDER == R_R4)

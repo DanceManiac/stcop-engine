@@ -53,6 +53,7 @@ public:
 	IBlender*					b_cut;
 	IBlender*					b_gasmask;
 	IBlender*					b_nightvision;
+	IBlender*					b_smaa;
 	
     // compute shader for hdao
     IBlender*                   b_hdao_cs;
@@ -80,6 +81,9 @@ public:
 
 	ref_rt                      rt_temp;
 	ref_rt                      rt_temp_without_samples;
+
+	ref_rt 						rt_smaa_edgetex;
+	ref_rt 						rt_smaa_blendtex;
 
 	// 
 	ref_rt						rt_Accumulator;		// 64bit		(r,g,b,specular)
@@ -149,6 +153,7 @@ private:
 	ref_shader					s_cut;
 	ref_shader					s_gasmask;
 	ref_shader					s_nightvision;
+	ref_shader 					s_smaa;
 	
 	//	generate min/max
 	ref_shader					s_create_minmax_sm;
@@ -284,6 +289,7 @@ public:
 	void						phase_cut();
 	void						phase_gasmask();
 	void						phase_nightvision();
+	void						phase_smaa();
 	
 	void						SwitchViewPort(ViewPort vp);
 	//	Generates min/max sm

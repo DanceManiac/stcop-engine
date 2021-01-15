@@ -19,6 +19,7 @@
 #include "blender_cut.h"
 #include "blender_gasmask.h"
 #include "blender_nightvision.h"
+#include "blender_smaa.h"
 
 #include "../xrRender/dxRenderDeviceRender.h"
 
@@ -313,7 +314,8 @@ CRenderTarget::CRenderTarget		()
 	b_cut					= xr_new<CBlender_cut>					(); //New
 	b_gasmask				= xr_new<CBlender_gasmask>				(); //New
 	b_nightvision			= xr_new<CBlender_nightvision>			(); //New
-		
+	b_smaa					= xr_new<CBlender_smaa>					(); //New
+			
 	
 	b_occq					= xr_new<CBlender_light_occq>			();
 	b_accum_mask			= xr_new<CBlender_accum_direct_mask>	();
@@ -425,6 +427,10 @@ CRenderTarget::CRenderTarget		()
 		//	temp: for higher quality blends
 		if (RImplementation.o.advancedpp)
 			rt_Generic_2.create			(r2_RT_generic2, vp_params_main_secondary,D3DFMT_A16B16G16R16F, SampleCount );
+		
+		//FFT Rendertargets
+		rt_smaa_edgetex.create(r2_RT_smaa_edgetex, w, h, D3DFMT_A8R8G8B8);
+		rt_smaa_blendtex.create(r2_RT_smaa_blendtex, w, h, D3DFMT_A8R8G8B8);		
 	}
 
 	// OCCLUSION
@@ -602,7 +608,12 @@ CRenderTarget::CRenderTarget		()
 	{
 		s_nightvision.create(b_nightvision, "r4\\nightvision");
 	}	
-		
+	
+	//SMAA shader
+	{
+		s_smaa.create(b_smaa, "r4\\smaa");
+	}
+	
 	// BLOOM
 	{
 		D3DFORMAT	fmt				= D3DFMT_A8R8G8B8;			//;		// D3DFMT_X8R8G8B8
@@ -1120,8 +1131,9 @@ CRenderTarget::~CRenderTarget	()
     }
 	
 	xr_delete					(b_cut					);
-	xr_delete					(b_gasmask				);	
-	xr_delete					(b_nightvision			);		
+	xr_delete					(b_gasmask				);
+	xr_delete					(b_nightvision			);	
+	xr_delete					(b_smaa					);	
 }
 
 void CRenderTarget::reset_light_marker( bool bResetStencil)
