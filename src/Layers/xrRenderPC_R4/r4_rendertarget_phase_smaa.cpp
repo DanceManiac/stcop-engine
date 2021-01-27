@@ -19,6 +19,7 @@ void CRenderTarget::phase_smaa()
 	u_setrt(rt_smaa_edgetex, 0, 0, 0);
 	RCache.set_CullMode(CULL_NONE);
 	RCache.set_Stencil(TRUE, D3DCMP_ALWAYS, 0x1, 0, 0, D3DSTENCILOP_KEEP, D3DSTENCILOP_REPLACE, D3DSTENCILOP_KEEP);
+	RCache.Clear(0, nullptr, D3DCLEAR_TARGET, D3DCOLOR_ARGB(0, 0, 0, 0), 1.0f, 0L);
 
 	FVF::TL* pv = (FVF::TL*)RCache.Vertex.Lock(4, g_combine->vb_stride, Offset);
 	pv->set(0, float(h), d_Z, d_W, C, p0.x, p1.y); pv++;
@@ -30,13 +31,13 @@ void CRenderTarget::phase_smaa()
 	RCache.set_Element(s_smaa->E[0]);
 	RCache.set_Geometry(g_combine);
 	RCache.Render(D3DPT_TRIANGLELIST, Offset, 0, 4, 0, 2);
-	HW.pContext->ClearRenderTargetView(rt_smaa_edgetex->pRT, ColorRGBA);
-	
+
 	//////////////////////////////////////////////////////////////////////////
 	//Blending	
 	u_setrt(rt_smaa_blendtex, 0, 0, 0);
 	RCache.set_CullMode(CULL_NONE);
 	RCache.set_Stencil(TRUE, D3DCMP_EQUAL, 0x1, 0, 0, D3DSTENCILOP_KEEP, D3DSTENCILOP_REPLACE, D3DSTENCILOP_KEEP);
+	RCache.Clear(0, nullptr, D3DCLEAR_TARGET, D3DCOLOR_ARGB(0, 0, 0, 0), 1.0f, 0L);
 
 	pv = (FVF::TL*)RCache.Vertex.Lock(4, g_combine->vb_stride, Offset);
 	pv->set(0, float(h), d_Z, d_W, C, p0.x, p1.y); pv++;
@@ -48,7 +49,6 @@ void CRenderTarget::phase_smaa()
 	RCache.set_Element(s_smaa->E[1]);
 	RCache.set_Geometry(g_combine);
 	RCache.Render(D3DPT_TRIANGLELIST, Offset, 0, 4, 0, 2);	
-	HW.pContext->ClearRenderTargetView(rt_smaa_blendtex->pRT, ColorRGBA);
 	
 	//////////////////////////////////////////////////////////////////////////
 	//Final stage	
