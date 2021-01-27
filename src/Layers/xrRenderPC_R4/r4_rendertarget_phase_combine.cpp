@@ -64,23 +64,8 @@ void	CRenderTarget::phase_combine	()
 
 
 	//LV: Perform custom SSDO pass here.
-    if( RImplementation.o.ssao_hdao && RImplementation.o.ssao_ultra)
-    {
-        if( ps_r_ssao > 0 )
-        {
-		    phase_hdao();
-        }
-    }
-    else
-    {
-        if (RImplementation.o.ssao_opt_data)
-        {
-            phase_downsamp();
-            //phase_ssao();
-        } 
-        else if (RImplementation.o.ssao_blur_on)
-            phase_ssao();
-    }
+//    if( ps_r_ssao > 0 )
+
 
 	FLOAT ColorRGBA[4] = {0.0f, 0.0f, 0.0f, 0.0f};
 	// low/hi RTs
@@ -162,15 +147,6 @@ void	CRenderTarget::phase_combine	()
 					
 		Fvector4	sunclr,sundir;
 
-		float		fSSAONoise = 2.0f;
-					fSSAONoise *= tan(deg2rad(67.5f/2.0f));
-					fSSAONoise /= tan(deg2rad(Device.fFOV/2.0f));
-
-		float		fSSAOKernelSize = 150.0f;
-					fSSAOKernelSize *= tan(deg2rad(67.5f/2.0f));
-					fSSAOKernelSize /= tan(deg2rad(Device.fFOV/2.0f));
-
-
 		// sun-params
 		{
 			light*		fuckingsun		= (light*)RImplementation.Lights.sun_adapted._get()	;
@@ -217,8 +193,6 @@ void	CRenderTarget::phase_combine	()
 
 		RCache.set_c				("env_color",		envclr	);
 
-		RCache.set_c				("ssao_noise_tile_factor",	fSSAONoise	);
-		RCache.set_c				("ssao_kernel_size",		fSSAOKernelSize	);
 
       if( !RImplementation.o.dx10_msaa )
 		   RCache.Render				(D3DPT_TRIANGLELIST,Offset,0,4,0,2);

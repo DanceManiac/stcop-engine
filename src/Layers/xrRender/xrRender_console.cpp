@@ -14,15 +14,6 @@ xr_token							qpreset_token							[ ]={
 	{ 0,							0											}
 };
 
-u32			ps_r_ssao_mode			=	2;
-xr_token							qssao_mode_token						[ ]={
-	{ "disabled",					0											},
-	{ "default",					1											},
-	{ "hdao",						2											},
-	{ "hbao",						3											},
-	{ 0,							0											}
-};
-
 u32			ps_r_sun_shafts				=	2;
 xr_token							qsun_shafts_token							[ ]={
 	{ "st_opt_off",					0												},
@@ -38,9 +29,6 @@ xr_token							qssao_token									[ ]={
 	{ "st_opt_low",					1												},
 	{ "st_opt_medium",				2												},
 	{ "st_opt_high",				3												},
-#if defined(USE_DX10) || defined(USE_DX11)
-	{ "st_opt_ultra",				4												},
-#endif
 	{ 0,							0												}
 };
 
@@ -161,8 +149,7 @@ Flags32		ps_r2_ls_flags				= { R2FLAG_SUN
 	};	// r2-only
 
 Flags32		ps_r2_ls_flags_ext			= {
-		/*R2FLAGEXT_SSAO_OPT_DATA |*/ R2FLAGEXT_SSAO_HALF_DATA
-		|R2FLAGEXT_ENABLE_TESSELLATION
+	R2FLAGEXT_ENABLE_TESSELLATION
 	};
 
 float		ps_r2_df_parallax_h			= 0.02f;
@@ -363,61 +350,6 @@ public:
 	CCC_ModelPoolStat(LPCSTR N) : IConsole_Command(N)  { bEmptyArgsHandled = TRUE; };
 	virtual void Execute(LPCSTR args) {
 		RImplementation.Models->dump();
-	}
-};
-
-class	CCC_SSAO_Mode		: public CCC_Token
-{
-public:
-	CCC_SSAO_Mode(LPCSTR N, u32* V, xr_token* T) : CCC_Token(N,V,T)	{}	;
-
-	virtual void	Execute	(LPCSTR args)	{
-		CCC_Token::Execute	(args);
-				
-		switch	(*value)
-		{
-			case 0:
-			{
-				ps_r_ssao = 0;
-				ps_r2_ls_flags_ext.set(R2FLAGEXT_SSAO_HBAO, 0);
-				ps_r2_ls_flags_ext.set(R2FLAGEXT_SSAO_HDAO, 0);
-				break;
-			}
-			case 1:
-			{
-				if (ps_r_ssao==0)
-				{
-					ps_r_ssao = 1;
-				}
-				ps_r2_ls_flags_ext.set(R2FLAGEXT_SSAO_HBAO, 0);
-				ps_r2_ls_flags_ext.set(R2FLAGEXT_SSAO_HDAO, 0);
-				ps_r2_ls_flags_ext.set(R2FLAGEXT_SSAO_HALF_DATA, 0);
-				break;
-			}
-			case 2:
-			{
-				if (ps_r_ssao==0)
-				{
-					ps_r_ssao = 1;
-				}
-				ps_r2_ls_flags_ext.set(R2FLAGEXT_SSAO_HBAO, 0);
-				ps_r2_ls_flags_ext.set(R2FLAGEXT_SSAO_HDAO, 1);
-				ps_r2_ls_flags_ext.set(R2FLAGEXT_SSAO_OPT_DATA, 0);
-				ps_r2_ls_flags_ext.set(R2FLAGEXT_SSAO_HALF_DATA, 0);
-				break;
-			}
-			case 3:
-			{
-				if (ps_r_ssao==0)
-				{
-					ps_r_ssao = 1;
-				}
-				ps_r2_ls_flags_ext.set(R2FLAGEXT_SSAO_HBAO, 1);
-				ps_r2_ls_flags_ext.set(R2FLAGEXT_SSAO_HDAO, 0);
-				ps_r2_ls_flags_ext.set(R2FLAGEXT_SSAO_OPT_DATA, 1);
-				break;
-			}
-		}
 	}
 };
 
@@ -884,13 +816,9 @@ void		xrRender_initconsole	()
 	CMD3(CCC_Mask,		"r2_volumetric_lights",			&ps_r2_ls_flags,			R2FLAG_VOLUMETRIC_LIGHTS);
 //	CMD3(CCC_Mask,		"r2_sun_shafts",				&ps_r2_ls_flags,			R2FLAG_SUN_SHAFTS);
 	CMD3(CCC_Token,		"r2_sun_shafts",				&ps_r_sun_shafts,			qsun_shafts_token);
-	CMD3(CCC_SSAO_Mode,	"r2_ssao_mode",					&ps_r_ssao_mode,			qssao_mode_token);
+
 	CMD3(CCC_Token,		"r2_ssao",						&ps_r_ssao,					qssao_token);
-	CMD3(CCC_Mask,		"r2_ssao_blur",                 &ps_r2_ls_flags_ext,		R2FLAGEXT_SSAO_BLUR);//Need restart
-	CMD3(CCC_Mask,		"r2_ssao_opt_data",				&ps_r2_ls_flags_ext,		R2FLAGEXT_SSAO_OPT_DATA);//Need restart
-	CMD3(CCC_Mask,		"r2_ssao_half_data",			&ps_r2_ls_flags_ext,		R2FLAGEXT_SSAO_HALF_DATA);//Need restart
-	CMD3(CCC_Mask,		"r2_ssao_hbao",					&ps_r2_ls_flags_ext,		R2FLAGEXT_SSAO_HBAO);//Need restart
-	CMD3(CCC_Mask,		"r2_ssao_hdao",					&ps_r2_ls_flags_ext,		R2FLAGEXT_SSAO_HDAO);//Need restart
+
 	CMD3(CCC_Mask,		"r4_enable_tessellation",		&ps_r2_ls_flags_ext,		R2FLAGEXT_ENABLE_TESSELLATION);//Need restart
 	CMD3(CCC_Mask,		"r4_wireframe",					&ps_r2_ls_flags_ext,		R2FLAGEXT_WIREFRAME);//Need restart
 	CMD3(CCC_Mask,		"r2_steep_parallax",			&ps_r2_ls_flags,			R2FLAG_STEEP_PARALLAX);

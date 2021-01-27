@@ -47,17 +47,11 @@ public:
 	IBlender*					b_accum_volumetric_msaa[8];
 	IBlender*					b_accum_point_msaa[8];
 	IBlender*					b_accum_reflected_msaa[8];
-	IBlender*					b_ssao;
-	IBlender*					b_ssao_msaa[8];
 
 	IBlender*					b_cut;
 	IBlender*					b_gasmask;
 	IBlender*					b_nightvision;
 	IBlender*					b_smaa;
-	
-    // compute shader for hdao
-    IBlender*                   b_hdao_cs;
-    IBlender*                   b_hdao_msaa_cs;
 
 #ifdef DEBUG
 	struct		dbg_line_t		{
@@ -131,14 +125,6 @@ private:
 	// OCCq
 
 	ref_shader					s_occq;
-
-	// SSAO
-	ref_rt						rt_ssao_temp;
-	ref_rt						rt_half_depth;
-	ref_shader					s_ssao;
-	ref_shader					s_ssao_msaa[8];
-	ref_shader					s_hdao_cs;
-	ref_shader					s_hdao_cs_msaa;
 
 	// Accum
 	ref_shader					s_accum_mask	;
@@ -273,9 +259,6 @@ public:
 	void						phase_scene_begin		();
 	void						phase_scene_end			();
 	void						phase_occq				();
-	void						phase_ssao				();
-	void						phase_hdao				();
-	void						phase_downsamp			();
 	void						phase_wallmarks			();
 	void						phase_smap_direct		(light* L,	u32 sub_phase);
 	void						phase_smap_direct_tsh	(light* L,	u32 sub_phase);
