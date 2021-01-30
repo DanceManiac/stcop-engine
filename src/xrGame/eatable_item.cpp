@@ -35,8 +35,19 @@ void CEatableItem::Load(LPCSTR section)
 {
 	inherited::Load(section);
 
-	m_iPortionsNum				= pSettings->r_s32	(section, "eat_portions_num");
-	VERIFY						(m_iPortionsNum<10000);
+	m_fHealth = pSettings->r_float(section, "eat_health");
+	m_fPower = pSettings->r_float(section, "eat_power");
+	m_fSatiety = pSettings->r_float(section, "eat_satiety");
+	m_fRadiation = pSettings->r_float(section, "eat_radiation");
+	m_fWoundsHeal = pSettings->r_float(section, "wounds_heal_perc");
+	clamp(m_fWoundsHeal, 0.f, 1.f);
+	m_fMaxPowerUp = READ_IF_EXISTS(pSettings, r_float, section, "eat_max_power", 0.0f);
+	m_fAlcohol = READ_IF_EXISTS(pSettings, r_float, section, "eat_alcohol", 0.0f);
+	//m_fTimeTotal = READ_IF_EXISTS(pSettings, r_float, sect.c_str(), "apply_time_sec", -1.0f);
+	m_iPortionsNum = pSettings->r_s32	(section, "eat_portions_num");
+	VERIFY (m_iPortionsNum<10000);
+
+	m_sUseSoundName = pSettings->r_string(section, "use_sound");
 }
 
 BOOL CEatableItem::net_Spawn				(CSE_Abstract* DC)
@@ -78,15 +89,12 @@ void CEatableItem::OnH_B_Independent(bool just_before_destroy)
 
 bool CEatableItem::UseBy (CEntityAlive* entity_alive)
 {
-	SMedicineInfluenceValues	V;
-	V.Load						(m_physic_item->cNameSect());
-
 	CInventoryOwner* IO	= smart_cast<CInventoryOwner*>(entity_alive);
 	R_ASSERT		(IO);
 	R_ASSERT		(m_pInventory==IO->m_inventory);
 	R_ASSERT		(object().H_Parent()->ID()==entity_alive->ID());
 
-	entity_alive->conditions().ApplyInfluence(V, m_physic_item->cNameSect());
+	entity_alive->conditions().ApplyInfluence(*this);
 
 	for(u8 i = 0; i<(u8)eBoostMaxCount; i++)
 	{

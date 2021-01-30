@@ -15,6 +15,7 @@
 #include "script_callback_ex.h"
 #include "object_broker.h"
 #include "weapon.h"
+#include "eatable_item.h"
 
 #include "PDA.h"
 #include "ai/monsters/basemonster/base_monster.h"
@@ -537,16 +538,6 @@ void CActorCondition::save(NET_Packet &output_packet)
 	save_data			(m_condition_flags, output_packet);
 	save_data			(m_fSatiety, output_packet);
 
-	save_data			(m_curr_medicine_influence.fHealth, output_packet);
-	save_data			(m_curr_medicine_influence.fPower, output_packet);
-	save_data			(m_curr_medicine_influence.fSatiety, output_packet);
-	save_data			(m_curr_medicine_influence.fRadiation, output_packet);
-	save_data			(m_curr_medicine_influence.fWoundsHeal, output_packet);
-	save_data			(m_curr_medicine_influence.fMaxPowerUp, output_packet);
-	save_data			(m_curr_medicine_influence.fAlcohol, output_packet);
-	save_data			(m_curr_medicine_influence.fTimeTotal, output_packet);
-	save_data			(m_curr_medicine_influence.fTimeCurrent, output_packet);
-
 	output_packet.w_u8((u8)m_booster_influences.size());
 	BOOSTER_MAP::iterator b = m_booster_influences.begin(), e = m_booster_influences.end();
 	for(; b!=e; b++)
@@ -564,15 +555,7 @@ void CActorCondition::load(IReader &input_packet)
 	load_data			(m_condition_flags, input_packet);
 	load_data			(m_fSatiety, input_packet);
 
-	load_data			(m_curr_medicine_influence.fHealth, input_packet);
-	load_data			(m_curr_medicine_influence.fPower, input_packet);
-	load_data			(m_curr_medicine_influence.fSatiety, input_packet);
-	load_data			(m_curr_medicine_influence.fRadiation, input_packet);
-	load_data			(m_curr_medicine_influence.fWoundsHeal, input_packet);
-	load_data			(m_curr_medicine_influence.fMaxPowerUp, input_packet);
-	load_data			(m_curr_medicine_influence.fAlcohol, input_packet);
-	load_data			(m_curr_medicine_influence.fTimeTotal, input_packet);
-	load_data			(m_curr_medicine_influence.fTimeCurrent, input_packet);
+
 
 	u8 cntr = input_packet.r_u8();
 	for(; cntr>0; cntr--)
@@ -849,29 +832,28 @@ float CActorCondition::HitSlowmo(SHit* pHDS)
 	return ret;	
 }
 
-bool CActorCondition::ApplyInfluence(const SMedicineInfluenceValues& V, const shared_str& sect)
+bool CActorCondition::ApplyInfluence(CEatableItem &object)
 {
-	if(m_curr_medicine_influence.InProcess())
-		return false;
+	//if(m_curr_medicine_influence.InProcess())
+		//return false;
 
 	if (m_object->Local() && m_object == Level().CurrentViewEntity())
 	{
-		if(pSettings->line_exist(sect, "use_sound"))
+		if(object.m_sUseSoundName != nullptr)
 		{
 			if(m_use_sound._feedback())
 				m_use_sound.stop		();
 
-			shared_str snd_name			= pSettings->r_string(sect, "use_sound");
-			m_use_sound.create			(snd_name.c_str(), st_Effect, sg_SourceType);
+			m_use_sound.create			(object.m_sUseSoundName.c_str(), st_Effect, sg_SourceType);
 			m_use_sound.play			(NULL, sm_2D);
 		}
 	}
 
-	if(V.fTimeTotal<0.0f)
-		return inherited::ApplyInfluence	(V, sect);
+	//if(V.fTimeTotal<0.0f)
+	return inherited::ApplyInfluence (object);
 
-	m_curr_medicine_influence				= V;
-	m_curr_medicine_influence.fTimeCurrent  = m_curr_medicine_influence.fTimeTotal;
+	//m_curr_medicine_influence				= V;
+	//m_curr_medicine_influence.fTimeCurrent  = m_curr_medicine_influence.fTimeTotal;
 	return true;
 }
 bool CActorCondition::ApplyBooster(const SBooster& B, const shared_str& sect)

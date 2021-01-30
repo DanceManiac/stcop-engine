@@ -111,14 +111,13 @@ public:
 	bool	DisableSprint							(SHit* pHDS);
 	bool	PlayHitSound							(SHit* pHDS);
 	float	HitSlowmo								(SHit* pHDS);
-	virtual bool			ApplyInfluence			(const SMedicineInfluenceValues& V, const shared_str& sect);
+	virtual bool			ApplyInfluence			(CEatableItem &object) override;
 	virtual bool			ApplyBooster			(const SBooster& B, const shared_str& sect);
 	float	GetMaxPowerRestoreSpeed					() {return m_max_power_restore_speed;};
 	float	GetMaxWoundProtection					() {return m_max_wound_protection;};
 	float	GetMaxFireWoundProtection				() {return m_max_fire_wound_protection;};
 
 protected:
-	SMedicineInfluenceValues						m_curr_medicine_influence;
 	float m_fAlcohol;
 	float m_fV_Alcohol;
 //--

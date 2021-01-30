@@ -11,6 +11,7 @@
 #include "../Include/xrRender/Kinematics.h"
 #include "object_broker.h"
 #include "ActorHelmet.h"
+#include "eatable_item.h"
 
 #define MAX_HEALTH 1.0f
 #define MIN_HEALTH -0.01f
@@ -639,34 +640,21 @@ void CEntityCondition::remove_links	(const CObject *object)
 	m_iWhoID				= m_object->ID();
 }
 
-bool CEntityCondition::ApplyInfluence(const SMedicineInfluenceValues& V, const shared_str& sect)
+bool CEntityCondition::ApplyInfluence(CEatableItem& object)
 {
-	ChangeHealth	(V.fHealth);
-	ChangePower		(V.fPower);
-	ChangeSatiety	(V.fSatiety);
-	ChangeRadiation	(V.fRadiation);
-	ChangeBleeding	(V.fWoundsHeal);
-	SetMaxPower		(GetMaxPower()+V.fMaxPowerUp);
-	ChangeAlcohol	(V.fAlcohol);
+	ChangeHealth (object.m_fHealth);
+	ChangePower	(object.m_fPower);
+	ChangeSatiety (object.m_fSatiety);
+	ChangeRadiation (object.m_fRadiation);
+	ChangeBleeding (object.m_fWoundsHeal);
+	SetMaxPower	(GetMaxPower()+ object.m_fMaxPowerUp);
+	ChangeAlcohol (object.m_fAlcohol);
 	return true;
 }
 
 bool CEntityCondition::ApplyBooster(const SBooster& B, const shared_str& sect)
 {
 	return true;
-}
-
-void SMedicineInfluenceValues::Load(const shared_str& sect)
-{
-	fHealth			= pSettings->r_float(sect.c_str(), "eat_health");
-	fPower			= pSettings->r_float(sect.c_str(), "eat_power");
-	fSatiety		= pSettings->r_float(sect.c_str(), "eat_satiety");
-	fRadiation		= pSettings->r_float(sect.c_str(), "eat_radiation");
-	fWoundsHeal		= pSettings->r_float(sect.c_str(), "wounds_heal_perc");
-	clamp			(fWoundsHeal, 0.f, 1.f);
-	fMaxPowerUp		= READ_IF_EXISTS	(pSettings,r_float,sect.c_str(),	"eat_max_power",0.0f);
-	fAlcohol		= READ_IF_EXISTS	(pSettings, r_float, sect.c_str(),	"eat_alcohol", 0.0f);
-	fTimeTotal		= READ_IF_EXISTS	(pSettings, r_float, sect.c_str(),	"apply_time_sec", -1.0f);
 }
 
 void SBooster::Load(const shared_str& sect, EBoostParams type)
