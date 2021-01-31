@@ -721,8 +721,6 @@ void CActorCondition::UpdateTutorialThresholds()
 	static float _cWpnCondition		= pSettings->r_float("tutorial_conditions_thresholds","weapon_jammed");
 	static float _cPsyHealthThr		= pSettings->r_float("tutorial_conditions_thresholds","psy_health");
 
-
-
 	bool b = true;
 	if(b && !m_condition_flags.test(eCriticalPowerReached) && GetPower()<_cPowerThr){
 		m_condition_flags.set			(eCriticalPowerReached, TRUE);
@@ -831,33 +829,41 @@ float CActorCondition::HitSlowmo(SHit* pHDS)
 	return ret;	
 }
 
-void CActorCondition::ApplyInfluence(const CEatableItem &object)
+void CActorCondition::ApplyBooster(const CEatableItem& object)
 {
 	if (m_object->Local() && m_object == Level().CurrentViewEntity())
 	{
-		if(object.m_sUseSoundName != nullptr)
+		if (object.m_sUseSoundName != nullptr)
 		{
-			if(m_use_sound._feedback())
-				m_use_sound.stop		();
+			if (m_use_sound._feedback())
+				m_use_sound.stop();
 
-			m_use_sound.create			(object.m_sUseSoundName.c_str(), st_Effect, sg_SourceType);
-			m_use_sound.play			(NULL, sm_2D);
+			m_use_sound.create(object.m_sUseSoundName.c_str(), st_Effect, sg_SourceType);
+			m_use_sound.play(NULL, sm_2D);
 		}
 	}
 
-	inherited::ApplyInfluence(object);
-}
+	//Non-temporary boosters
+	ChangeHealth(object.m_fHealth);
+	ChangePower(object.m_fPower);
+	ChangeSatiety(object.m_fSatiety);
+	ChangeRadiation(object.m_fRadiation);
+	ChangeBleeding(object.m_fWoundsHeal);
+	SetMaxPower(GetMaxPower() + object.m_fMaxPowerUp);
+	ChangeAlcohol(object.m_fAlcohol);
 
-void CActorCondition::ApplyBooster(const SBooster& B, const shared_str& sect)
-{
-	if(B.fBoostValue>0.0f)
+	//Temporary boosters
+	for (int i = 0; i < eBoostMaxCount; i++) 
 	{
-		BOOSTER_MAP::iterator it = m_booster_influences.find(B.m_type);
-		if(it!=m_booster_influences.end())
-			DisableBoostParameters((*it).second);
+		if (object.m_bBoosters[i].fBoostValue > 0.0f)
+		{
+			BOOSTER_MAP::iterator it = m_booster_influences.find(object.m_bBoosters[i].m_type);
+			if (it != m_booster_influences.end())
+				DisableBoostParameters((*it).second);
 
-		m_booster_influences[B.m_type] = B;
-		BoostParameters(B);
+			m_booster_influences[object.m_bBoosters[i].m_type] = object.m_bBoosters[i];
+			BoostParameters(object.m_bBoosters[i]);
+		}
 	}
 }
 

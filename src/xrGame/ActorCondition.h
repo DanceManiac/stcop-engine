@@ -14,16 +14,18 @@ class CActorDeathEffector;
 class CActorCondition: public CEntityCondition {
 private:
 	typedef CEntityCondition inherited;
-	enum {	eCriticalPowerReached			=(1<<0),
-			eCriticalMaxPowerReached		=(1<<1),
-			eCriticalBleedingSpeed			=(1<<2),
-			eCriticalSatietyReached			=(1<<3),
-			eCriticalRadiationReached		=(1<<4),
-			eWeaponJammedReached			=(1<<5),
-			ePhyHealthMinReached			=(1<<6),
-			eCantWalkWeight					=(1<<7),
-			eCantWalkWeightReached			=(1<<8),
-			};
+	enum 
+	{	
+		eCriticalPowerReached			=(1<<0),
+		eCriticalMaxPowerReached		=(1<<1),
+		eCriticalBleedingSpeed			=(1<<2),
+		eCriticalSatietyReached			=(1<<3),
+		eCriticalRadiationReached		=(1<<4),
+		eWeaponJammedReached			=(1<<5),
+		ePhyHealthMinReached			=(1<<6),
+		eCantWalkWeight					=(1<<7),
+		eCantWalkWeightReached			=(1<<8),
+	};
 	Flags16											m_condition_flags;
 private:
 	CActor*											m_object;
@@ -111,8 +113,7 @@ public:
 	bool	DisableSprint							(SHit* pHDS);
 	bool	PlayHitSound							(SHit* pHDS);
 	float	HitSlowmo								(SHit* pHDS);
-	virtual void			ApplyInfluence			(const CEatableItem &object) override;
-	virtual void			ApplyBooster			(const SBooster& B, const shared_str& sect) override;
+	virtual void			ApplyBooster			(const CEatableItem& object) override;
 	float	GetMaxPowerRestoreSpeed					() {return m_max_power_restore_speed;};
 	float	GetMaxWoundProtection					() {return m_max_wound_protection;};
 	float	GetMaxFireWoundProtection				() {return m_max_fire_wound_protection;};

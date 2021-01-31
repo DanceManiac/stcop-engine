@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////
 //	Module 		: eatable_item.cpp
 //	Created 	: 24.03.2003
-//  Modified 	: 29.01.2004
+//  Modified 	: 31.01.2021
 //	Author		: Yuri Dobronravin
 //	Description : Eatable item
 ////////////////////////////////////////////////////////////////////////////
@@ -43,7 +43,6 @@ void CEatableItem::Load(LPCSTR section)
 	clamp(m_fWoundsHeal, 0.f, 1.f);
 	m_fMaxPowerUp = READ_IF_EXISTS(pSettings, r_float, section, "eat_max_power", 0.0f);
 	m_fAlcohol = READ_IF_EXISTS(pSettings, r_float, section, "eat_alcohol", 0.0f);
-	//m_fTimeTotal = READ_IF_EXISTS(pSettings, r_float, sect.c_str(), "apply_time_sec", -1.0f);
 	m_iPortionsNum = pSettings->r_s32	(section, "eat_portions_num");
 	VERIFY (m_iPortionsNum<10000);
 
@@ -97,12 +96,7 @@ bool CEatableItem::UseBy (CEntityAlive* entity_alive)
 	R_ASSERT		(m_pInventory==IO->m_inventory);
 	R_ASSERT		(object().H_Parent()->ID()==entity_alive->ID());
 
-	entity_alive->conditions().ApplyInfluence(*this);
-
-	for(int i = 0; i < eBoostMaxCount; i++)
-	{
-		entity_alive->conditions().ApplyBooster(m_bBoosters[i], m_physic_item->cNameSect());
-	}
+	entity_alive->conditions().ApplyBooster(*this);
 
 	if (!IsGameTypeSingle() && OnServer())
 	{

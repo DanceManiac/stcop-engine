@@ -640,17 +640,6 @@ void CEntityCondition::remove_links	(const CObject *object)
 	m_iWhoID				= m_object->ID();
 }
 
-void CEntityCondition::ApplyInfluence(const CEatableItem& object)
-{
-	ChangeHealth (object.m_fHealth);
-	ChangePower	(object.m_fPower);
-	ChangeSatiety (object.m_fSatiety);
-	ChangeRadiation (object.m_fRadiation);
-	ChangeBleeding (object.m_fWoundsHeal);
-	SetMaxPower	(GetMaxPower()+ object.m_fMaxPowerUp);
-	ChangeAlcohol (object.m_fAlcohol);
-}
-
 void SBooster::Load(const shared_str& sect, EBoostParams type)
 {
 	fBoostTime = pSettings->r_float(sect.c_str(), "boost_time");
