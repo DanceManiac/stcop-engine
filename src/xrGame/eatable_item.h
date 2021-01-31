@@ -1,6 +1,7 @@
 #pragma once
 
 #include "inventory_item.h"
+#include "EntityCondition.h"
 
 class CPhysicItem;
 class CEntityAlive;
@@ -37,6 +38,8 @@ public:
 	float m_fWoundsHeal;
 	float m_fMaxPowerUp;
 	float m_fAlcohol;
+
+	SBooster m_bBoosters[eBoostMaxCount];
 
 	shared_str m_sUseSoundName;
 

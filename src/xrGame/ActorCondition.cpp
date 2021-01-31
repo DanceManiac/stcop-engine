@@ -804,7 +804,6 @@ bool CActorCondition::PlayHitSound(SHit* pHDS)
 		case ALife::eHitTypeExplosion:
 		case ALife::eHitTypeFireWound:
 		case ALife::eHitTypeWound_2:
-//		case ALife::eHitTypePhysicStrike:
 			return true;
 			break;
 
@@ -832,11 +831,8 @@ float CActorCondition::HitSlowmo(SHit* pHDS)
 	return ret;	
 }
 
-bool CActorCondition::ApplyInfluence(CEatableItem &object)
+void CActorCondition::ApplyInfluence(const CEatableItem &object)
 {
-	//if(m_curr_medicine_influence.InProcess())
-		//return false;
-
 	if (m_object->Local() && m_object == Level().CurrentViewEntity())
 	{
 		if(object.m_sUseSoundName != nullptr)
@@ -849,30 +845,13 @@ bool CActorCondition::ApplyInfluence(CEatableItem &object)
 		}
 	}
 
-	//if(V.fTimeTotal<0.0f)
-	return inherited::ApplyInfluence (object);
-
-	//m_curr_medicine_influence				= V;
-	//m_curr_medicine_influence.fTimeCurrent  = m_curr_medicine_influence.fTimeTotal;
-	return true;
+	inherited::ApplyInfluence(object);
 }
-bool CActorCondition::ApplyBooster(const SBooster& B, const shared_str& sect)
+
+void CActorCondition::ApplyBooster(const SBooster& B, const shared_str& sect)
 {
 	if(B.fBoostValue>0.0f)
 	{
-		if (m_object->Local() && m_object == Level().CurrentViewEntity())
-		{
-			if(pSettings->line_exist(sect, "use_sound"))
-			{
-				if(m_use_sound._feedback())
-					m_use_sound.stop		();
-
-				shared_str snd_name			= pSettings->r_string(sect, "use_sound");
-				m_use_sound.create			(snd_name.c_str(), st_Effect, sg_SourceType);
-				m_use_sound.play			(NULL, sm_2D);
-			}
-		}
-
 		BOOSTER_MAP::iterator it = m_booster_influences.find(B.m_type);
 		if(it!=m_booster_influences.end())
 			DisableBoostParameters((*it).second);
@@ -880,7 +859,6 @@ bool CActorCondition::ApplyBooster(const SBooster& B, const shared_str& sect)
 		m_booster_influences[B.m_type] = B;
 		BoostParameters(B);
 	}
-	return true;
 }
 
 void disable_input();

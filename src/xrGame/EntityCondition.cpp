@@ -640,7 +640,7 @@ void CEntityCondition::remove_links	(const CObject *object)
 	m_iWhoID				= m_object->ID();
 }
 
-bool CEntityCondition::ApplyInfluence(CEatableItem& object)
+void CEntityCondition::ApplyInfluence(const CEatableItem& object)
 {
 	ChangeHealth (object.m_fHealth);
 	ChangePower	(object.m_fPower);
@@ -649,12 +649,6 @@ bool CEntityCondition::ApplyInfluence(CEatableItem& object)
 	ChangeBleeding (object.m_fWoundsHeal);
 	SetMaxPower	(GetMaxPower()+ object.m_fMaxPowerUp);
 	ChangeAlcohol (object.m_fAlcohol);
-	return true;
-}
-
-bool CEntityCondition::ApplyBooster(const SBooster& B, const shared_str& sect)
-{
-	return true;
 }
 
 void SBooster::Load(const shared_str& sect, EBoostParams type)

@@ -111,8 +111,8 @@ public:
 	bool	DisableSprint							(SHit* pHDS);
 	bool	PlayHitSound							(SHit* pHDS);
 	float	HitSlowmo								(SHit* pHDS);
-	virtual bool			ApplyInfluence			(CEatableItem &object) override;
-	virtual bool			ApplyBooster			(const SBooster& B, const shared_str& sect);
+	virtual void			ApplyInfluence			(const CEatableItem &object) override;
+	virtual void			ApplyBooster			(const SBooster& B, const shared_str& sect) override;
 	float	GetMaxPowerRestoreSpeed					() {return m_max_power_restore_speed;};
 	float	GetMaxWoundProtection					() {return m_max_wound_protection;};
 	float	GetMaxFireWoundProtection				() {return m_max_fire_wound_protection;};

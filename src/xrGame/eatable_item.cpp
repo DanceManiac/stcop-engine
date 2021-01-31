@@ -47,6 +47,9 @@ void CEatableItem::Load(LPCSTR section)
 	m_iPortionsNum = pSettings->r_s32	(section, "eat_portions_num");
 	VERIFY (m_iPortionsNum<10000);
 
+	for (int i = 0; i < eBoostMaxCount; i++)
+		m_bBoosters[i].Load(section, EBoostParams(i));
+
 	m_sUseSoundName = pSettings->r_string(section, "use_sound");
 }
 
@@ -96,14 +99,9 @@ bool CEatableItem::UseBy (CEntityAlive* entity_alive)
 
 	entity_alive->conditions().ApplyInfluence(*this);
 
-	for(u8 i = 0; i<(u8)eBoostMaxCount; i++)
+	for(int i = 0; i < eBoostMaxCount; i++)
 	{
-		if(pSettings->line_exist(m_physic_item->cNameSect().c_str(), ef_boosters_section_names[i]))
-		{
-			SBooster B;
-			B.Load(m_physic_item->cNameSect(), (EBoostParams)i);
-			entity_alive->conditions().ApplyBooster(B, m_physic_item->cNameSect());
-		}
+		entity_alive->conditions().ApplyBooster(m_bBoosters[i], m_physic_item->cNameSect());
 	}
 
 	if (!IsGameTypeSingle() && OnServer())
