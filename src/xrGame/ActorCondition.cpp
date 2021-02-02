@@ -120,6 +120,10 @@ void CActorCondition::LoadCondition(LPCSTR entity_section)
 	m_fV_Satiety				= pSettings->r_float(section,"satiety_v");		
 	m_fV_SatietyPower			= pSettings->r_float(section,"satiety_power_v");
 	m_fV_SatietyHealth			= pSettings->r_float(section,"satiety_health_v");
+
+	m_fToxicityCritical = pSettings->r_float(section, "toxicity_critical");
+	m_fV_Toxicity = pSettings->r_float(section, "toxicity_v");
+	m_fV_ToxicityDamage = pSettings->r_float(section, "toxicity_damage_v");
 	
 	m_MaxWalkWeight				= pSettings->r_float(section,"max_walk_weight");
 
@@ -183,6 +187,7 @@ void CActorCondition::UpdateCondition()
 	{
 		UpdateSatiety();
 		UpdateBoosters();
+		UpdateToxicity();
 
 		m_fAlcohol		+= m_fV_Alcohol*m_fDeltaTime;
 		clamp			(m_fAlcohol,			0.0f,		1.0f);
@@ -273,6 +278,7 @@ void CActorCondition::UpdateCondition()
 
 	UpdateSatiety();
 	UpdateBoosters();
+	UpdateToxicity();
 
 	inherited::UpdateCondition();
 
@@ -444,11 +450,26 @@ void CActorCondition::UpdateSatiety()
 		clamp(m_fSatiety, 0.0f, 1.0f);
 	}
 		
-	float satiety_health_koef = (m_fSatiety-m_fSatietyCritical)/(m_fSatiety>=m_fSatietyCritical?1-m_fSatietyCritical:m_fSatietyCritical);
+	float satiety_health_koef = (m_fSatiety - m_fSatietyCritical) / (m_fSatiety >= m_fSatietyCritical ? 1 - m_fSatietyCritical : m_fSatietyCritical);
+
 	if(CanBeHarmed() && !psActorFlags.test(AF_GODMODE_RT) )
 	{
 		m_fDeltaHealth += m_fV_SatietyHealth*satiety_health_koef*m_fDeltaTime;
 		m_fDeltaPower += m_fV_SatietyPower*m_fSatiety*m_fDeltaTime;
+	}
+}
+
+void CActorCondition::UpdateToxicity()
+{
+	if (m_fToxicity > 0)
+	{
+		m_fToxicity -= m_fV_Toxicity * m_fDeltaTime;
+		clamp(m_fToxicity, 0.0f, 1.0f);
+	}
+
+	if (CanBeHarmed() && !psActorFlags.test(AF_GODMODE_RT) && m_fToxicityCritical <= m_fToxicity)
+	{
+		m_fDeltaHealth -= m_fV_ToxicityDamage * m_fDeltaTime;
 	}
 }
 
@@ -537,6 +558,7 @@ void CActorCondition::save(NET_Packet &output_packet)
 	save_data			(m_fAlcohol, output_packet);
 	save_data			(m_condition_flags, output_packet);
 	save_data			(m_fSatiety, output_packet);
+	save_data			(m_fToxicity, output_packet);
 
 	output_packet.w_u8((u8)m_booster_influences.size());
 	BOOSTER_MAP::iterator b = m_booster_influences.begin(), e = m_booster_influences.end();
@@ -554,8 +576,7 @@ void CActorCondition::load(IReader &input_packet)
 	load_data			(m_fAlcohol, input_packet);
 	load_data			(m_condition_flags, input_packet);
 	load_data			(m_fSatiety, input_packet);
-
-
+	load_data			(m_fToxicity, input_packet);
 
 	u8 cntr = input_packet.r_u8();
 	for(; cntr>0; cntr--)
@@ -584,6 +605,12 @@ void CActorCondition::ChangeSatiety(float value)
 {
 	m_fSatiety += value;
 	clamp		(m_fSatiety, 0.0f, 1.0f);
+}
+
+void CActorCondition::ChangeToxicity(float value)
+{
+	m_fToxicity += value;
+	clamp(m_fToxicity, 0.0f, 1.0f);
 }
 
 void CActorCondition::BoostParameters(const SBooster& B)
@@ -851,6 +878,7 @@ void CActorCondition::ApplyBooster(const CEatableItem& object)
 	ChangeBleeding(object.m_fWoundsHeal);
 	SetMaxPower(GetMaxPower() + object.m_fMaxPowerUp);
 	ChangeAlcohol(object.m_fAlcohol);
+	ChangeToxicity(object.m_fToxicity);
 
 	//Temporary boosters
 	for (int i = 0; i < eBoostMaxCount; i++) 

@@ -28,3 +28,7 @@ src/3rd party/luajit-2/src/luajit.pdb
 src/3rd party/luajit-2/src/lua51.pdb
 src/3rd party/luajit-2/src/vc140.pdb
 *.exp
+src/3rd party/luajit-2/src/buildvm.lib
+src/3rd party/luajit-2/src/luajit.lib
+src/3rd party/luajit-2/src/minilua.lib
+src/engine.sln

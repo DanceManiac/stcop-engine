@@ -43,6 +43,7 @@ void CEatableItem::Load(LPCSTR section)
 	clamp(m_fWoundsHeal, 0.f, 1.f);
 	m_fMaxPowerUp = READ_IF_EXISTS(pSettings, r_float, section, "eat_max_power", 0.0f);
 	m_fAlcohol = READ_IF_EXISTS(pSettings, r_float, section, "eat_alcohol", 0.0f);
+	m_fToxicity = READ_IF_EXISTS(pSettings, r_float, section, "eat_toxicity", 0.0f);
 	m_iPortionsNum = pSettings->r_s32	(section, "eat_portions_num");
 	VERIFY (m_iPortionsNum<10000);
 

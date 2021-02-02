@@ -38,6 +38,7 @@ public:
 	float m_fWoundsHeal;
 	float m_fMaxPowerUp;
 	float m_fAlcohol;
+	float m_fToxicity;
 
 	SBooster m_bBoosters[eBoostMaxCount];
 
