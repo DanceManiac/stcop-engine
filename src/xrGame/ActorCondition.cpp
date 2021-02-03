@@ -303,22 +303,16 @@ void CActorCondition::UpdateCondition()
 
 void CActorCondition::UpdateBoosters()
 {
-	for(u8 i=0;i<eBoostMaxCount;i++)
+	for (auto &it = BoostersList.begin(); it != BoostersList.end(); ++it) 
 	{
-		BOOSTER_MAP::iterator it = m_booster_influences.find((EBoostParams)i);
-		if(it!=m_booster_influences.end())
+		it->fBoostTime -= m_fDeltaTime / (IsGameTypeSingle() ? Level().GetGameTimeFactor() : 1.0f);
+		if (it->fBoostTime <= 0.0f)
 		{
-			it->second.fBoostTime -= m_fDeltaTime/(IsGameTypeSingle()?Level().GetGameTimeFactor():1.0f);
-			if(it->second.fBoostTime<=0.0f)
-			{
-				DisableBoostParameters(it->second);
-				m_booster_influences.erase(it);
-			}
+			DisableBoostParameters(*it);
+			BoostersList.erase(it);
+			break;
 		}
 	}
-
-	if(m_object == Level().CurrentViewEntity())
-		CurrentGameUI()->UIMainIngameWnd->UpdateBoosterIndicators(m_booster_influences);
 }
 
 void CActorCondition::AffectDamage_InjuriousMaterialAndMonstersInfluence()
@@ -326,9 +320,7 @@ void CActorCondition::AffectDamage_InjuriousMaterialAndMonstersInfluence()
 	float one = 0.1f;
 	float tg  = Device.fTimeGlobal;
 	if ( m_f_time_affected + one > tg )
-	{
 		return;
-	}
 
 	clamp( m_f_time_affected, tg - (one * 3), tg );
 
@@ -560,14 +552,16 @@ void CActorCondition::save(NET_Packet &output_packet)
 	save_data			(m_fSatiety, output_packet);
 	save_data			(m_fToxicity, output_packet);
 
-	output_packet.w_u8((u8)m_booster_influences.size());
+	save_data			(BoostersList, output_packet);
+
+	/*output_packet.w_u8((u8)m_booster_influences.size());
 	BOOSTER_MAP::iterator b = m_booster_influences.begin(), e = m_booster_influences.end();
 	for(; b!=e; b++)
 	{
 		output_packet.w_u8((u8)b->second.m_type);
 		output_packet.w_float(b->second.fBoostValue);
 		output_packet.w_float(b->second.fBoostTime);
-	}
+	}*/
 }
 
 void CActorCondition::load(IReader &input_packet)
@@ -578,7 +572,9 @@ void CActorCondition::load(IReader &input_packet)
 	load_data			(m_fSatiety, input_packet);
 	load_data			(m_fToxicity, input_packet);
 
-	u8 cntr = input_packet.r_u8();
+	load_data			(BoostersList, input_packet);
+
+	/*u8 cntr = input_packet.r_u8();
 	for(; cntr>0; cntr--)
 	{
 		SBooster B;
@@ -587,7 +583,7 @@ void CActorCondition::load(IReader &input_packet)
 		B.fBoostTime = input_packet.r_float();
 		m_booster_influences[B.m_type] = B;
 		BoostParameters(B);
-	}
+	}*/
 }
 
 void CActorCondition::reinit	()
@@ -615,57 +611,43 @@ void CActorCondition::ChangeToxicity(float value)
 
 void CActorCondition::BoostParameters(const SBooster& B)
 {
-	if(OnServer())
-	{
-		switch(B.m_type)
-		{
-			case eBoostHpRestore: BoostHpRestore(B.fBoostValue); break;
-			case eBoostPowerRestore: BoostPowerRestore(B.fBoostValue); break;
-			case eBoostRadiationRestore: BoostRadiationRestore(B.fBoostValue); break;
-			case eBoostBleedingRestore: BoostBleedingRestore(B.fBoostValue); break;
-			case eBoostMaxWeight: BoostMaxWeight(B.fBoostValue); break;
-			case eBoostBurnImmunity: BoostBurnImmunity(B.fBoostValue); break;
-			case eBoostShockImmunity: BoostShockImmunity(B.fBoostValue); break;
-			case eBoostRadiationImmunity: BoostRadiationImmunity(B.fBoostValue); break;
-			case eBoostTelepaticImmunity: BoostTelepaticImmunity(B.fBoostValue); break;
-			case eBoostChemicalBurnImmunity: BoostChemicalBurnImmunity(B.fBoostValue); break;
-			case eBoostExplImmunity: BoostExplImmunity(B.fBoostValue); break;
-			case eBoostStrikeImmunity: BoostStrikeImmunity(B.fBoostValue); break;
-			case eBoostFireWoundImmunity: BoostFireWoundImmunity(B.fBoostValue); break;
-			case eBoostWoundImmunity: BoostWoundImmunity(B.fBoostValue); break;
-			case eBoostRadiationProtection: BoostRadiationProtection(B.fBoostValue); break;
-			case eBoostTelepaticProtection: BoostTelepaticProtection(B.fBoostValue); break;
-			case eBoostChemicalBurnProtection: BoostChemicalBurnProtection(B.fBoostValue); break;
-			default: NODEFAULT;	
-		}
-	}
+	BoostHpRestore(B.fHealthRestore);
+	BoostPowerRestore(B.fPowerRestore);
+	BoostRadiationRestore(B.fRadiationRestore);
+	BoostBleedingRestore(B.fBleedingRestore);
+	BoostMaxWeight(B.fMaxWeight);
+	BoostBurnImmunity(B.fBurnImmunity);
+	BoostShockImmunity(B.fShockImmunity);
+	BoostRadiationImmunity(B.fRadiationImmunity);
+	BoostTelepaticImmunity(B.fTelepaticImmunity);
+	BoostChemicalBurnImmunity(B.fChemburnImmunity);;
+	BoostExplImmunity(B.fExplosionImmunity);
+	BoostStrikeImmunity(B.fStrikeImmunity);
+	BoostFireWoundImmunity(B.fFireWoundImmunity);
+	BoostWoundImmunity(B.fWoundImmunity);
+	BoostRadiationProtection(B.fRadiationProtection);
+	BoostTelepaticProtection(B.fTelepaticProtection);
+	BoostChemicalBurnProtection(B.fChemburnProtection); 	
 }
 void CActorCondition::DisableBoostParameters(const SBooster& B)
 {
-	if(!OnServer())
-		return;
-
-	switch(B.m_type)
-	{
-		case eBoostHpRestore: BoostHpRestore(-B.fBoostValue); break;
-		case eBoostPowerRestore: BoostPowerRestore(-B.fBoostValue); break;
-		case eBoostRadiationRestore: BoostRadiationRestore(-B.fBoostValue); break;
-		case eBoostBleedingRestore: BoostBleedingRestore(-B.fBoostValue); break;
-		case eBoostMaxWeight: BoostMaxWeight(-B.fBoostValue); break;
-		case eBoostBurnImmunity: BoostBurnImmunity(-B.fBoostValue); break;
-		case eBoostShockImmunity: BoostShockImmunity(-B.fBoostValue); break;
-		case eBoostRadiationImmunity: BoostRadiationImmunity(-B.fBoostValue); break;
-		case eBoostTelepaticImmunity: BoostTelepaticImmunity(-B.fBoostValue); break;
-		case eBoostChemicalBurnImmunity: BoostChemicalBurnImmunity(-B.fBoostValue); break;
-		case eBoostExplImmunity: BoostExplImmunity(-B.fBoostValue); break;
-		case eBoostStrikeImmunity: BoostStrikeImmunity(-B.fBoostValue); break;
-		case eBoostFireWoundImmunity: BoostFireWoundImmunity(-B.fBoostValue); break;
-		case eBoostWoundImmunity: BoostWoundImmunity(-B.fBoostValue); break;
-		case eBoostRadiationProtection: BoostRadiationProtection(-B.fBoostValue); break;
-		case eBoostTelepaticProtection: BoostTelepaticProtection(-B.fBoostValue); break;
-		case eBoostChemicalBurnProtection: BoostChemicalBurnProtection(-B.fBoostValue); break;
-		default: NODEFAULT;	
-	}
+	BoostHpRestore(-B.fHealthRestore);
+	BoostPowerRestore(-B.fPowerRestore);
+	BoostRadiationRestore(-B.fRadiationRestore);
+	BoostBleedingRestore(-B.fBleedingRestore);
+	BoostMaxWeight(-B.fMaxWeight);
+	BoostBurnImmunity(-B.fBurnImmunity);
+	BoostShockImmunity(-B.fShockImmunity);
+	BoostRadiationImmunity(-B.fRadiationImmunity);
+	BoostTelepaticImmunity(-B.fTelepaticImmunity);
+	BoostChemicalBurnImmunity(-B.fChemburnImmunity);;
+	BoostExplImmunity(-B.fExplosionImmunity);
+	BoostStrikeImmunity(-B.fStrikeImmunity);
+	BoostFireWoundImmunity(-B.fFireWoundImmunity);
+	BoostWoundImmunity(-B.fWoundImmunity);
+	BoostRadiationProtection(-B.fRadiationProtection);
+	BoostTelepaticProtection(-B.fTelepaticProtection);
+	BoostChemicalBurnProtection(-B.fChemburnProtection);
 }
 void CActorCondition::BoostHpRestore(const float value)
 {
@@ -881,18 +863,8 @@ void CActorCondition::ApplyBooster(const CEatableItem& object)
 	ChangeToxicity(object.m_fToxicity);
 
 	//Temporary boosters
-	for (int i = 0; i < eBoostMaxCount; i++) 
-	{
-		if (object.m_bBoosters[i].fBoostValue > 0.0f)
-		{
-			BOOSTER_MAP::iterator it = m_booster_influences.find(object.m_bBoosters[i].m_type);
-			if (it != m_booster_influences.end())
-				DisableBoostParameters((*it).second);
-
-			m_booster_influences[object.m_bBoosters[i].m_type] = object.m_bBoosters[i];
-			BoostParameters(object.m_bBoosters[i]);
-		}
-	}
+	BoostersList.push_back(object.m_Boosters);
+	BoostParameters(object.m_Boosters);
 }
 
 void disable_input();

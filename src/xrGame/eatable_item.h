@@ -40,7 +40,20 @@ public:
 	float m_fAlcohol;
 	float m_fToxicity;
 
-	SBooster m_bBoosters[eBoostMaxCount];
+	float m_fBoostBurnImmunity;
+	float m_fBoostShockImmunity;
+	float m_fBoostRadiationImmunity;
+	float m_fBoostTelepaticImmunity;
+	float m_fBoostChemicalBurnImmunity;
+	float m_fBoostExplImmunity;
+	float m_fBoostStrikeImmunity;
+	float m_fBoostFireWoundImmunity;
+	float m_fBoostWoundImmunity;
+	float m_fBoostRadiationProtection;
+	float m_fBoostTelepaticProtection;
+	float m_fBoostChemicalBurnProtection;
+
+	SBooster m_Boosters;
 
 	shared_str m_sUseSoundName;
 

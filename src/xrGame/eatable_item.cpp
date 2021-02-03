@@ -44,13 +44,31 @@ void CEatableItem::Load(LPCSTR section)
 	m_fMaxPowerUp = READ_IF_EXISTS(pSettings, r_float, section, "eat_max_power", 0.0f);
 	m_fAlcohol = READ_IF_EXISTS(pSettings, r_float, section, "eat_alcohol", 0.0f);
 	m_fToxicity = READ_IF_EXISTS(pSettings, r_float, section, "eat_toxicity", 0.0f);
-	m_iPortionsNum = pSettings->r_s32	(section, "eat_portions_num");
-	VERIFY (m_iPortionsNum<10000);
 
-	for (int i = 0; i < eBoostMaxCount; i++)
-		m_bBoosters[i].Load(section, EBoostParams(i));
+	m_Boosters.sSectionName = section;
+	m_Boosters.fHealthRestore = pSettings->r_float(section, "boost_health_restore");
+	m_Boosters.fPowerRestore = pSettings->r_float(section, "boost_power_restore");
+	m_Boosters.fRadiationRestore = pSettings->r_float(section, "boost_radiation_restore");
+	m_Boosters.fBleedingRestore = pSettings->r_float(section, "boost_bleeding_restore");
+	m_Boosters.fMaxWeight = pSettings->r_float(section, "boost_max_weight");
+	m_Boosters.fBurnImmunity = pSettings->r_float(section, "boost_burn_immunity");
+	m_Boosters.fShockImmunity = pSettings->r_float(section, "boost_shock_immunity");
+	m_Boosters.fRadiationImmunity = pSettings->r_float(section, "boost_radiation_immunity");
+	m_Boosters.fTelepaticImmunity = pSettings->r_float(section, "boost_telepat_immunity");
+	m_Boosters.fChemburnImmunity = pSettings->r_float(section, "boost_chemburn_immunity");
+	m_Boosters.fExplosionImmunity = pSettings->r_float(section, "boost_explosion_immunity");
+	m_Boosters.fStrikeImmunity = pSettings->r_float(section, "boost_strike_immunity");
+	m_Boosters.fFireWoundImmunity = pSettings->r_float(section, "boost_fire_wound_immunity");
+	m_Boosters.fWoundImmunity = pSettings->r_float(section, "boost_wound_immunity");;
+	m_Boosters.fRadiationProtection = pSettings->r_float(section, "boost_radiation_protection");
+	m_Boosters.fTelepaticProtection = pSettings->r_float(section, "boost_telepat_protection");
+	m_Boosters.fChemburnProtection = pSettings->r_float(section, "boost_chemburn_protection");
+	m_Boosters.fBoostTime = pSettings->r_float(section, "boost_time");
 
-	m_sUseSoundName = pSettings->r_string(section, "use_sound");
+	m_sUseSoundName = pSettings->r_string(section, "use_sound");\
+
+	m_iPortionsNum = pSettings->r_s32(section, "eat_portions_num");
+	VERIFY(m_iPortionsNum < 10000);
 }
 
 BOOL CEatableItem::net_Spawn				(CSE_Abstract* DC)

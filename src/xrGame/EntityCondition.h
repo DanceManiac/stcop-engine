@@ -50,12 +50,27 @@ static const LPCSTR ef_boosters_section_names[] =
 	"boost_wound_immunity"
 };
 
-struct SBooster {
+struct SBooster 
+{
+	shared_str sSectionName;
+	float fHealthRestore;
+	float fPowerRestore;
+	float fRadiationRestore;
+	float fBleedingRestore;
+	float fMaxWeight;
+	float fBurnImmunity;
+	float fShockImmunity;
+	float fRadiationImmunity;
+	float fTelepaticImmunity;
+	float fChemburnImmunity;
+	float fExplosionImmunity;
+	float fStrikeImmunity;
+	float fFireWoundImmunity;
+	float fWoundImmunity;
+	float fRadiationProtection;
+	float fTelepaticProtection;
+	float fChemburnProtection;
 	float fBoostTime;
-	float fBoostValue;
-	EBoostParams m_type;
-	SBooster() :fBoostTime(-1.0f) {};
-	void Load(const shared_str& sect, EBoostParams type);
 };
 
 class CEntityConditionSimple
