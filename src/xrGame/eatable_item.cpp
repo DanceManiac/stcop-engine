@@ -59,7 +59,7 @@ void CEatableItem::Load(LPCSTR section)
 	m_Boosters.fExplosionImmunity = pSettings->r_float(section, "boost_explosion_immunity");
 	m_Boosters.fStrikeImmunity = pSettings->r_float(section, "boost_strike_immunity");
 	m_Boosters.fFireWoundImmunity = pSettings->r_float(section, "boost_fire_wound_immunity");
-	m_Boosters.fWoundImmunity = pSettings->r_float(section, "boost_wound_immunity");;
+	m_Boosters.fWoundImmunity = pSettings->r_float(section, "boost_wound_immunity");
 	m_Boosters.fRadiationProtection = pSettings->r_float(section, "boost_radiation_protection");
 	m_Boosters.fTelepaticProtection = pSettings->r_float(section, "boost_telepat_protection");
 	m_Boosters.fChemburnProtection = pSettings->r_float(section, "boost_chemburn_protection");

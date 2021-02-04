@@ -259,7 +259,6 @@ protected:
 
 	bool				m_bTimeValid;
 	bool				m_bCanBeHarmed;
-	BOOSTER_MAP			m_booster_influences;
 
 public:
 	virtual void					reinit();

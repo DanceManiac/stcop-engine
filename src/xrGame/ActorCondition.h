@@ -68,7 +68,6 @@ public:
 	IC void				BoostRadiationProtection(const float value);
 	IC void				BoostTelepaticProtection(const float value);
 	IC void				BoostChemicalBurnProtection(const float value);
-	BOOSTER_MAP			GetCurBoosterInfluences() { return m_booster_influences; };
 	std::list<SBooster>   BoostersList;
 
 	// хромание при потере сил и здоровья

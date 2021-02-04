@@ -552,16 +552,30 @@ void CActorCondition::save(NET_Packet &output_packet)
 	save_data			(m_fSatiety, output_packet);
 	save_data			(m_fToxicity, output_packet);
 
-	save_data			(BoostersList, output_packet);
+	save_data((u8)BoostersList.size(), output_packet);
 
-	/*output_packet.w_u8((u8)m_booster_influences.size());
-	BOOSTER_MAP::iterator b = m_booster_influences.begin(), e = m_booster_influences.end();
-	for(; b!=e; b++)
+	for (auto& it = BoostersList.cbegin(); it != BoostersList.cend(); ++it)
 	{
-		output_packet.w_u8((u8)b->second.m_type);
-		output_packet.w_float(b->second.fBoostValue);
-		output_packet.w_float(b->second.fBoostTime);
-	}*/
+		//B.sSectionName = input_packet.r_s8();
+		save_data(it->fHealthRestore, output_packet);
+		save_data(it->fPowerRestore, output_packet);
+		save_data(it->fRadiationRestore, output_packet);
+		save_data(it->fBleedingRestore, output_packet);
+		save_data(it->fMaxWeight, output_packet);
+		save_data(it->fBurnImmunity, output_packet);
+		save_data(it->fShockImmunity, output_packet);
+		save_data(it->fRadiationImmunity, output_packet);
+		save_data(it->fTelepaticImmunity, output_packet);
+		save_data(it->fChemburnImmunity, output_packet);
+		save_data(it->fExplosionImmunity, output_packet);
+		save_data(it->fStrikeImmunity, output_packet);
+		save_data(it->fFireWoundImmunity, output_packet);
+		save_data(it->fWoundImmunity, output_packet);
+		save_data(it->fRadiationProtection, output_packet);
+		save_data(it->fTelepaticProtection, output_packet);
+		save_data(it->fChemburnProtection, output_packet);
+		save_data(it->fBoostTime, output_packet);
+	}
 }
 
 void CActorCondition::load(IReader &input_packet)
@@ -572,18 +586,33 @@ void CActorCondition::load(IReader &input_packet)
 	load_data			(m_fSatiety, input_packet);
 	load_data			(m_fToxicity, input_packet);
 
-	load_data			(BoostersList, input_packet);
+	u8 cntr;
+	load_data(cntr, input_packet);
 
-	/*u8 cntr = input_packet.r_u8();
-	for(; cntr>0; cntr--)
+	for (; cntr > 0; --cntr)
 	{
 		SBooster B;
-		B.m_type = (EBoostParams)input_packet.r_u8();
-		B.fBoostValue = input_packet.r_float();
-		B.fBoostTime = input_packet.r_float();
-		m_booster_influences[B.m_type] = B;
+		load_data(B.fHealthRestore, input_packet);
+		load_data(B.fPowerRestore, input_packet);
+		load_data(B.fRadiationRestore, input_packet);
+		load_data(B.fBleedingRestore, input_packet);
+		load_data(B.fMaxWeight, input_packet);
+		load_data(B.fBurnImmunity, input_packet);
+		load_data(B.fShockImmunity, input_packet);
+		load_data(B.fRadiationImmunity, input_packet);
+		load_data(B.fTelepaticImmunity, input_packet);
+		load_data(B.fChemburnImmunity, input_packet);
+		load_data(B.fExplosionImmunity, input_packet);
+		load_data(B.fStrikeImmunity, input_packet);
+		load_data(B.fFireWoundImmunity, input_packet);
+		load_data(B.fWoundImmunity, input_packet);
+		load_data(B.fRadiationProtection, input_packet);
+		load_data(B.fTelepaticProtection, input_packet);
+		load_data(B.fChemburnProtection, input_packet);
+		load_data(B.fBoostTime, input_packet);
 		BoostParameters(B);
-	}*/
+		BoostersList.push_back(B);
+	}
 }
 
 void CActorCondition::reinit	()

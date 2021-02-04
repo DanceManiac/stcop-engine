@@ -899,7 +899,7 @@ void CUIMainIngameWnd::DrawMainIndicatorsForInventory()
 		return;
 
 	UpdateQuickSlots();
-	UpdateBoosterIndicators(pActor->conditions().GetCurBoosterInfluences());
+	//UpdateBoosterIndicators(pActor->conditions().GetCurBoosterInfluences());
 
 	for(int i=0;i<4;i++)
 		m_quick_slots_icons[i]->Draw();
