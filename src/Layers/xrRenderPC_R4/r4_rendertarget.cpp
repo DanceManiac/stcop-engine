@@ -305,15 +305,6 @@ CRenderTarget::CRenderTarget		()
 	dxRenderDeviceRender::Instance().Resources->Evict			();
 
 	// Blenders
-	
-	//FFT
-	b_cut					= xr_new<CBlender_cut>					(); //New
-	b_gasmask				= xr_new<CBlender_gasmask>				(); //New
-	b_nightvision			= xr_new<CBlender_nightvision>			(); //New
-	b_smaa					= xr_new<CBlender_smaa>					(); //New
-	b_ao					= xr_new<CBlender_ao>					(); //New
-				
-	
 	b_occq					= xr_new<CBlender_light_occq>			();
 	b_accum_mask			= xr_new<CBlender_accum_direct_mask>	();
 	b_accum_direct			= xr_new<CBlender_accum_direct>			();
@@ -413,14 +404,7 @@ CRenderTarget::CRenderTarget		()
 		//rt_Generic_2.create			(r2_RT_generic2,w,h,D3DFMT_A8R8G8B8		);
 		//	temp: for higher quality blends
 		if (RImplementation.o.advancedpp)
-			rt_Generic_2.create			(r2_RT_generic2, vp_params_main_secondary,D3DFMT_A16B16G16R16F, SampleCount );
-		
-		//FFT Rendertargets
-		rt_smaa_edgetex.create(r2_RT_smaa_edgetex, vp_params_main_secondary, D3DFMT_A8R8G8B8);
-		rt_smaa_blendtex.create(r2_RT_smaa_blendtex, vp_params_main_secondary, D3DFMT_A8R8G8B8);
-
-		rt_ao.create(r2_RT_ao, vp_params_main_secondary, D3DFMT_R32F);
-		rt_ao_blur.create(r2_RT_ao_blur, vp_params_main_secondary, D3DFMT_R32F);			
+			rt_Generic_2.create			(r2_RT_generic2, vp_params_main_secondary,D3DFMT_A16B16G16R16F, SampleCount );	
 	}
 
 	// OCCLUSION
@@ -584,28 +568,54 @@ CRenderTarget::CRenderTarget		()
 		}
 	}
 
+
 	//SVP cut shader
 	{
+		b_cut = xr_new<CBlender_cut>();		
 		s_cut.create(b_cut, "r4\\cut");
 	}
 
 	//Gasmask shader
 	{
+		b_gasmask = xr_new<CBlender_gasmask>();		
 		s_gasmask.create(b_gasmask, "r4\\gasmask");
 	}	
 
 	//Nightvision shader
 	{
+		b_nightvision = xr_new<CBlender_nightvision>();		
 		s_nightvision.create(b_nightvision, "r4\\nightvision");
 	}	
 	
 	//SMAA shader
 	{
+		u32	w = Device.dwWidth;
+		u32 h = Device.dwHeight;
+		
+		xr_vector<RtCreationParams> vp_params_main_secondary;
+		vp_params_main_secondary.push_back(RtCreationParams(w, h, MAIN_VIEWPORT));
+		vp_params_main_secondary.push_back(RtCreationParams(Device.m_SecondViewport.screenWidth, Device.m_SecondViewport.screenHeight, SECONDARY_WEAPON_SCOPE));
+		
+		rt_smaa_edgetex.create(r2_RT_smaa_edgetex, vp_params_main_secondary, D3DFMT_A8R8G8B8);
+		rt_smaa_blendtex.create(r2_RT_smaa_blendtex, vp_params_main_secondary, D3DFMT_A8R8G8B8);
+		
+		b_smaa = xr_new<CBlender_smaa>();
 		s_smaa.create(b_smaa, "r4\\smaa");
 	}
 	
 	//SMAA shader
 	{
+		u32	w = Device.dwWidth;
+		u32 h = Device.dwHeight;	
+
+		xr_vector<RtCreationParams> vp_params_main_secondary;
+		vp_params_main_secondary.push_back(RtCreationParams(w, h, MAIN_VIEWPORT));
+		vp_params_main_secondary.push_back(RtCreationParams(Device.m_SecondViewport.screenWidth, Device.m_SecondViewport.screenHeight, SECONDARY_WEAPON_SCOPE));
+
+		rt_ao.create(r2_RT_ao, vp_params_main_secondary, D3DFMT_R32F); //AMD compatible
+		rt_ao_blur.create(r2_RT_ao_blur, vp_params_main_secondary, D3DFMT_R32F); //AMD compatible
+		
+		b_ao = xr_new<CBlender_ao>();
 		s_ao.create(b_ao, "r4\\ao");
 	}
 	
