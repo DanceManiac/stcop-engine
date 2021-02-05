@@ -337,6 +337,18 @@ static class cl_inv_v : public R_constant_setup //LV, inverted view matrix (v2w)
 	}
 } binder_inv_v;
 
+static class cl_screen_near_far : public R_constant_setup
+{
+	Fvector4 result;
+
+	virtual void setup(R_constant* C)
+	{
+		float nearPlane = float(VIEWPORT_NEAR);
+		float farPlane = g_pGamePersistent->Environment().CurrentEnv->far_plane;
+		result.set(nearPlane, farPlane, 0, 0);
+		RCache.set_c(C, result);
+	}
+} binder_screen_near_far;
 
 // Standart constant-binding
 void	CBlender_Compile::SetMapping	()
@@ -399,7 +411,7 @@ void	CBlender_Compile::SetMapping	()
 	r_Constant				("L_ambient",		&binder_amb_color);
 #endif
 	r_Constant				("screen_res",		&binder_screen_res);
-
+	r_Constant				("screen_near_far", &binder_screen_near_far);
 	// detail
 	//if (bDetail	&& detail_scaler)
 	//	Igor: bDetail can be overridden by no_detail_texture option.
