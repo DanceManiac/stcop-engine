@@ -52,7 +52,8 @@ public:
 	IBlender*					b_gasmask;
 	IBlender*					b_nightvision;
 	IBlender*					b_smaa;
-
+	IBlender*					b_ao;
+	
 #ifdef DEBUG
 	struct		dbg_line_t		{
 		Fvector	P0,P1;
@@ -78,6 +79,9 @@ public:
 
 	ref_rt 						rt_smaa_edgetex;
 	ref_rt 						rt_smaa_blendtex;
+
+	ref_rt 						rt_ao;
+	ref_rt 						rt_ao_blur;
 
 	// 
 	ref_rt						rt_Accumulator;		// 64bit		(r,g,b,specular)
@@ -140,6 +144,7 @@ private:
 	ref_shader					s_gasmask;
 	ref_shader					s_nightvision;
 	ref_shader 					s_smaa;
+	ref_shader 					s_ao;
 	
 	//	generate min/max
 	ref_shader					s_create_minmax_sm;
@@ -273,6 +278,7 @@ public:
 	void						phase_gasmask();
 	void						phase_nightvision();
 	void						phase_smaa();
+	void						phase_ao();
 	
 	void						SwitchViewPort(ViewPort vp);
 	//	Generates min/max sm

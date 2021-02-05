@@ -64,8 +64,8 @@ void	CRenderTarget::phase_combine	()
 
 
 	//LV: Perform custom SSDO pass here.
-//    if( ps_r_ssao > 0 )
-
+    if( ps_r_ssao > 0 )
+		phase_ao();
 
 	FLOAT ColorRGBA[4] = {0.0f, 0.0f, 0.0f, 0.0f};
 	// low/hi RTs

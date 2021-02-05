@@ -9,7 +9,7 @@
 #include "blender_combine.h"
 #include "blender_bloom_build.h"
 #include "blender_luminance.h"
-#include "blender_ao.h"
+
 #include "dx11MinMaxSMBlender.h"
 #include "../xrRenderDX10/msaa/dx10MSAABlender.h"
 #include "../xrRenderDX10/DX10 Rain/dx10RainBlender.h"
@@ -19,6 +19,7 @@
 #include "blender_gasmask.h"
 #include "blender_nightvision.h"
 #include "blender_smaa.h"
+#include "blender_ao.h"
 
 #include "../xrRender/dxRenderDeviceRender.h"
 
@@ -310,7 +311,8 @@ CRenderTarget::CRenderTarget		()
 	b_gasmask				= xr_new<CBlender_gasmask>				(); //New
 	b_nightvision			= xr_new<CBlender_nightvision>			(); //New
 	b_smaa					= xr_new<CBlender_smaa>					(); //New
-			
+	b_ao					= xr_new<CBlender_ao>					(); //New
+				
 	
 	b_occq					= xr_new<CBlender_light_occq>			();
 	b_accum_mask			= xr_new<CBlender_accum_direct_mask>	();
@@ -415,7 +417,10 @@ CRenderTarget::CRenderTarget		()
 		
 		//FFT Rendertargets
 		rt_smaa_edgetex.create(r2_RT_smaa_edgetex, vp_params_main_secondary, D3DFMT_A8R8G8B8);
-		rt_smaa_blendtex.create(r2_RT_smaa_blendtex, vp_params_main_secondary, D3DFMT_A8R8G8B8);		
+		rt_smaa_blendtex.create(r2_RT_smaa_blendtex, vp_params_main_secondary, D3DFMT_A8R8G8B8);
+
+		rt_ao.create(r2_RT_ao, vp_params_main_secondary, D3DFMT_R32F);
+		rt_ao_blur.create(r2_RT_ao_blur, vp_params_main_secondary, D3DFMT_R32F);			
 	}
 
 	// OCCLUSION
@@ -597,6 +602,11 @@ CRenderTarget::CRenderTarget		()
 	//SMAA shader
 	{
 		s_smaa.create(b_smaa, "r4\\smaa");
+	}
+	
+	//SMAA shader
+	{
+		s_ao.create(b_ao, "r4\\ao");
 	}
 	
 	// BLOOM
@@ -1042,6 +1052,7 @@ CRenderTarget::~CRenderTarget	()
 	xr_delete					(b_gasmask				);
 	xr_delete					(b_nightvision			);	
 	xr_delete					(b_smaa					);	
+	xr_delete					(b_ao					);	
 }
 
 void CRenderTarget::reset_light_marker( bool bResetStencil)
