@@ -8,13 +8,24 @@
 #include "UIXmlInit.h"
 #include "UIHelper.h"
 #include "../string_table.h"
+#include "../eatable_item.h"
 
 CUIBoosterInfo::CUIBoosterInfo()
 {
-	for(u32 i = 0; i < eBoostExplImmunity; ++i)
-	{
-		m_booster_items[i] = NULL;
-	}
+	m_booster_health_restore = NULL;
+	m_booster_power_restore = NULL;
+	m_booster_radiation_restore = NULL;
+	m_booster_bleeding_restore = NULL;
+	m_booster_max_weight = NULL;
+	m_booster_radiation_protection = NULL;
+	m_booster_telepatic_protection = NULL;
+	m_booster_chemburn_protection = NULL;
+	m_booster_burn_immunity = NULL;
+	m_booster_shock_immunity = NULL;
+	m_booster_radiation_immunity = NULL;
+	m_booster_telepatic_immunity = NULL;
+	m_booster_chemburn_immunity = NULL;
+
 	m_booster_satiety = NULL;
 	m_booster_anabiotic = NULL;
 	m_booster_time = NULL;
@@ -22,190 +33,158 @@ CUIBoosterInfo::CUIBoosterInfo()
 
 CUIBoosterInfo::~CUIBoosterInfo()
 {
-	delete_data(m_booster_items);
+	xr_delete(m_booster_health_restore);
+	xr_delete(m_booster_power_restore);
+	xr_delete(m_booster_radiation_restore);
+	xr_delete(m_booster_bleeding_restore);
+	xr_delete(m_booster_max_weight);
+	xr_delete(m_booster_radiation_protection);
+	xr_delete(m_booster_telepatic_protection);
+	xr_delete(m_booster_chemburn_protection);
+	xr_delete(m_booster_burn_immunity);
+	xr_delete(m_booster_shock_immunity);
+	xr_delete(m_booster_radiation_immunity);
+	xr_delete(m_booster_telepatic_immunity);
+	xr_delete(m_booster_chemburn_immunity);
+
 	xr_delete(m_booster_satiety);
 	xr_delete(m_booster_anabiotic);
 	xr_delete(m_booster_time);
 	xr_delete(m_Prop_line);
 }
 
-LPCSTR boost_influence_caption[] =
-{
-	"ui_inv_health",
-	"ui_inv_power",
-	"ui_inv_radiation",
-	"ui_inv_bleeding",
-	"ui_inv_outfit_additional_weight",
-	"ui_inv_outfit_radiation_protection",
-	"ui_inv_outfit_telepatic_protection",
-	"ui_inv_outfit_chemical_burn_protection",
-	"ui_inv_outfit_burn_immunity",
-	"ui_inv_outfit_shock_immunity",
-	"ui_inv_outfit_radiation_immunity",
-	"ui_inv_outfit_telepatic_immunity",
-	"ui_inv_outfit_chemical_burn_immunity"
-};
-
 void CUIBoosterInfo::InitFromXml(CUIXml& xml)
 {
-	LPCSTR base	= "booster_params";
+	LPCSTR base = "booster_params";
 	XML_NODE* stored_root = xml.GetLocalRoot();
-	XML_NODE* base_node   = xml.NavigateToNode( base, 0 );
-	if(!base_node)
+	XML_NODE* base_node = xml.NavigateToNode(base, 0);
+	if (!base_node)
 		return;
 
 	CUIXmlInit::InitWindow(xml, base, 0, this);
 	xml.SetLocalRoot(base_node);
-	
+
 	m_Prop_line = xr_new<CUIStatic>();
 	AttachChild(m_Prop_line);
-	m_Prop_line->SetAutoDelete(false);	
+	m_Prop_line->SetAutoDelete(false);
 	CUIXmlInit::InitStatic(xml, "prop_line", 0, m_Prop_line);
 
-	for(u32 i = 0; i < eBoostExplImmunity; ++i)
-	{
-		m_booster_items[i] = xr_new<UIBoosterInfoItem>();
-		m_booster_items[i]->Init(xml, ef_boosters_section_names[i]);
-		m_booster_items[i]->SetAutoDelete(false);
+	InitInfoItemXml(xml, m_booster_health_restore, "boost_health_restore", "ui_inv_health");
+	xml.SetLocalRoot(base_node);
+	InitInfoItemXml(xml, m_booster_power_restore, "boost_power_restore", "ui_inv_power");
+	xml.SetLocalRoot(base_node);
+	InitInfoItemXml(xml, m_booster_radiation_restore, "boost_radiation_restore", "ui_inv_radiation");
+	xml.SetLocalRoot(base_node);
+	InitInfoItemXml(xml, m_booster_bleeding_restore, "boost_bleeding_restore", "ui_inv_bleeding");
+	xml.SetLocalRoot(base_node);
+	InitInfoItemXml(xml, m_booster_max_weight, "boost_max_weight", "ui_inv_outfit_additional_weight");
+	xml.SetLocalRoot(base_node);
+	InitInfoItemXml(xml, m_booster_radiation_protection, "boost_radiation_protection", "ui_inv_outfit_radiation_protection");
+	xml.SetLocalRoot(base_node);
+	InitInfoItemXml(xml, m_booster_telepatic_protection, "boost_telepat_protection", "ui_inv_outfit_telepatic_protection");
+	xml.SetLocalRoot(base_node);
+	InitInfoItemXml(xml, m_booster_chemburn_protection, "boost_chemburn_protection", "ui_inv_outfit_chemical_burn_protection");
+	xml.SetLocalRoot(base_node);
+	InitInfoItemXml(xml, m_booster_burn_immunity, "boost_burn_immunity", "ui_inv_outfit_burn_immunity");
+	xml.SetLocalRoot(base_node);
+	InitInfoItemXml(xml, m_booster_shock_immunity, "boost_shock_immunity", "ui_inv_outfit_shock_immunity");
+	xml.SetLocalRoot(base_node);
+	InitInfoItemXml(xml, m_booster_radiation_immunity, "boost_radiation_immunity", "ui_inv_outfit_radiation_immunity");
+	xml.SetLocalRoot(base_node);
+	InitInfoItemXml(xml, m_booster_telepatic_immunity, "boost_telepat_immunity", "ui_inv_outfit_telepatic_immunity");
+	xml.SetLocalRoot(base_node);
+	InitInfoItemXml(xml, m_booster_chemburn_immunity, "boost_chemburn_immunity", "ui_inv_outfit_chemical_burn_immunity");
+	xml.SetLocalRoot(base_node);
 
-		LPCSTR name = CStringTable().translate(boost_influence_caption[i]).c_str();
-		m_booster_items[i]->SetCaption(name);
-
-		xml.SetLocalRoot(base_node);
-	}
-
-	m_booster_satiety = xr_new<UIBoosterInfoItem>();
-	m_booster_satiety->Init(xml, "boost_satiety");
-	m_booster_satiety->SetAutoDelete(false);
-	LPCSTR name = CStringTable().translate("ui_inv_satiety").c_str();
-	m_booster_satiety->SetCaption(name);
-	xml.SetLocalRoot( base_node );
-
-	m_booster_anabiotic = xr_new<UIBoosterInfoItem>();
-	m_booster_anabiotic->Init(xml, "boost_anabiotic");
-	m_booster_anabiotic->SetAutoDelete(false);
-	name = CStringTable().translate("ui_inv_survive_surge").c_str();
-	m_booster_anabiotic->SetCaption(name);
-	xml.SetLocalRoot( base_node );
+	InitInfoItemXml(xml, m_booster_satiety, "boost_satiety", "ui_inv_satiety");
+	xml.SetLocalRoot(base_node);
+	InitInfoItemXml(xml, m_booster_anabiotic, "boost_anabiotic", "ui_inv_survive_surge");
+	xml.SetLocalRoot(base_node);
 
 	m_booster_time = xr_new<UIBoosterInfoItem>();
 	m_booster_time->Init(xml, "boost_time");
 	m_booster_time->SetAutoDelete(false);
-	name = CStringTable().translate("ui_inv_effect_time").c_str();
+	LPCSTR name = CStringTable().translate("ui_inv_effect_time").c_str();
 	m_booster_time->SetCaption(name);
 
-	xml.SetLocalRoot( stored_root );
+	xml.SetLocalRoot(stored_root);
 }
+void CUIBoosterInfo::InitInfoItemXml(CUIXml& xml, UIBoosterInfoItem*& InfoItem, LPCSTR section, LPCSTR name)
+{
+	InfoItem = xr_new<UIBoosterInfoItem>();
+	InfoItem->Init(xml, section);
+	InfoItem->SetAutoDelete(false);
+	InfoItem->SetCaption(CStringTable().translate(name).c_str());
+};
 
-void CUIBoosterInfo::SetInfo( shared_str const& section )
+void CUIBoosterInfo::UpdateInfo(const CEatableItem& object)
 {
 	DetachAll();
 	AttachChild( m_Prop_line );
 
 	CActor* actor = smart_cast<CActor*>( Level().CurrentViewEntity() );
 	if ( !actor )
-	{
 		return;
-	}
-
-	//CEntityCondition::BOOSTER_MAP boosters = actor->conditions().GetCurBoosterInfluences();
 
 	float val = 0.0f, max_val = 1.0f;
-	Fvector2 pos;
-	float h = m_Prop_line->GetWndPos().y+m_Prop_line->GetWndSize().y;
+	float cur_h = m_Prop_line->GetWndPos().y+m_Prop_line->GetWndSize().y;
 
-	for (u32 i = 0; i < eBoostExplImmunity; ++i)
-	{
-		if(pSettings->line_exist(section.c_str(), ef_boosters_section_names[i]))
-		{
-			val	= pSettings->r_float(section, ef_boosters_section_names[i]);
-			if(fis_zero(val))
-				continue;
+	if (!fis_zero(object.m_Boosters.fHealthRestore))
+		SetInfo(m_booster_health_restore, object.m_Boosters.fHealthRestore, cur_h);
+	if (!fis_zero(object.m_Boosters.fPowerRestore))
+		SetInfo(m_booster_power_restore, object.m_Boosters.fPowerRestore, cur_h);
+	if (!fis_zero(object.m_Boosters.fRadiationRestore))
+		SetInfo(m_booster_radiation_restore, object.m_Boosters.fRadiationRestore / -1.0f, cur_h);
+	if (!fis_zero(object.m_Boosters.fBleedingRestore))
+		SetInfo(m_booster_bleeding_restore, object.m_Boosters.fBleedingRestore, cur_h);
+	if (!fis_zero(object.m_Boosters.fMaxWeight))
+		SetInfo(m_booster_max_weight, object.m_Boosters.fMaxWeight, cur_h);
+	if (!fis_zero(object.m_Boosters.fRadiationProtection))
+		SetInfo(m_booster_radiation_protection, object.m_Boosters.fRadiationProtection / GetMaxValue(ALife::infl_rad), cur_h);
+	if (!fis_zero(object.m_Boosters.fTelepaticProtection))
+		SetInfo(m_booster_telepatic_protection, object.m_Boosters.fTelepaticProtection / GetMaxValue(ALife::infl_psi), cur_h);
+	if (!fis_zero(object.m_Boosters.fChemburnProtection))
+		SetInfo(m_booster_chemburn_protection, object.m_Boosters.fChemburnProtection / GetMaxValue(ALife::infl_acid), cur_h);
+	if (!fis_zero(object.m_Boosters.fBurnImmunity))
+		SetInfo(m_booster_burn_immunity, object.m_Boosters.fBurnImmunity / GetMaxValue(ALife::infl_fire), cur_h);
+	if (!fis_zero(object.m_Boosters.fShockImmunity))
+		SetInfo(m_booster_shock_immunity, object.m_Boosters.fShockImmunity / GetMaxValue(ALife::infl_electra), cur_h);
+	if (!fis_zero(object.m_Boosters.fRadiationImmunity))
+		SetInfo(m_booster_radiation_immunity, object.m_Boosters.fRadiationImmunity / GetMaxValue(ALife::infl_rad), cur_h);
+	if (!fis_zero(object.m_Boosters.fTelepaticImmunity))
+		SetInfo(m_booster_telepatic_immunity, object.m_Boosters.fTelepaticImmunity / GetMaxValue(ALife::infl_psi), cur_h);
+	if (!fis_zero(object.m_Boosters.fChemburnImmunity))
+		SetInfo(m_booster_chemburn_immunity, object.m_Boosters.fChemburnImmunity / GetMaxValue(ALife::infl_acid), cur_h);
+	if (!fis_zero(object.m_fSatiety))
+		SetInfo(m_booster_satiety, object.m_fSatiety, cur_h);
 
-			EBoostParams type = (EBoostParams)i;
-			switch(type)
-			{
-				case eBoostHpRestore: 
-				case eBoostPowerRestore: 
-				case eBoostBleedingRestore: 
-				case eBoostMaxWeight: 
-					max_val = 1.0f;
-					break;
-				case eBoostRadiationRestore: 
-					max_val = -1.0f;
-					break;
-				case eBoostBurnImmunity: 
-					max_val = actor->conditions().GetZoneMaxPower(ALife::infl_fire);
-					break;
-				case eBoostShockImmunity: 
-					max_val = actor->conditions().GetZoneMaxPower(ALife::infl_electra);
-					break;
-				case eBoostRadiationImmunity: 
-				case eBoostRadiationProtection: 
-					max_val = actor->conditions().GetZoneMaxPower(ALife::infl_rad);
-					break;
-				case eBoostTelepaticImmunity: 
-				case eBoostTelepaticProtection: 
-					max_val = actor->conditions().GetZoneMaxPower(ALife::infl_psi);
-					break;
-				case eBoostChemicalBurnImmunity: 
-				case eBoostChemicalBurnProtection: 
-					max_val = actor->conditions().GetZoneMaxPower(ALife::infl_acid);
-					break;
-			}
-			val /= max_val;
-			m_booster_items[i]->SetValue(val);
-
-			pos.set(m_booster_items[i]->GetWndPos());
-			pos.y = h;
-			m_booster_items[i]->SetWndPos(pos);
-
-			h += m_booster_items[i]->GetWndSize().y;
-			AttachChild(m_booster_items[i]);
-		}
-	}
-
-	if(pSettings->line_exist(section.c_str(), "eat_satiety"))
-	{
-		val	= pSettings->r_float(section, "eat_satiety");
-		if(!fis_zero(val))
-		{
-			m_booster_satiety->SetValue(val);
-			pos.set(m_booster_satiety->GetWndPos());
-			pos.y = h;
-			m_booster_satiety->SetWndPos(pos);
-
-			h += m_booster_satiety->GetWndSize().y;
-			AttachChild(m_booster_satiety);
-		}
-	}
-
-	if(!xr_strcmp(section.c_str(), "drug_anabiotic"))
-	{
+	if (object.object().cNameSect() == "drug_anabiotic")
+	{	
+		Fvector2 pos;
 		pos.set(m_booster_anabiotic->GetWndPos());
-		pos.y = h;
+		pos.y = cur_h;
 		m_booster_anabiotic->SetWndPos(pos);
 
-		h += m_booster_anabiotic->GetWndSize().y;
+		cur_h += m_booster_anabiotic->GetWndSize().y;
 		AttachChild(m_booster_anabiotic);
 	}
 
-	if(pSettings->line_exist(section.c_str(), "boost_time"))
-	{
-		val	= pSettings->r_float(section, "boost_time");
-		if(!fis_zero(val))
-		{
-			m_booster_time->SetValue(val);
-			pos.set(m_booster_time->GetWndPos());
-			pos.y = h;
-			m_booster_time->SetWndPos(pos);
+	if (!fis_zero(object.m_Boosters.fBoostTime))
+		SetInfo(m_booster_time, object.m_Boosters.fBoostTime, cur_h);
 
-			h += m_booster_time->GetWndSize().y;
-			AttachChild(m_booster_time);
-		}
-	}
-	SetHeight(h);
+	SetHeight(cur_h);
 }
+void CUIBoosterInfo::SetInfo(UIBoosterInfoItem*& InfoItem, float value, float& cur_h)
+{
+	Fvector2 pos;
+	InfoItem->SetValue(value);
+	pos.set(InfoItem->GetWndPos());
+	pos.y = cur_h;
+	InfoItem->SetWndPos(pos);
+
+	cur_h += InfoItem->GetWndSize().y;
+	AttachChild(InfoItem);
+};
 
 /// ----------------------------------------------------------------
 
@@ -220,7 +199,6 @@ UIBoosterInfoItem::UIBoosterInfoItem()
 	m_texture_minus._set	("");
 	m_texture_plus._set		("");
 }
-
 UIBoosterInfoItem::~UIBoosterInfoItem()
 {
 }
