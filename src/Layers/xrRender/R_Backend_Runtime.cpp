@@ -81,7 +81,7 @@ void CBackend::Invalidate	()
 	state						= NULL;
 	ps							= NULL;
 	vs							= NULL;
-DX10_ONLY(gs					= NULL);
+	gs							= NULL;
 #ifdef USE_DX11
 	hs = 0;
 	ds = 0;
