@@ -271,11 +271,21 @@ void dxRenderDeviceRender::ResourcesDumpMemoryUsage()
 
 dxRenderDeviceRender::DeviceState dxRenderDeviceRender::GetDeviceState()
 {
-	HW.Validate		();
+	HW.Validate	();
 #if defined(USE_DX10) || defined(USE_DX11)
-	//	TODO: DX10: Implement GetDeviceState
-	//	TODO: DX10: Implement DXGI_PRESENT_TEST testing
-	//VERIFY(!"dxRenderDeviceRender::overdrawBegin not implemented.");
+    HRESULT _hr = HW.m_pSwapChain->Present(0, DXGI_PRESENT_TEST);
+	
+	if (FAILED(_hr))
+	{
+		//LV: Check if it's correct. If so - that should be fix for AMD issues.
+		// If the device was lost, do not render until we get it back
+		if (DXGI_ERROR_DEVICE_REMOVED == _hr)
+			return dsLost;
+
+		// Check if the device is ready to be reset
+		if (DXGI_ERROR_DEVICE_RESET == _hr)
+			return dsNeedReset;
+	}
 #else	//	USE_DX10
 	HRESULT	_hr		= HW.pDevice->TestCooperativeLevel();
 	if (FAILED(_hr))
