@@ -29,50 +29,6 @@ enum EBoostParams {
 	eBoostMaxCount,
 };
 
-static const LPCSTR ef_boosters_section_names[] =
-{
-	"boost_health_restore",
-	"boost_power_restore",
-	"boost_radiation_restore",
-	"boost_bleeding_restore",
-	"boost_max_weight",
-	"boost_radiation_protection",
-	"boost_telepat_protection",
-	"boost_chemburn_protection",
-	"boost_burn_immunity",
-	"boost_shock_immunity",
-	"boost_radiation_immunity",
-	"boost_telepat_immunity",
-	"boost_chemburn_immunity",
-	"boost_explosion_immunity",
-	"boost_strike_immunity",
-	"boost_fire_wound_immunity",
-	"boost_wound_immunity"
-};
-
-struct SBooster 
-{
-	shared_str sSectionName;
-	float fHealthRestore;
-	float fPowerRestore;
-	float fRadiationRestore;
-	float fBleedingRestore;
-	float fMaxWeight;
-	float fBurnImmunity;
-	float fShockImmunity;
-	float fRadiationImmunity;
-	float fTelepaticImmunity;
-	float fChemburnImmunity;
-	float fExplosionImmunity;
-	float fStrikeImmunity;
-	float fFireWoundImmunity;
-	float fWoundImmunity;
-	float fRadiationProtection;
-	float fTelepaticProtection;
-	float fChemburnProtection;
-	float fBoostTime;
-};
-
 class CEntityConditionSimple
 {
 	float					m_fHealth;
@@ -155,7 +111,6 @@ public:
 
 	IC float				GetBoostRadiationImmunity() const { return m_fBoostRadiationImmunity; };
 
-	typedef					xr_map<EBoostParams, SBooster> BOOSTER_MAP;
 protected:
 	void					UpdateHealth();
 	void					UpdatePower();

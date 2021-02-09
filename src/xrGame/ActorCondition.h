@@ -6,6 +6,30 @@
 #include "EntityCondition.h"
 #include "actor_defs.h"
 
+struct SBooster
+{
+	shared_str sSectionName;
+	float fHealthRestore;
+	float fPowerRestore;
+	float fRadiationRestore;
+	float fBleedingRestore;
+	float fMaxWeight;
+	float fBurnImmunity;
+	float fShockImmunity;
+	float fRadiationImmunity;
+	float fTelepaticImmunity;
+	float fChemburnImmunity;
+	float fExplosionImmunity;
+	float fStrikeImmunity;
+	float fFireWoundImmunity;
+	float fWoundImmunity;
+	float fRadiationProtection;
+	float fTelepaticProtection;
+	float fChemburnProtection;
+	float fToxicityRestore;
+	float fBoostTime;
+};
+
 template <typename _return_type>
 class CScriptCallbackEx;
 class CActor;
@@ -68,6 +92,7 @@ public:
 	IC void				BoostRadiationProtection(const float value);
 	IC void				BoostTelepaticProtection(const float value);
 	IC void				BoostChemicalBurnProtection(const float value);
+	IC void				BoostToxicityRestore(const float value);
 	std::list<SBooster>   BoostersList;
 
 	// хромание при потере сил и здоровья
@@ -134,6 +159,8 @@ protected:
 	float m_fV_Toxicity;
 	float m_fV_ToxicityDamage;
 	float m_fToxicityCritical;
+	float m_fToxicityThreshold;
+	float m_fToxicityThresholdDamageCoef;
 	//--
 	float m_fPowerLeakSpeed;
 

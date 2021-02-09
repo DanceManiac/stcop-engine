@@ -26,7 +26,7 @@
 #define MAX_SATIETY					1.0f
 #define START_SATIETY				0.5f
 
-BOOL	GodMode	()	
+BOOL GodMode ()	
 { 
 	if (GameID() == eGameIDSingle) 
 		return psActorFlags.test(AF_GODMODE|AF_GODMODE_RT); 
@@ -48,8 +48,6 @@ CActorCondition::CActorCondition(CActor *object) :
 	m_fAlcohol					= 0.f;
 	m_fSatiety					= 1.0f;
 
-//	m_vecBoosts.clear();
-
 	VERIFY						(object);
 	m_object					= object;
 	m_condition_flags.zero		();
@@ -59,13 +57,13 @@ CActorCondition::CActorCondition(CActor *object) :
 	m_zone_max_power[ALife::infl_fire]	= 1.0f;
 	m_zone_max_power[ALife::infl_acid]	= 1.0f;
 	m_zone_max_power[ALife::infl_psi]	= 1.0f;
-	m_zone_max_power[ALife::infl_electra]= 1.0f;
+	m_zone_max_power[ALife::infl_electra] = 1.0f;
 
 	m_zone_danger[ALife::infl_rad]	= 0.0f;
 	m_zone_danger[ALife::infl_fire]	= 0.0f;
 	m_zone_danger[ALife::infl_acid]	= 0.0f;
 	m_zone_danger[ALife::infl_psi]	= 0.0f;
-	m_zone_danger[ALife::infl_electra]= 0.0f;
+	m_zone_danger[ALife::infl_electra] = 0.0f;
 	m_f_time_affected = Device.fTimeGlobal;
 
 	m_max_power_restore_speed	= 0.0f;
@@ -75,7 +73,7 @@ CActorCondition::CActorCondition(CActor *object) :
 
 CActorCondition::~CActorCondition()
 {
-	xr_delete( m_death_effector );
+	xr_delete(m_death_effector);
 }
 
 void CActorCondition::LoadCondition(LPCSTR entity_section)
@@ -122,6 +120,8 @@ void CActorCondition::LoadCondition(LPCSTR entity_section)
 	m_fV_SatietyHealth			= pSettings->r_float(section,"satiety_health_v");
 
 	m_fToxicityCritical = pSettings->r_float(section, "toxicity_critical");
+	m_fToxicityThreshold = pSettings->r_float(section, "toxicity_threshold");
+	m_fToxicityThresholdDamageCoef = pSettings->r_float(section, "toxicity_threshold_damage_coef");
 	m_fV_Toxicity = pSettings->r_float(section, "toxicity_v");
 	m_fV_ToxicityDamage = pSettings->r_float(section, "toxicity_damage_v");
 	
@@ -170,7 +170,6 @@ float CActorCondition::GetZoneMaxPower( ALife::EHitType hit_type ) const
 	case ALife::eHitTypeExplosion:
 	case ALife::eHitTypeFireWound:
 	case ALife::eHitTypeWound_2:
-//	case ALife::eHitTypePhysicStrike:
 		return 1.0f;
 	case ALife::eHitTypeWound:
 		return m_max_wound_protection;
@@ -189,8 +188,8 @@ void CActorCondition::UpdateCondition()
 		UpdateBoosters();
 		UpdateToxicity();
 
-		m_fAlcohol		+= m_fV_Alcohol*m_fDeltaTime;
-		clamp			(m_fAlcohol,			0.0f,		1.0f);
+		m_fAlcohol += m_fV_Alcohol*m_fDeltaTime;
+		clamp(m_fAlcohol, 0.0f,	1.0f);
 		if(IsGameTypeSingle())
 		{
 			CEffectorCam* ce = Actor()->Cameras().GetCamEffector((ECamEffectorType)effAlcohol);
@@ -217,10 +216,10 @@ void CActorCondition::UpdateCondition()
 		ConditionStand( cur_weight / base_weight );
 	}
 	
-	if ( IsGameTypeSingle() )
+	if (IsGameTypeSingle())
 	{
 		float k_max_power = 1.0f;
-		if( true )
+		if (true)
 		{
 			k_max_power = 1.0f + _min(cur_weight, base_weight) / base_weight
 				+ _max(0.0f, (cur_weight - base_weight) / 10.0f);
@@ -236,44 +235,29 @@ void CActorCondition::UpdateCondition()
 	m_fAlcohol		+= m_fV_Alcohol*m_fDeltaTime;
 	clamp			(m_fAlcohol,			0.0f,		1.0f);
 
-	if ( IsGameTypeSingle() )
+	if (IsGameTypeSingle())
 	{	
 		CEffectorCam* ce = Actor()->Cameras().GetCamEffector((ECamEffectorType)effAlcohol);
-		if	((m_fAlcohol>0.0001f) ){
-			if(!ce){
-				AddEffector(m_object,effAlcohol, "effector_alcohol", GET_KOEFF_FUNC(this, &CActorCondition::GetAlcohol));
-			}
-		}else{
-			if(ce)
-				RemoveEffector(m_object,effAlcohol);
-		}
-
+		if (m_fAlcohol>0.0001f && !ce)
+			AddEffector(m_object,effAlcohol, "effector_alcohol", GET_KOEFF_FUNC(this, &CActorCondition::GetAlcohol));
+		else if (ce)
+			RemoveEffector(m_object,effAlcohol);
 		
 		string512			pp_sect_name;
 		shared_str ln		= Level().name();
 		if(ln.size())
 		{
-			CEffectorPP* ppe	= object().Cameras().GetPPEffector((EEffectorPPType)effPsyHealth);
-			
+			CEffectorPP* ppe	= object().Cameras().GetPPEffector((EEffectorPPType)effPsyHealth);		
 
 			strconcat			(sizeof(pp_sect_name),pp_sect_name, "effector_psy_health", "_", *ln);
-			if(!pSettings->section_exist(pp_sect_name))
+			if (!pSettings->section_exist(pp_sect_name))
 				xr_strcpy			(pp_sect_name, "effector_psy_health");
 
-			if	( !fsimilar(GetPsyHealth(), 1.0f, 0.05f) )
-			{
-				if(!ppe)
-				{
-					AddEffector(m_object,effPsyHealth, pp_sect_name, GET_KOEFF_FUNC(this, &CActorCondition::GetPsy));
-				}
-			}else
-			{
-				if(ppe)
-					RemoveEffector(m_object,effPsyHealth);
-			}
+			if (!fsimilar(GetPsyHealth(), 1.0f, 0.05f) && !ppe)
+				AddEffector(m_object,effPsyHealth, pp_sect_name, GET_KOEFF_FUNC(this, &CActorCondition::GetPsy));
+			else if (ppe)
+				RemoveEffector(m_object,effPsyHealth);
 		}
-//-		if(fis_zero(GetPsyHealth()))
-//-			SetHealth( 0.0f );
 	};
 
 	UpdateSatiety();
@@ -363,32 +347,23 @@ void CActorCondition::AffectDamage_InjuriousMaterialAndMonstersInfluence()
 	{
 		m_f_time_affected			+=	one;
 
-		for ( int i=0; i<sizeof(hits)/sizeof(hits[0]); ++i )
+		for(int i=0; i<sizeof(hits)/sizeof(hits[0]); ++i)
 		{
 			float			damage	=	hits[i].value;
 			ALife::EHitType	type	=	hits[i].type;
 
 			if ( damage > EPS )
 			{
-				SHit HDS = SHit(damage, 
-//.								0.0f, 
-								Fvector().set(0,1,0), 
-								NULL, 
-								BI_NONE, 
-								Fvector().set(0,0,0), 
-								0.0f, 
-								type, 
-								0.0f, 
-								false);
+				SHit HDS = SHit(damage, Fvector().set(0,1,0), NULL, BI_NONE, Fvector().set(0,0,0), 0.0f, type, 0.0f, false);
 
 				HDS.GenHeader(GE_HIT, m_object->ID());
 				HDS.Write_Packet( np );
 				CGameObject::u_EventSend( np );
 			}
 
-		} // for
+		}
 
-	}//while
+	}
 }
 
 #include "characterphysicssupport.h"
@@ -446,23 +421,18 @@ void CActorCondition::UpdateSatiety()
 
 	if(CanBeHarmed() && !psActorFlags.test(AF_GODMODE_RT) )
 	{
-		m_fDeltaHealth += m_fV_SatietyHealth*satiety_health_koef*m_fDeltaTime;
-		m_fDeltaPower += m_fV_SatietyPower*m_fSatiety*m_fDeltaTime;
+		m_fDeltaHealth += m_fV_SatietyHealth * satiety_health_koef * m_fDeltaTime;
+		m_fDeltaPower += m_fV_SatietyPower * m_fSatiety * m_fDeltaTime;
 	}
 }
 
 void CActorCondition::UpdateToxicity()
 {
-	if (m_fToxicity > 0)
-	{
-		m_fToxicity -= m_fV_Toxicity * m_fDeltaTime;
-		clamp(m_fToxicity, 0.0f, 1.0f);
-	}
+	m_fToxicity -= m_fV_Toxicity * m_fDeltaTime;
+	clamp(m_fToxicity, 0.0f, 1.0f);
 
 	if (CanBeHarmed() && !psActorFlags.test(AF_GODMODE_RT) && m_fToxicityCritical <= m_fToxicity)
-	{
-		m_fDeltaHealth -= m_fV_ToxicityDamage * m_fDeltaTime;
-	}
+		m_fDeltaHealth -= m_fV_ToxicityDamage * m_fDeltaTime * (m_fToxicity >= m_fToxicityThreshold ? m_fToxicityThresholdDamageCoef : 1);
 }
 
 CWound* CActorCondition::ConditionHit(SHit* pHDS)
@@ -574,6 +544,7 @@ void CActorCondition::save(NET_Packet &output_packet)
 		save_data(it->fRadiationProtection, output_packet);
 		save_data(it->fTelepaticProtection, output_packet);
 		save_data(it->fChemburnProtection, output_packet);
+		save_data(it->fToxicityRestore, output_packet);
 		save_data(it->fBoostTime, output_packet);
 	}
 }
@@ -609,6 +580,7 @@ void CActorCondition::load(IReader &input_packet)
 		load_data(B.fRadiationProtection, input_packet);
 		load_data(B.fTelepaticProtection, input_packet);
 		load_data(B.fChemburnProtection, input_packet);
+		load_data(B.fToxicityRestore, input_packet);
 		load_data(B.fBoostTime, input_packet);
 		BoostParameters(B);
 		BoostersList.push_back(B);
@@ -656,7 +628,8 @@ void CActorCondition::BoostParameters(const SBooster& B)
 	BoostWoundImmunity(B.fWoundImmunity);
 	BoostRadiationProtection(B.fRadiationProtection);
 	BoostTelepaticProtection(B.fTelepaticProtection);
-	BoostChemicalBurnProtection(B.fChemburnProtection); 	
+	BoostChemicalBurnProtection(B.fChemburnProtection);
+	BoostToxicityRestore(B.fToxicityRestore);
 }
 void CActorCondition::DisableBoostParameters(const SBooster& B)
 {
@@ -677,6 +650,7 @@ void CActorCondition::DisableBoostParameters(const SBooster& B)
 	BoostRadiationProtection(-B.fRadiationProtection);
 	BoostTelepaticProtection(-B.fTelepaticProtection);
 	BoostChemicalBurnProtection(-B.fChemburnProtection);
+	BoostToxicityRestore(-B.fToxicityRestore);
 }
 void CActorCondition::BoostHpRestore(const float value)
 {
@@ -746,6 +720,10 @@ void CActorCondition::BoostTelepaticProtection(const float value)
 void CActorCondition::BoostChemicalBurnProtection(const float value)
 {
 	m_fBoostChemicalBurnProtection += value;
+}
+void CActorCondition::BoostToxicityRestore(const float value)
+{
+	m_fV_Toxicity += value;
 }
 
 void CActorCondition::UpdateTutorialThresholds()
@@ -932,7 +910,6 @@ void CActorDeathEffector::OnPPEffectorReleased()
 {
 	m_b_actual				= false;	
 	Msg("111");
-	//m_pParent->health()		= -1.0f;
 	m_pParent->SetHealth		(-1.0f);
 }
 

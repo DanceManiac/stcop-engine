@@ -2,6 +2,7 @@
 
 #include "inventory_item.h"
 #include "EntityCondition.h"
+#include "ActorCondition.h"
 
 class CPhysicItem;
 class CEntityAlive;
@@ -52,6 +53,7 @@ public:
 	float m_fBoostRadiationProtection;
 	float m_fBoostTelepaticProtection;
 	float m_fBoostChemicalBurnProtection;
+	float m_fBoostToxicity;
 
 	SBooster m_Boosters;
 

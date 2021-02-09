@@ -21,7 +21,7 @@ CEatableItem::CEatableItem()
 	m_physic_item	= 0;
 }
 
-CEatableItem::~CEatableItem()
+CEatableItem::~CEatableItem() 
 {
 }
 
@@ -63,9 +63,10 @@ void CEatableItem::Load(LPCSTR section)
 	m_Boosters.fRadiationProtection = pSettings->r_float(section, "boost_radiation_protection");
 	m_Boosters.fTelepaticProtection = pSettings->r_float(section, "boost_telepat_protection");
 	m_Boosters.fChemburnProtection = pSettings->r_float(section, "boost_chemburn_protection");
+	m_Boosters.fToxicityRestore = pSettings->r_float(section, "boost_toxicity_restore");
 	m_Boosters.fBoostTime = pSettings->r_float(section, "boost_time");
 
-	m_sUseSoundName = pSettings->r_string(section, "use_sound");\
+	m_sUseSoundName = pSettings->r_string(section, "use_sound");
 
 	m_iPortionsNum = pSettings->r_s32(section, "eat_portions_num");
 	VERIFY(m_iPortionsNum < 10000);
@@ -73,17 +74,19 @@ void CEatableItem::Load(LPCSTR section)
 
 BOOL CEatableItem::net_Spawn				(CSE_Abstract* DC)
 {
-	if (!inherited::net_Spawn(DC)) return FALSE;
+	if (!inherited::net_Spawn(DC)) 
+		return FALSE;
 
 	return TRUE;
 };
 
 bool CEatableItem::Useful() const
 {
-	if(!inherited::Useful()) return false;
-
+	if (!inherited::Useful()) 
+		return false;
 	//проверить не все ли еще съедено
-	if(m_iPortionsNum == 0) return false;
+	if (m_iPortionsNum == 0) 
+		return false;
 
 	return true;
 }
@@ -91,19 +94,19 @@ bool CEatableItem::Useful() const
 void CEatableItem::OnH_A_Independent() 
 {
 	inherited::OnH_A_Independent();
-	if(!Useful()) {
-		if (object().Local() && OnServer())	object().DestroyObject	();
-	}	
+	if (!Useful())
+		if (object().Local() && OnServer())	
+			object().DestroyObject();	
 }
 
 void CEatableItem::OnH_B_Independent(bool just_before_destroy)
 {
-	if(!Useful()) 
+	if (!Useful()) 
 	{
 		object().setVisible(FALSE);
 		object().setEnabled(FALSE);
 		if (m_physic_item)
-			m_physic_item->m_ready_to_destroy	= true;
+			m_physic_item->m_ready_to_destroy = true;
 	}
 	inherited::OnH_B_Independent(just_before_destroy);
 }
