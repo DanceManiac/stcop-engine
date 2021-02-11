@@ -47,6 +47,9 @@ extern	BOOL death_anim_debug;
 
 #include "../xrEngine/device.h"
 
+#define IK_CALC_DIST 100.f //Max distance of IK
+#define IK_ALWAYS_CALC_DIST 20.f //Min distance of IK
+
 #define USE_SMART_HITS
 #define USE_IK
 
@@ -642,7 +645,6 @@ void CCharacterPhysicsSupport::in_UpdateCL( )
 	else if( ik_controller( ) )
 	{
 		CFrustum& view_frust = ::Render->ViewBase;
-
 		vis_data& vis = m_EntityAlife.Visual()->getVisData();
 		Fvector p;
 
@@ -650,10 +652,9 @@ void CCharacterPhysicsSupport::in_UpdateCL( )
 
 		float dist = Device.vCameraPosition.distance_to(p);
 
-		if (1/*dist < IK_CALC_DIST*/) // if the distance is too big - no need to calc ik.
+		if (dist < IK_CALC_DIST)
 		{
-			// calc if object is in view frustum or if distance is less than "always calc"
-			if (1/*view_frust.testSphere_dirty(p, vis.sphere.R) || dist < IK_ALWAYS_CALC_DIST*/) 
+			if (view_frust.testSphere_dirty(p, vis.sphere.R) || dist < IK_ALWAYS_CALC_DIST)
 			{
 				update_interactive_anims();
 				ik_controller()->Update();
