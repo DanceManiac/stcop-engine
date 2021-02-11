@@ -576,6 +576,11 @@ void ParticleRenderStream(FVF::LIT* pv, u32 count, PAPI::Particle* particles, CP
 
 void CParticleEffect::Render(float )
 {
+	//LV: Minioptimizon from OXR, tweaked a bit. We should try far_plane in future
+    float dist = Device.vCameraPosition.distance_to_sqr(m_InitialPosition);
+    if (dist < psVisDistance)
+        return;		
+	
 	#ifdef _GPA_ENABLED	
 		TAL_SCOPED_TASK_NAMED( "CParticleEffect::Render()" );
 	#endif // _GPA_ENABLED
