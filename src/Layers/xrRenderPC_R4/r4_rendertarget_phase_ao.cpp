@@ -31,7 +31,7 @@ void CRenderTarget::phase_ao()
 	RCache.Render(D3DPT_TRIANGLELIST, Offset, 0, 4, 0, 2);
 
 	//////////////////////////////////////////////////////////////////////////
-	//Blur	
+	//Blur - horizontal
 	u_setrt(rt_ao_blur, 0, 0, HW.pBaseZB);
 	RCache.set_CullMode(CULL_NONE);
 	RCache.set_Stencil(FALSE);
@@ -45,5 +45,28 @@ void CRenderTarget::phase_ao()
 
 	RCache.set_Element(s_ao->E[1]);
 	RCache.set_Geometry(g_combine);
+
+	RCache.set_c("pp_blur_params", 1.0, 0.0, w, h);	
+	
+	RCache.Render(D3DPT_TRIANGLELIST, Offset, 0, 4, 0, 2);	
+
+	//////////////////////////////////////////////////////////////////////////
+	//Blur - vertical
+	u_setrt(rt_ao, 0, 0, HW.pBaseZB);
+	RCache.set_CullMode(CULL_NONE);
+	RCache.set_Stencil(FALSE);
+
+	pv = (FVF::TL*)RCache.Vertex.Lock(4, g_combine->vb_stride, Offset);
+	pv->set(0, float(h), d_Z, d_W, C, p0.x, p1.y); pv++;
+	pv->set(0, 0, d_Z, d_W, C, p0.x, p0.y); pv++;
+	pv->set(float(w), float(h), d_Z, d_W, C, p1.x, p1.y); pv++;
+	pv->set(float(w), 0, d_Z, d_W, C, p1.x, p0.y); pv++;
+	RCache.Vertex.Unlock(4, g_combine->vb_stride);
+
+	RCache.set_Element(s_ao->E[2]);
+	RCache.set_Geometry(g_combine);
+
+	RCache.set_c("pp_blur_params", 0.0, 1.0, w, h);	
+	
 	RCache.Render(D3DPT_TRIANGLELIST, Offset, 0, 4, 0, 2);	
 }
