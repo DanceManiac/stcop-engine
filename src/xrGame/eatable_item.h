@@ -35,6 +35,7 @@ public:
 	float m_fHealth;
 	float m_fPower;
 	float m_fSatiety;
+	float m_fThirst;
 	float m_fRadiation;
 	float m_fWoundsHeal;
 	float m_fMaxPowerUp;

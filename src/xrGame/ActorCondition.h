@@ -5,6 +5,8 @@
 
 #include "EntityCondition.h"
 #include "actor_defs.h"
+#include "actor.h"
+#include "inventory.h"
 
 struct SBooster
 {
@@ -56,8 +58,8 @@ private:
 	CActorDeathEffector* m_death_effector;
 	void				UpdateTutorialThresholds();
 	void 		UpdateSatiety();
+	void 		UpdateThirst();
 	void 		UpdateToxicity();
-	virtual void		UpdateRadiation();
 public:
 	CActorCondition(CActor* object);
 	virtual				~CActorCondition();
@@ -69,30 +71,31 @@ public:
 	virtual void		UpdateCondition();
 	void		UpdateBoosters();
 
-	virtual void 		ChangeAlcohol(const float value);
-	virtual void 		ChangeSatiety(const float value);
-	virtual void 		ChangeToxicity(const float value);
+	virtual void 		ChangeAlcohol(const float value) { m_fAlcohol += value; };
+	virtual void 		ChangeSatiety(const float value) { clamp(m_fSatiety += value, 0.0f, 1.0f); };
+	virtual void 		ChangeThirst(const float value) { clamp(m_fThirst += value, 0.0f, 1.0f); };
+	virtual void 		ChangeToxicity(const float value) { clamp(m_fToxicity += value, 0.0f, 1.0f); };
 
 	void 				BoostParameters(const SBooster& B);
 	void 				DisableBoostParameters(const SBooster& B);
-	IC void				BoostMaxWeight(const float value);
-	IC void				BoostHpRestore(const float value);
-	IC void				BoostPowerRestore(const float value);
-	IC void				BoostRadiationRestore(const float value);
-	IC void				BoostBleedingRestore(const float value);
-	IC void				BoostBurnImmunity(const float value);
-	IC void				BoostShockImmunity(const float value);
-	IC void				BoostRadiationImmunity(const float value);
-	IC void				BoostTelepaticImmunity(const float value);
-	IC void				BoostChemicalBurnImmunity(const float value);
-	IC void				BoostExplImmunity(const float value);
-	IC void				BoostStrikeImmunity(const float value);
-	IC void				BoostFireWoundImmunity(const float value);
-	IC void				BoostWoundImmunity(const float value);
-	IC void				BoostRadiationProtection(const float value);
-	IC void				BoostTelepaticProtection(const float value);
-	IC void				BoostChemicalBurnProtection(const float value);
-	IC void				BoostToxicityRestore(const float value);
+	IC void				BoostMaxWeight(const float value) { m_object->inventory().SetMaxWeight(object().inventory().GetMaxWeight() + value); m_MaxWalkWeight += value; };
+	IC void				BoostHpRestore(const float value) { m_change_v.m_fV_HealthRestore += value; };
+	IC void				BoostPowerRestore(const float value) { m_fV_SatietyPower += value; };
+	IC void				BoostRadiationRestore(const float value) { m_change_v.m_fV_Radiation += value; };
+	IC void				BoostBleedingRestore(const float value) { m_change_v.m_fV_WoundIncarnation += value; };
+	IC void				BoostBurnImmunity(const float value) { m_fBoostBurnImmunity += value; };
+	IC void				BoostShockImmunity(const float value) { m_fBoostShockImmunity += value; };
+	IC void				BoostRadiationImmunity(const float value) { m_fBoostRadiationImmunity += value; };
+	IC void				BoostTelepaticImmunity(const float value) { m_fBoostTelepaticImmunity += value; };
+	IC void				BoostChemicalBurnImmunity(const float value) { m_fBoostChemicalBurnImmunity += value; };
+	IC void				BoostExplImmunity(const float value) { m_fBoostExplImmunity += value; };
+	IC void				BoostStrikeImmunity(const float value) { m_fBoostStrikeImmunity += value; };
+	IC void				BoostFireWoundImmunity(const float value) { m_fBoostFireWoundImmunity += value; };
+	IC void				BoostWoundImmunity(const float value) { m_fBoostWoundImmunity += value; };
+	IC void				BoostRadiationProtection(const float value) { m_fBoostRadiationProtection += value; };
+	IC void				BoostTelepaticProtection(const float value) { m_fBoostTelepaticProtection += value; };
+	IC void				BoostChemicalBurnProtection(const float value) { m_fBoostChemicalBurnProtection += value; };
+	IC void				BoostToxicityRestore(const float value) { m_fV_Toxicity += value; };
 	std::list<SBooster>   BoostersList;
 
 	// хромание при потере сил и здоровья
@@ -155,6 +158,12 @@ protected:
 	float m_fV_SatietyHealth;
 	float m_fSatietyCritical;
 	//--
+	float m_fThirst;
+	float m_fV_Thirst;
+	float m_fV_ThirstPower;
+	float m_fV_ThirstDamage;
+	float m_fThirstCritical;
+	//--
 	float m_fToxicity;
 	float m_fV_Toxicity;
 	float m_fV_ToxicityDamage;
@@ -212,8 +221,8 @@ class CActorDeathEffector
 	float					m_start_health;
 	void xr_stdcall			OnPPEffectorReleased();
 public:
-	CActorDeathEffector(CActorCondition* parent, LPCSTR sect);	// -((
-	~CActorDeathEffector();
+	CActorDeathEffector(CActorCondition* parent, LPCSTR sect);
+	~CActorDeathEffector() {};
 	void	UpdateCL();
 	IC bool	IsActual() { return m_b_actual; }
 	void	Stop();

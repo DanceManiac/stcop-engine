@@ -38,6 +38,7 @@ void CEatableItem::Load(LPCSTR section)
 	m_fHealth = pSettings->r_float(section, "eat_health");
 	m_fPower = pSettings->r_float(section, "eat_power");
 	m_fSatiety = pSettings->r_float(section, "eat_satiety");
+	m_fThirst = pSettings->r_float(section, "eat_thirst");
 	m_fRadiation = pSettings->r_float(section, "eat_radiation");
 	m_fWoundsHeal = pSettings->r_float(section, "wounds_heal_perc");
 	clamp(m_fWoundsHeal, 0.f, 1.f);
