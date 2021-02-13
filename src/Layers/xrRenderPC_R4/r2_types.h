@@ -58,9 +58,9 @@
 
 #define		JITTER(a) r2_jitter #a
 
-const		float				SMAP_near_plane		= .1f	;
+const		float				SMAP_near_plane		= .1f	; //LV: Check it in future
 
-const		u32					SMAP_adapt_min		= 32	;
+const		u32					SMAP_adapt_min		= 128	;
 const		u32					SMAP_adapt_optimal	= 768	;
 const		u32					SMAP_adapt_max		= 1536	;
 
