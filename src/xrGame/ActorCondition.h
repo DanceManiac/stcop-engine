@@ -8,30 +8,6 @@
 #include "actor.h"
 #include "inventory.h"
 
-struct SBooster
-{
-	shared_str sSectionName;
-	float fHealthRestore;
-	float fPowerRestore;
-	float fRadiationRestore;
-	float fBleedingRestore;
-	float fMaxWeight;
-	float fBurnImmunity;
-	float fShockImmunity;
-	float fRadiationImmunity;
-	float fTelepaticImmunity;
-	float fChemburnImmunity;
-	float fExplosionImmunity;
-	float fStrikeImmunity;
-	float fFireWoundImmunity;
-	float fWoundImmunity;
-	float fRadiationProtection;
-	float fTelepaticProtection;
-	float fChemburnProtection;
-	float fToxicityRestore;
-	float fBoostTime;
-};
-
 template <typename _return_type>
 class CScriptCallbackEx;
 class CActor;
@@ -79,6 +55,9 @@ public:
 	void 				BoostParameters(const SBooster& B);
 	void 				DisableBoostParameters(const SBooster& B);
 	IC void				BoostMaxWeight(const float value) { m_object->inventory().SetMaxWeight(object().inventory().GetMaxWeight() + value); m_MaxWalkWeight += value; };
+	IC void				BoostSatietyRestore(const float value) { m_fV_Satiety += value; };
+	IC void				BoostThirstRestore(const float value) { m_fV_Thirst += value; };
+	IC void				BoostAlcoholRestore(const float value) { m_fV_Alcohol += value; };
 	IC void				BoostHpRestore(const float value) { m_change_v.m_fV_HealthRestore += value; };
 	IC void				BoostPowerRestore(const float value) { m_fV_SatietyPower += value; };
 	IC void				BoostRadiationRestore(const float value) { m_change_v.m_fV_Radiation += value; };

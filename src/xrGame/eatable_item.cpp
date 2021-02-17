@@ -47,6 +47,9 @@ void CEatableItem::Load(LPCSTR section)
 	m_fToxicity = READ_IF_EXISTS(pSettings, r_float, section, "eat_toxicity", 0.0f);
 
 	m_Boosters.sSectionName = section;
+	m_Boosters.fSatietyRestore = pSettings->r_float(section, "boost_satiety_restore");
+	m_Boosters.fThirstRestore = pSettings->r_float(section, "boost_thirst_restore");
+	m_Boosters.fAlcoholRestore = pSettings->r_float(section, "boost_alcohol_restore");
 	m_Boosters.fHealthRestore = pSettings->r_float(section, "boost_health_restore");
 	m_Boosters.fPowerRestore = pSettings->r_float(section, "boost_power_restore");
 	m_Boosters.fRadiationRestore = pSettings->r_float(section, "boost_radiation_restore");

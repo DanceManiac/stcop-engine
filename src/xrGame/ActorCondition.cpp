@@ -380,7 +380,7 @@ void CActorCondition::UpdateSatiety()
 {
 	if(m_fSatiety>0)
 	{
-		m_fSatiety -= m_fV_Satiety*m_fDeltaTime;
+		m_fSatiety += m_fV_Satiety*m_fDeltaTime;
 		clamp(m_fSatiety, 0.0f, 1.0f);
 	}
 		
@@ -394,7 +394,7 @@ void CActorCondition::UpdateThirst()
 {
 	if (m_fThirst > 0)
 	{
-		m_fThirst -= m_fV_Thirst * m_fDeltaTime;
+		m_fThirst += m_fV_Thirst * m_fDeltaTime;
 		clamp(m_fThirst, 0.0f, 1.0f);
 	}
 
@@ -408,7 +408,7 @@ void CActorCondition::UpdateThirst()
 
 void CActorCondition::UpdateToxicity()
 {
-	m_fToxicity -= m_fV_Toxicity * m_fDeltaTime;
+	m_fToxicity += m_fV_Toxicity * m_fDeltaTime;
 	clamp(m_fToxicity, 0.0f, 1.0f);
 
 	if (CanBeHarmed() && !psActorFlags.test(AF_GODMODE_RT) && m_fToxicityCritical <= m_fToxicity)
@@ -507,6 +507,9 @@ void CActorCondition::save(NET_Packet &output_packet)
 	for (auto& it = BoostersList.cbegin(); it != BoostersList.cend(); ++it)
 	{
 		//B.sSectionName = input_packet.r_s8();
+		save_data(it->fSatietyRestore, output_packet);
+		save_data(it->fThirstRestore, output_packet);
+		save_data(it->fAlcoholRestore, output_packet);
 		save_data(it->fHealthRestore, output_packet);
 		save_data(it->fPowerRestore, output_packet);
 		save_data(it->fRadiationRestore, output_packet);
@@ -544,6 +547,9 @@ void CActorCondition::load(IReader &input_packet)
 	for (; cntr > 0; --cntr)
 	{
 		SBooster B;
+		load_data(B.fSatietyRestore, input_packet);
+		load_data(B.fThirstRestore, input_packet);
+		load_data(B.fAlcoholRestore, input_packet);
 		load_data(B.fHealthRestore, input_packet);
 		load_data(B.fPowerRestore, input_packet);
 		load_data(B.fRadiationRestore, input_packet);
@@ -578,6 +584,9 @@ void CActorCondition::reinit	()
 
 void CActorCondition::BoostParameters(const SBooster& B)
 {
+	BoostSatietyRestore(B.fSatietyRestore);
+	BoostThirstRestore(B.fThirstRestore);
+	BoostAlcoholRestore(B.fAlcoholRestore);
 	BoostHpRestore(B.fHealthRestore);
 	BoostPowerRestore(B.fPowerRestore);
 	BoostRadiationRestore(B.fRadiationRestore);
@@ -599,6 +608,9 @@ void CActorCondition::BoostParameters(const SBooster& B)
 }
 void CActorCondition::DisableBoostParameters(const SBooster& B)
 {
+	BoostSatietyRestore(-B.fSatietyRestore);
+	BoostThirstRestore(-B.fThirstRestore);
+	BoostAlcoholRestore(-B.fAlcoholRestore);
 	BoostHpRestore(-B.fHealthRestore);
 	BoostPowerRestore(-B.fPowerRestore);
 	BoostRadiationRestore(-B.fRadiationRestore);
