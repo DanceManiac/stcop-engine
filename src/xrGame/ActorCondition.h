@@ -8,6 +8,33 @@
 #include "actor.h"
 #include "inventory.h"
 
+struct SBooster
+{
+	shared_str sSectionName;
+	float fSatietyRestore;
+	float fThirstRestore;
+	float fAlcoholRestore;
+	float fHealthRestore;
+	float fPowerRestore;
+	float fRadiationRestore;
+	float fBleedingRestore;
+	float fMaxWeight;
+	float fBurnImmunity;
+	float fShockImmunity;
+	float fRadiationImmunity;
+	float fTelepaticImmunity;
+	float fChemburnImmunity;
+	float fExplosionImmunity;
+	float fStrikeImmunity;
+	float fFireWoundImmunity;
+	float fWoundImmunity;
+	float fRadiationProtection;
+	float fTelepaticProtection;
+	float fChemburnProtection;
+	float fToxicityRestore;
+	float fBoostTime;
+};
+
 template <typename _return_type>
 class CScriptCallbackEx;
 class CActor;
@@ -52,14 +79,13 @@ public:
 	virtual void 		ChangeThirst(const float value) { clamp(m_fThirst += value, 0.0f, 1.0f); };
 	virtual void 		ChangeToxicity(const float value) { clamp(m_fToxicity += value, 0.0f, 1.0f); };
 
-	void 				BoostParameters(const SBooster& B);
-	void 				DisableBoostParameters(const SBooster& B);
+	void 				ChangeBoostParameters(const SBooster& B, bool positive);
 	IC void				BoostMaxWeight(const float value) { m_object->inventory().SetMaxWeight(object().inventory().GetMaxWeight() + value); m_MaxWalkWeight += value; };
 	IC void				BoostSatietyRestore(const float value) { m_fV_Satiety += value; };
 	IC void				BoostThirstRestore(const float value) { m_fV_Thirst += value; };
 	IC void				BoostAlcoholRestore(const float value) { m_fV_Alcohol += value; };
 	IC void				BoostHpRestore(const float value) { m_change_v.m_fV_HealthRestore += value; };
-	IC void				BoostPowerRestore(const float value) { m_fV_SatietyPower += value; };
+	IC void				BoostPowerRestore(const float value) { m_fV_Power += value; };
 	IC void				BoostRadiationRestore(const float value) { m_change_v.m_fV_Radiation += value; };
 	IC void				BoostBleedingRestore(const float value) { m_change_v.m_fV_WoundIncarnation += value; };
 	IC void				BoostBurnImmunity(const float value) { m_fBoostBurnImmunity += value; };
@@ -93,8 +119,9 @@ public:
 
 	float	xr_stdcall	GetAlcohol() { return m_fAlcohol; }
 	float	xr_stdcall	GetPsy() { return 1.0f - GetPsyHealth(); }
+	float				GetThirst() { return m_fThirst; }
 	float				GetSatiety() { return m_fSatiety; }
-	IC		float				GetSatietyPower() const { return m_fV_SatietyPower * m_fSatiety; };
+	IC float GetConditionPower() const { return m_fV_Power * m_fSatiety * m_fThirst; };
 
 	void		AffectDamage_InjuriousMaterialAndMonstersInfluence();
 	float		GetInjuriousMaterialDamage();
@@ -112,7 +139,7 @@ public:
 	virtual void			load(IReader& input_packet);
 	//	IC		float const&	Satiety					()	{ return m_fSatiety; }
 	IC		float const& V_Satiety() { return m_fV_Satiety; }
-	IC		float const& V_SatietyPower() { return m_fV_SatietyPower; }
+	IC		float const& V_SatietyPower() { return m_fV_Power; }
 	IC		float const& V_SatietyHealth() { return m_fV_SatietyHealth; }
 	IC		float const& SatietyCritical() { return m_fSatietyCritical; }
 
@@ -122,7 +149,7 @@ public:
 	bool	DisableSprint(SHit* pHDS);
 	bool	PlayHitSound(SHit* pHDS);
 	float	HitSlowmo(SHit* pHDS);
-	virtual void			ApplyBooster(const CEatableItem& object) override;
+	virtual void ApplyBooster(const CEatableItem& object) override;
 	float	GetMaxPowerRestoreSpeed() { return m_max_power_restore_speed; };
 	float	GetMaxWoundProtection() { return m_max_wound_protection; };
 	float	GetMaxFireWoundProtection() { return m_max_fire_wound_protection; };
@@ -133,23 +160,19 @@ protected:
 	//--
 	float m_fSatiety;
 	float m_fV_Satiety;
-	float m_fV_SatietyPower;
 	float m_fV_SatietyHealth;
 	float m_fSatietyCritical;
 	//--
 	float m_fThirst;
 	float m_fV_Thirst;
 	float m_fV_ThirstPower;
-	float m_fV_ThirstDamage;
-	float m_fThirstCritical;
 	//--
 	float m_fToxicity;
 	float m_fV_Toxicity;
 	float m_fV_ToxicityDamage;
 	float m_fToxicityCritical;
-	float m_fToxicityThreshold;
-	float m_fToxicityThresholdDamageCoef;
 	//--
+	float m_fV_Power;
 	float m_fPowerLeakSpeed;
 
 	float m_fJumpPower;
@@ -186,9 +209,6 @@ protected:
 	float m_fLimpingHealthBegin;
 	float m_fLimpingHealthEnd;
 
-	//typedef xr_vector<SMedicineInfluenceValues> BOOSTS_VECTOR;
-	//typedef xr_vector<SMedicineInfluenceValues>::iterator BOOSTS_VECTOR_ITER;
-	//BOOSTS_VECTOR m_vecBoosts;
 	ref_sound m_use_sound;
 };
 

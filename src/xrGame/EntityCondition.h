@@ -9,54 +9,6 @@ class CLevel;
 #include "Hit.h"
 #include "Level.h"
 
-struct SBooster
-{
-	shared_str sSectionName;
-	float fSatietyRestore;
-	float fThirstRestore;
-	float fAlcoholRestore;
-	float fHealthRestore;
-	float fPowerRestore;
-	float fRadiationRestore;
-	float fBleedingRestore;
-	float fMaxWeight;
-	float fBurnImmunity;
-	float fShockImmunity;
-	float fRadiationImmunity;
-	float fTelepaticImmunity;
-	float fChemburnImmunity;
-	float fExplosionImmunity;
-	float fStrikeImmunity;
-	float fFireWoundImmunity;
-	float fWoundImmunity;
-	float fRadiationProtection;
-	float fTelepaticProtection;
-	float fChemburnProtection;
-	float fToxicityRestore;
-	float fBoostTime;
-};
-
-enum EBoostParams {
-	eBoostHpRestore = 0,
-	eBoostPowerRestore,
-	eBoostRadiationRestore,
-	eBoostBleedingRestore,
-	eBoostMaxWeight,
-	eBoostRadiationProtection,
-	eBoostTelepaticProtection,
-	eBoostChemicalBurnProtection,
-	eBoostBurnImmunity,
-	eBoostShockImmunity,
-	eBoostRadiationImmunity,
-	eBoostTelepaticImmunity,
-	eBoostChemicalBurnImmunity,
-	eBoostExplImmunity,
-	eBoostStrikeImmunity,
-	eBoostFireWoundImmunity,
-	eBoostWoundImmunity,
-	eBoostMaxCount,
-};
-
 class CEntityConditionSimple
 {
 	float					m_fHealth;
@@ -141,7 +93,7 @@ public:
 
 protected:
 	void					UpdateHealth();
-	void					UpdatePower();
+	void					UpdatePower() {};
 	virtual void			UpdateRadiation();
 	void					UpdatePsyHealth();
 

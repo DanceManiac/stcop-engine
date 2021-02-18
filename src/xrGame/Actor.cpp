@@ -2061,7 +2061,7 @@ float CActor::GetRestoreSpeed( ALife::EConditionRestoreType const& type )
 	}
 	case ALife::ePowerRestoreSpeed:
 	{
-		res = conditions().GetSatietyPower();
+		res = conditions().GetConditionPower();
 
 		TIItemContainer::iterator itb = inventory().m_belt.begin();
 		TIItemContainer::iterator ite = inventory().m_belt.end();

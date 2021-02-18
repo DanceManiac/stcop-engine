@@ -120,18 +120,12 @@ void CActorCondition::LoadCondition(LPCSTR entity_section)
 	m_fSatietyCritical			= pSettings->r_float(section,"satiety_critical");
 	clamp						(m_fSatietyCritical, 0.0f, 1.0f);
 	m_fV_Satiety				= pSettings->r_float(section,"satiety_v");		
-	m_fV_SatietyPower			= pSettings->r_float(section,"satiety_power_v");
 	m_fV_SatietyHealth			= pSettings->r_float(section,"satiety_health_v");
 
-	m_fThirstCritical = pSettings->r_float(section, "thirst_critical");
-	clamp(m_fThirstCritical, 0.0f, 1.0f);
 	m_fV_Thirst = pSettings->r_float(section, "thirst_v");
 	m_fV_ThirstPower = pSettings->r_float(section, "thirst_power_v");
-	m_fV_ThirstDamage = pSettings->r_float(section, "thirst_damage_v");
 
 	m_fToxicityCritical = pSettings->r_float(section, "toxicity_critical");
-	m_fToxicityThreshold = pSettings->r_float(section, "toxicity_threshold");
-	m_fToxicityThresholdDamageCoef = pSettings->r_float(section, "toxicity_threshold_damage_coef");
 	m_fV_Toxicity = pSettings->r_float(section, "toxicity_v");
 	m_fV_ToxicityDamage = pSettings->r_float(section, "toxicity_damage_v");
 	
@@ -194,8 +188,8 @@ void CActorCondition::UpdateCondition()
 {
 	if (psActorFlags.test(AF_GODMODE_RT))
 	{
-		UpdateSatiety();
 		UpdateThirst();
+		UpdateSatiety();
 		UpdateBoosters();
 		UpdateToxicity();
 
@@ -246,8 +240,8 @@ void CActorCondition::UpdateCondition()
 			RemoveEffector(m_object,effPsyHealth);
 	}
 
-	UpdateSatiety();
 	UpdateThirst();
+	UpdateSatiety();
 	UpdateBoosters();
 	UpdateToxicity();
 
@@ -271,6 +265,32 @@ void CActorCondition::UpdateCondition()
 	AffectDamage_InjuriousMaterialAndMonstersInfluence();
 }
 
+void CActorCondition::UpdateThirst()
+{
+	if (m_fThirst > 0)
+	{
+		m_fThirst += m_fV_Thirst * m_fDeltaTime;
+		clamp(m_fThirst, 0.0f, 1.0f);
+	}
+
+	if (CanBeHarmed() && !psActorFlags.test(AF_GODMODE_RT))
+		m_fDeltaPower += m_fV_ThirstPower * m_fThirst * m_fDeltaTime;
+}
+
+void CActorCondition::UpdateSatiety()
+{
+	if (m_fSatiety > 0)
+	{
+		m_fSatiety += m_fV_Satiety * m_fDeltaTime * (m_fV_Satiety > 0 ? m_fThirst : 1);
+		clamp(m_fSatiety, 0.0f, 1.0f);
+	}
+
+	float satiety_health_koef = (m_fSatiety - m_fSatietyCritical) / (m_fSatiety >= m_fSatietyCritical ? 1 - m_fSatietyCritical : m_fSatietyCritical);
+
+	if (CanBeHarmed() && !psActorFlags.test(AF_GODMODE_RT))
+		m_fDeltaHealth += m_fV_SatietyHealth * satiety_health_koef * m_fDeltaTime;
+}
+
 void CActorCondition::UpdateBoosters()
 {
 	for (auto &it = BoostersList.begin(); it != BoostersList.end(); ++it) 
@@ -278,11 +298,20 @@ void CActorCondition::UpdateBoosters()
 		it->fBoostTime -= m_fDeltaTime / (IsGameTypeSingle() ? Level().GetGameTimeFactor() : 1.0f);
 		if (it->fBoostTime <= 0.0f)
 		{
-			DisableBoostParameters(*it);
+			ChangeBoostParameters(*it, false);
 			BoostersList.erase(it);
 			break;
 		}
 	}
+}
+
+void CActorCondition::UpdateToxicity()
+{
+	m_fToxicity += m_fV_Toxicity * m_fDeltaTime * (m_fV_Toxicity < 0 ? m_fThirst : 1);
+	clamp(m_fToxicity, 0.0f, 1.0f);
+
+	if (CanBeHarmed() && !psActorFlags.test(AF_GODMODE_RT) && m_fToxicityCritical <= m_fToxicity)
+		m_fDeltaHealth -= m_fV_ToxicityDamage * m_fDeltaTime;
 }
 
 void CActorCondition::AffectDamage_InjuriousMaterialAndMonstersInfluence()
@@ -374,45 +403,6 @@ float CActorCondition::GetZoneDanger() const
 
 	clamp(sum, 0.0f, 1.5f);
 	return sum;
-}
-
-void CActorCondition::UpdateSatiety()
-{
-	if(m_fSatiety>0)
-	{
-		m_fSatiety += m_fV_Satiety*m_fDeltaTime;
-		clamp(m_fSatiety, 0.0f, 1.0f);
-	}
-		
-	float satiety_health_koef = (m_fSatiety - m_fSatietyCritical) / (m_fSatiety >= m_fSatietyCritical ? 1 - m_fSatietyCritical : m_fSatietyCritical);
-
-	if(CanBeHarmed() && !psActorFlags.test(AF_GODMODE_RT))
-		m_fDeltaHealth += m_fV_SatietyHealth * satiety_health_koef * m_fDeltaTime;
-}
-
-void CActorCondition::UpdateThirst()
-{
-	if (m_fThirst > 0)
-	{
-		m_fThirst += m_fV_Thirst * m_fDeltaTime;
-		clamp(m_fThirst, 0.0f, 1.0f);
-	}
-
-	if (CanBeHarmed() && !psActorFlags.test(AF_GODMODE_RT))
-	{
-		m_fDeltaPower += m_fV_ThirstPower * m_fThirst * m_fDeltaTime;
-		if (m_fThirst <= m_fThirstCritical)
-			m_fDeltaHealth -= m_fV_ThirstDamage * m_fDeltaTime;
-	}
-}
-
-void CActorCondition::UpdateToxicity()
-{
-	m_fToxicity += m_fV_Toxicity * m_fDeltaTime;
-	clamp(m_fToxicity, 0.0f, 1.0f);
-
-	if (CanBeHarmed() && !psActorFlags.test(AF_GODMODE_RT) && m_fToxicityCritical <= m_fToxicity)
-		m_fDeltaHealth -= m_fV_ToxicityDamage * m_fDeltaTime * (m_fToxicity >= m_fToxicityThreshold ? m_fToxicityThresholdDamageCoef : 1);
 }
 
 CWound* CActorCondition::ConditionHit(SHit* pHDS)
@@ -569,7 +559,7 @@ void CActorCondition::load(IReader &input_packet)
 		load_data(B.fChemburnProtection, input_packet);
 		load_data(B.fToxicityRestore, input_packet);
 		load_data(B.fBoostTime, input_packet);
-		BoostParameters(B);
+		ChangeBoostParameters(B, true);
 		BoostersList.push_back(B);
 	}
 }
@@ -582,53 +572,30 @@ void CActorCondition::reinit	()
 	m_fThirst					= 1.f;
 }
 
-void CActorCondition::BoostParameters(const SBooster& B)
+void CActorCondition::ChangeBoostParameters(const SBooster& B, bool positive)
 {
-	BoostSatietyRestore(B.fSatietyRestore);
-	BoostThirstRestore(B.fThirstRestore);
-	BoostAlcoholRestore(B.fAlcoholRestore);
-	BoostHpRestore(B.fHealthRestore);
-	BoostPowerRestore(B.fPowerRestore);
-	BoostRadiationRestore(B.fRadiationRestore);
-	BoostBleedingRestore(B.fBleedingRestore);
-	BoostMaxWeight(B.fMaxWeight);
-	BoostBurnImmunity(B.fBurnImmunity);
-	BoostShockImmunity(B.fShockImmunity);
-	BoostRadiationImmunity(B.fRadiationImmunity);
-	BoostTelepaticImmunity(B.fTelepaticImmunity);
-	BoostChemicalBurnImmunity(B.fChemburnImmunity);;
-	BoostExplImmunity(B.fExplosionImmunity);
-	BoostStrikeImmunity(B.fStrikeImmunity);
-	BoostFireWoundImmunity(B.fFireWoundImmunity);
-	BoostWoundImmunity(B.fWoundImmunity);
-	BoostRadiationProtection(B.fRadiationProtection);
-	BoostTelepaticProtection(B.fTelepaticProtection);
-	BoostChemicalBurnProtection(B.fChemburnProtection);
-	BoostToxicityRestore(B.fToxicityRestore);
-}
-void CActorCondition::DisableBoostParameters(const SBooster& B)
-{
-	BoostSatietyRestore(-B.fSatietyRestore);
-	BoostThirstRestore(-B.fThirstRestore);
-	BoostAlcoholRestore(-B.fAlcoholRestore);
-	BoostHpRestore(-B.fHealthRestore);
-	BoostPowerRestore(-B.fPowerRestore);
-	BoostRadiationRestore(-B.fRadiationRestore);
-	BoostBleedingRestore(-B.fBleedingRestore);
-	BoostMaxWeight(-B.fMaxWeight);
-	BoostBurnImmunity(-B.fBurnImmunity);
-	BoostShockImmunity(-B.fShockImmunity);
-	BoostRadiationImmunity(-B.fRadiationImmunity);
-	BoostTelepaticImmunity(-B.fTelepaticImmunity);
-	BoostChemicalBurnImmunity(-B.fChemburnImmunity);;
-	BoostExplImmunity(-B.fExplosionImmunity);
-	BoostStrikeImmunity(-B.fStrikeImmunity);
-	BoostFireWoundImmunity(-B.fFireWoundImmunity);
-	BoostWoundImmunity(-B.fWoundImmunity);
-	BoostRadiationProtection(-B.fRadiationProtection);
-	BoostTelepaticProtection(-B.fTelepaticProtection);
-	BoostChemicalBurnProtection(-B.fChemburnProtection);
-	BoostToxicityRestore(-B.fToxicityRestore);
+	int m = positive ? 1 : -1;
+	BoostSatietyRestore(B.fSatietyRestore * m);
+	BoostThirstRestore(B.fThirstRestore * m);
+	BoostAlcoholRestore(B.fAlcoholRestore * m);
+	BoostHpRestore(B.fHealthRestore * m);
+	BoostPowerRestore(B.fPowerRestore * m);
+	BoostRadiationRestore(B.fRadiationRestore * m);
+	BoostBleedingRestore(B.fBleedingRestore * m);
+	BoostMaxWeight(B.fMaxWeight * m);
+	BoostBurnImmunity(B.fBurnImmunity * m);
+	BoostShockImmunity(B.fShockImmunity * m);
+	BoostRadiationImmunity(B.fRadiationImmunity * m);
+	BoostTelepaticImmunity(B.fTelepaticImmunity * m);
+	BoostChemicalBurnImmunity(B.fChemburnImmunity * m);
+	BoostExplImmunity(B.fExplosionImmunity * m);
+	BoostStrikeImmunity(B.fStrikeImmunity * m);
+	BoostFireWoundImmunity(B.fFireWoundImmunity * m);
+	BoostWoundImmunity(B.fWoundImmunity * m);
+	BoostRadiationProtection(B.fRadiationProtection * m);
+	BoostTelepaticProtection(B.fTelepaticProtection * m);
+	BoostChemicalBurnProtection(B.fChemburnProtection * m);
+	BoostToxicityRestore(B.fToxicityRestore * m);
 }
 
 void CActorCondition::UpdateTutorialThresholds()
@@ -787,7 +754,7 @@ void CActorCondition::ApplyBooster(const CEatableItem& object)
 
 	//Temporary boosters
 	BoostersList.push_back(object.m_Boosters);
-	BoostParameters(object.m_Boosters);
+	ChangeBoostParameters(object.m_Boosters, true);
 }
 
 void disable_input();
