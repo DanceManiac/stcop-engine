@@ -56,6 +56,8 @@
 #define		r2_RT_ao	"$user$ao"
 #define		r2_RT_ao_blur	"$user$ao_blur"
 
+#define		r2_RT_ssr "$user$ssr"
+
 #define		JITTER(a) r2_jitter #a
 
 const		float				SMAP_near_plane		= .1f	; //LV: Check it in future

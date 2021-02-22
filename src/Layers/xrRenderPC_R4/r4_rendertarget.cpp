@@ -20,6 +20,7 @@
 #include "blender_nightvision.h"
 #include "blender_smaa.h"
 #include "blender_ao.h"
+#include "blender_ssr.h"
 
 #include "../xrRender/dxRenderDeviceRender.h"
 
@@ -603,7 +604,7 @@ CRenderTarget::CRenderTarget		()
 		s_smaa.create(b_smaa, "r4\\smaa");
 	}
 	
-	//SMAA shader
+	//AO shader
 	{
 		u32	w = Device.dwWidth;
 		u32 h = Device.dwHeight;	
@@ -617,6 +618,21 @@ CRenderTarget::CRenderTarget		()
 		
 		b_ao = xr_new<CBlender_ao>();
 		s_ao.create(b_ao, "r4\\ao");
+	}
+
+	//SSR shader
+	{
+		u32	w = Device.dwWidth;
+		u32 h = Device.dwHeight;	
+
+		xr_vector<RtCreationParams> vp_params_main_secondary;
+		vp_params_main_secondary.push_back(RtCreationParams(w, h, MAIN_VIEWPORT));
+		vp_params_main_secondary.push_back(RtCreationParams(Device.m_SecondViewport.screenWidth, Device.m_SecondViewport.screenHeight, SECONDARY_WEAPON_SCOPE));
+
+		rt_ssr.create(r2_RT_ssr, vp_params_main_secondary, D3DFMT_A8R8G8B8);
+
+		b_ssr = xr_new<CBlender_ssr>();
+		s_ssr.create(b_ao, "r4\\ssr");
 	}
 	
 	// BLOOM
@@ -1063,6 +1079,7 @@ CRenderTarget::~CRenderTarget	()
 	xr_delete					(b_nightvision			);	
 	xr_delete					(b_smaa					);	
 	xr_delete					(b_ao					);	
+	xr_delete					(b_ssr					);
 }
 
 void CRenderTarget::reset_light_marker( bool bResetStencil)

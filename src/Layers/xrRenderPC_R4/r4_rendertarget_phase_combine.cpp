@@ -124,6 +124,9 @@ void CRenderTarget::phase_combine()
 		m_blur_scale.set	(scale,-scale).div(12.f);
 	}
 
+	//Pierdolone odbicia w pizde jebane
+	//phase_ssr();
+
 	//Combine1 stage - full screen suqad
 	if (!_menu_pp)
 	{
