@@ -632,7 +632,7 @@ CRenderTarget::CRenderTarget		()
 		rt_ssr.create(r2_RT_ssr, vp_params_main_secondary, D3DFMT_A8R8G8B8);
 
 		b_ssr = xr_new<CBlender_ssr>();
-		s_ssr.create(b_ao, "r4\\ssr");
+		s_ssr.create(b_ssr, "r4\\ssr");
 	}
 	
 	// BLOOM
