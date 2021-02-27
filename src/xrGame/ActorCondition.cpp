@@ -119,11 +119,11 @@ void CActorCondition::LoadCondition(LPCSTR entity_section)
 
 	m_fSatietyCritical			= pSettings->r_float(section,"satiety_critical");
 	clamp						(m_fSatietyCritical, 0.0f, 1.0f);
-	m_fV_Satiety				= pSettings->r_float(section,"satiety_v");		
-	m_fV_SatietyHealth			= pSettings->r_float(section,"satiety_health_v");
+	m_fV_Satiety				= pSettings->r_float(section, "satiety_v");		
+	m_fV_SatietyHealth			= pSettings->r_float(section, "satiety_health_v");
+	m_fV_SatietyPower			= pSettings->r_float(section, "satiety_power_v");
 
 	m_fV_Thirst = pSettings->r_float(section, "thirst_v");
-	m_fV_ThirstPower = pSettings->r_float(section, "thirst_power_v");
 
 	m_fToxicityCritical = pSettings->r_float(section, "toxicity_critical");
 	m_fV_Toxicity = pSettings->r_float(section, "toxicity_v");
@@ -188,17 +188,11 @@ void CActorCondition::UpdateCondition()
 {
 	if (psActorFlags.test(AF_GODMODE_RT))
 	{
+		UpdateAlcohol();
 		UpdateThirst();
 		UpdateSatiety();
 		UpdateBoosters();
 		UpdateToxicity();
-
-		m_fAlcohol += m_fV_Alcohol*m_fDeltaTime;
-		clamp(m_fAlcohol, 0.0f,	1.0f);
-
-		CEffectorCam* ce = Actor()->Cameras().GetCamEffector((ECamEffectorType)effAlcohol);
-		if (ce)
-			RemoveEffector(m_object,effAlcohol);
 	}
 
 	if (GodMode() || !object().g_Alive() || !object().Local() && m_object != Level().CurrentViewEntity())
@@ -215,14 +209,7 @@ void CActorCondition::UpdateCondition()
 	float k_max_power = 1.0f + _min(cur_weight, base_weight) / base_weight + _max(0.0f, (cur_weight - base_weight) / 10.0f);
 	SetMaxPower(GetMaxPower() - m_fPowerLeakSpeed * m_fDeltaTime * k_max_power);
 
-	m_fAlcohol += m_fV_Alcohol*m_fDeltaTime;
-	clamp(m_fAlcohol, 0.0f, 1.0f);
-
-	CEffectorCam* ce = Actor()->Cameras().GetCamEffector((ECamEffectorType)effAlcohol);
-	if (m_fAlcohol>0.0001f && !ce)
-		AddEffector(m_object,effAlcohol, "effector_alcohol", GET_KOEFF_FUNC(this, &CActorCondition::GetAlcohol));
-	else if (ce)
-		RemoveEffector(m_object,effAlcohol);
+	UpdateAlcohol();
 		
 	string512 pp_sect_name;
 	shared_str ln = Level().name();
@@ -272,23 +259,47 @@ void CActorCondition::UpdateThirst()
 		m_fThirst += m_fV_Thirst * m_fDeltaTime;
 		clamp(m_fThirst, 0.0f, 1.0f);
 	}
-
-	if (CanBeHarmed() && !psActorFlags.test(AF_GODMODE_RT))
-		m_fDeltaPower += m_fV_ThirstPower * m_fThirst * m_fDeltaTime;
 }
 
 void CActorCondition::UpdateSatiety()
 {
+	float V_satiety_koef = 1.0f + (GetMaxHealth() - GetHealth() + GetMaxPower() - GetPower()) / 2;
+
 	if (m_fSatiety > 0)
 	{
-		m_fSatiety += m_fV_Satiety * m_fDeltaTime * (m_fV_Satiety > 0 ? m_fThirst : 1);
+		m_fSatiety += m_fV_Satiety * V_satiety_koef * m_fDeltaTime;
 		clamp(m_fSatiety, 0.0f, 1.0f);
 	}
 
-	float satiety_health_koef = (m_fSatiety - m_fSatietyCritical) / (m_fSatiety >= m_fSatietyCritical ? 1 - m_fSatietyCritical : m_fSatietyCritical);
+	float satiety_health_koef = (m_fSatiety - m_fSatietyCritical) / (m_fSatiety >= m_fSatietyCritical ? 1 - m_fSatietyCritical : m_fSatietyCritical) 
+		* (m_fSatiety >= m_fSatietyCritical ? m_fThirst : 2.0f - m_fThirst);
 
-	if (CanBeHarmed() && !psActorFlags.test(AF_GODMODE_RT))
+	if (CanBeHarmed() && !psActorFlags.test(AF_GODMODE_RT)) 
+	{
 		m_fDeltaHealth += m_fV_SatietyHealth * satiety_health_koef * m_fDeltaTime;
+		m_fDeltaPower += m_fV_SatietyPower * m_fSatiety * m_fThirst * m_fDeltaTime;
+	}
+}
+
+void CActorCondition::UpdateAlcohol()
+{
+	m_fAlcohol += m_fV_Alcohol * m_fDeltaTime;
+	clamp(m_fAlcohol, 0.0f, 1.0f);
+
+	if (!psActorFlags.test(AF_GODMODE_RT)) 
+	{
+		CEffectorCam* ce = Actor()->Cameras().GetCamEffector((ECamEffectorType)effAlcohol);
+		if (m_fAlcohol > 0.0001f && !ce)
+			AddEffector(m_object, effAlcohol, "effector_alcohol", GET_KOEFF_FUNC(this, &CActorCondition::GetAlcohol));
+		else if (ce)
+			RemoveEffector(m_object, effAlcohol);
+	}
+	else 
+	{
+		CEffectorCam* ce = Actor()->Cameras().GetCamEffector((ECamEffectorType)effAlcohol);
+		if (ce)
+			RemoveEffector(m_object, effAlcohol);
+	}
 }
 
 void CActorCondition::UpdateBoosters()
@@ -310,8 +321,11 @@ void CActorCondition::UpdateToxicity()
 	m_fToxicity += m_fV_Toxicity * m_fDeltaTime * (m_fV_Toxicity < 0 ? m_fThirst : 1);
 	clamp(m_fToxicity, 0.0f, 1.0f);
 
-	if (CanBeHarmed() && !psActorFlags.test(AF_GODMODE_RT) && m_fToxicityCritical <= m_fToxicity)
-		m_fDeltaHealth -= m_fV_ToxicityDamage * m_fDeltaTime;
+	if (CanBeHarmed() && !psActorFlags.test(AF_GODMODE_RT)) 
+	{
+		if (m_fToxicityCritical <= m_fToxicity)
+			m_fDeltaHealth -= m_fV_ToxicityDamage * m_fDeltaTime;
+	}
 }
 
 void CActorCondition::AffectDamage_InjuriousMaterialAndMonstersInfluence()

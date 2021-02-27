@@ -63,6 +63,7 @@ private:
 	void 		UpdateSatiety();
 	void 		UpdateThirst();
 	void 		UpdateToxicity();
+	void 		UpdateAlcohol();
 public:
 	CActorCondition(CActor* object);
 	virtual				~CActorCondition();
@@ -72,7 +73,7 @@ public:
 
 	virtual CWound* ConditionHit(SHit* pHDS);
 	virtual void		UpdateCondition();
-	void		UpdateBoosters();
+	void				UpdateBoosters();
 
 	virtual void 		ChangeAlcohol(const float value) { m_fAlcohol += value; };
 	virtual void 		ChangeSatiety(const float value) { clamp(m_fSatiety += value, 0.0f, 1.0f); };
@@ -161,11 +162,11 @@ protected:
 	float m_fSatiety;
 	float m_fV_Satiety;
 	float m_fV_SatietyHealth;
+	float m_fV_SatietyPower;
 	float m_fSatietyCritical;
 	//--
 	float m_fThirst;
 	float m_fV_Thirst;
-	float m_fV_ThirstPower;
 	//--
 	float m_fToxicity;
 	float m_fV_Toxicity;

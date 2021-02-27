@@ -272,7 +272,8 @@ void CEntityCondition::UpdateCondition()
 	}
 	else
 	{
-		if (m_fDeltaHealth<0) m_object->OnHitHealthLoss(GetHealth()+m_fDeltaHealth);
+		if (m_fDeltaHealth<0) 
+			m_object->OnHitHealthLoss(GetHealth() + m_fDeltaHealth);
 	}
 	//-----------------------------------------
 	UpdateHealth				();
@@ -298,14 +299,14 @@ void CEntityCondition::UpdateCondition()
 
 	if(Device.fTimeGlobal>m_fInvulnerableTime)
 	{
-		float curr_health			= GetHealth();
-		if(curr_health>m_fKillHitTreshold && curr_health+m_fDeltaHealth<0)
+		float curr_health = GetHealth();
+		if(curr_health > m_fKillHitTreshold && curr_health + m_fDeltaHealth<0)
 		{
 			SetHealth(m_fLastChanceHealth);
 			m_fInvulnerableTime = Device.fTimeGlobal + m_fInvulnerableTimeDelta;
 		}
 		else
-			SetHealth				( curr_health + m_fDeltaHealth );
+			SetHealth(curr_health + m_fDeltaHealth);
 	}
 
 	m_fPower					+= m_fDeltaPower;
@@ -519,7 +520,6 @@ float CEntityCondition::BleedingSpeed()
 	
 	return (m_WoundVector.empty() ? 0.f : bleeding_speed / m_WoundVector.size());
 }
-
 
 void CEntityCondition::UpdateHealth()
 {
