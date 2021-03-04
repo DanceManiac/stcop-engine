@@ -1182,6 +1182,9 @@ void CWeapon::renderable_Render()
 
 	RenderLight();
 
+	for (auto mesh : m_attaches)
+		mesh->Render(false);
+
 	//если мы в режиме снайперки, то сам HUD рисовать не надо
 	if (IsZoomed() && !IsRotatingToZoom() && ZoomTexture())
 		RenderHud(FALSE);
@@ -2587,6 +2590,9 @@ u8 CWeapon::GetCurrentHudOffsetIdx()
 
 void CWeapon::render_hud_mode()
 {
+	for (auto mesh : m_attaches)
+		mesh->Render(true);
+
 	RenderLight();
 }
 
@@ -2745,12 +2751,6 @@ void CWeapon::UpdateAddonsHudParams()
 
 }
 
-
-void CWeapon::UpdateAddonsTransform(bool for_hud)
-{
-
-}
-
 void CWeapon::SaveAttachableParams()
 {
 	if (!m_dbgItem)	return;
@@ -2784,3 +2784,112 @@ void CWeapon::ParseCurrentItem(CGameFont* F)
 {
 	F->OutNext("WEAPON IN STRAPPED MOD [%d]", m_strapped_mode);
 }
+
+void CWeapon::UpdateAddonsTransform(bool for_hud)
+{
+	for (auto& mesh : m_attaches)
+	{
+		if (for_hud)
+			mesh->UpdateRenderPos(HudItemData()->m_model->dcast_RenderVisual(), for_hud, HudItemData()->m_item_transform);
+		else
+			mesh->UpdateRenderPos(Visual(), for_hud, XFORM());
+	}
+}
+
+VisualAddonHelper::VisualAddonHelper()
+{
+	hud_model = NULL;
+	world_model = NULL;
+	m_boneName = NULL;
+	m_sectionId = NULL;
+	m_meshName = NULL;
+	m_meshHUDName = NULL;
+	m_renderPos.identity();
+	isRoot = false;
+}
+
+void VisualAddonHelper::UpdateRenderPos(IRenderVisual* model, bool hud, Fmatrix parent)
+{
+	if (!model) return;
+
+	u16 bone_id = model->dcast_PKinematics()->LL_BoneID(m_boneName);
+	Fmatrix bone_trans = model->dcast_PKinematics()->LL_GetTransform(bone_id);
+	m_renderPos.identity();
+	m_renderPos.mul(parent, bone_trans);
+}
+
+void VisualAddonHelper::PrepareRender(bool hud)
+{
+	if (hud && !hud_model)
+		hud_model = ::Render->model_Create(m_meshHUDName.c_str());
+	else if (!hud && !world_model)
+		world_model = ::Render->model_Create(m_meshName.c_str());
+	for (auto& child : m_childs)
+		child->PrepareRender(hud);
+}
+
+void VisualAddonHelper::Render(bool hud)
+{
+	if ((hud && !hud_model) || (!hud && !world_model))
+		PrepareRender(hud);
+
+	::Render->set_Transform(&m_renderPos);
+	::Render->add_Visual(hud ? hud_model : world_model);
+
+	for (auto& child : m_childs)
+		child->UpdateRenderPos(hud ? hud_model : world_model, hud, m_renderPos);//child->UpdateRenderPos(hud ? hud_model : world_model, hud);
+
+	for (auto& child : m_childs)
+		child->Render(hud);
+}
+
+void VisualAddonHelper::Load(shared_str& section)
+{
+	m_sectionId = section;
+	m_boneName = READ_IF_EXISTS(pSettings, r_string, section, "bone_slot", "wpn_body");
+	m_sectionParent = READ_IF_EXISTS(pSettings, r_string, section, "mesh_require", NULL);
+	isRoot = READ_IF_EXISTS(pSettings, r_bool, section, "is_root", false);
+	m_meshName = pSettings->r_string(section, "visual");
+	m_meshHUDName = pSettings->r_string(section, "hud_visual");
+}
+
+VisualAddonHelper* VisualAddonHelper::create_and_attach_to_parent(shared_str sect, FFAddons& m_attaches)
+{
+	VisualAddonHelper* addon = xr_new<VisualAddonHelper>();
+	addon->Load(sect);
+
+	if (addon->m_sectionParent != NULL)
+	{
+		if (!FindParentAndAttach(addon->m_sectionParent, m_attaches))
+		{
+			VisualAddonHelper* parent = create_and_attach_to_parent(addon->m_sectionParent, m_attaches);
+			if (parent)
+				parent->m_childs.push_back(addon);
+		}
+	}
+	else
+	{
+		m_attaches.push_back(addon);
+	}
+
+	return addon;
+}
+
+bool VisualAddonHelper::FindParentAndAttach(shared_str section, FFAddons& m_attaches)
+{
+	for (auto& it : m_attaches)
+	{
+		if (it->m_sectionId == section)
+		{
+			it->m_childs.push_back(this);
+			return true;
+		}
+		else
+		{
+			return FindParentAndAttach(section, it->m_childs);
+		}
+	}
+
+	return false;
+}
+

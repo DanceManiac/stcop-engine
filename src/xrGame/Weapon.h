@@ -23,6 +23,37 @@ class CParticlesObject;
 class CUIWindow;
 class CBinocularsVision;
 class CNightVisionEffector;
+typedef xr_vector<VisualAddonHelper*> FFAddons;
+
+class VisualAddonHelper
+{
+public:
+	//typedef xr_vector<VisualAddonHelper*> FFAddons;
+
+	VisualAddonHelper();
+	~VisualAddonHelper() {};
+	IRenderVisual* hud_model;
+	IRenderVisual* world_model;
+	Fmatrix		   m_renderPos;	  //Текущая позиция для рендеринга
+
+	xr_vector<VisualAddonHelper*> m_childs;
+
+	shared_str	 m_boneName;	  //позиция кости которая будет использоваться для аттача, если пусто то аттач будет происходит к кости LeadGun
+	shared_str   m_meshHUDName;   //путь до меша
+	shared_str   m_meshName;      //путь до меша
+	shared_str   m_sectionId;	  //название секции
+	shared_str   m_sectionParent; //название секции-родителя, если пусто то будет использоваться основная модель худа 
+
+	bool isRoot;
+
+	VisualAddonHelper* create_and_attach_to_parent(shared_str sect, FFAddons& m_attaches);
+	bool FindParentAndAttach(shared_str section, FFAddons& m_attaches);
+
+	void UpdateRenderPos(IRenderVisual* model, bool hud, Fmatrix parent);
+	void PrepareRender(bool hud);
+	void Load(shared_str& section);
+	void Render(bool hud);
+};
 
 class CWeapon : public CHudItemObject,
 	public CShootingObject
@@ -47,10 +78,17 @@ public:
 	virtual	bool            bMarkCanShow() { return IsZoomed(); }
 	bool            bChangeNVSecondVPStatus();
 
-	virtual void			UpdateAddonsTransform(bool for_hud = false); // FFT++
-	virtual void			UpdateAddonsHudParams(); // FFT++
+	// ATTACH SYSTEM
+	FFAddons m_attaches;
 
-	virtual void			UpdateSecondVP(bool bInGrenade = false);
+	virtual void	UpdateAddonsTransform(bool for_hud = false); // FFT++
+	virtual void	UpdateAddonsHudParams(); // FFT++
+
+	virtual void    ResetAllProxies();
+	virtual void    AllProxiesUpdate();
+	//=====================================================================================
+
+	virtual void	UpdateSecondVP(bool bInGrenade = false);
 	void			LoadModParams(LPCSTR section);
 	void			Load3DScopeParams(LPCSTR section);
 	void			LoadOriginalScopesParams(LPCSTR section);
