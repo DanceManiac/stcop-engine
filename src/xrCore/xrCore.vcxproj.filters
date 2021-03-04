@@ -91,6 +91,9 @@
     <Filter Include="thread">
       <UniqueIdentifier>{d1cecf39-4a71-485c-b365-9c8bd4afa2c2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Media">
+      <UniqueIdentifier>{eff4d91b-cce6-4be0-9070-01777c05eef0}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="FTimer.cpp">
@@ -302,6 +305,9 @@
     </ClCompile>
     <ClCompile Include="Threading\Event.cpp">
       <Filter>thread</Filter>
+    </ClCompile>
+    <ClCompile Include="image.cpp">
+      <Filter>Media</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -655,6 +661,9 @@
     </ClInclude>
     <ClInclude Include="Threading\Event.hpp">
       <Filter>thread</Filter>
+    </ClInclude>
+    <ClInclude Include="image.hpp">
+      <Filter>Media</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
