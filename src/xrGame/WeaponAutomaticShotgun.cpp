@@ -12,11 +12,19 @@ CWeaponAutomaticShotgun::CWeaponAutomaticShotgun()
 	m_eSoundClose_2 = ESoundTypes(SOUND_TYPE_WEAPON_SHOOTING);
 	m_eSoundAddCartridge	= ESoundTypes(SOUND_TYPE_WEAPON_SHOOTING);
 	m_eSoundOpen = ESoundTypes(SOUND_TYPE_WEAPON_RECHARGING);
+	bNeedPumpAfterReload = false;
+	bPumpShotgun		 = false;
 }
 
 CWeaponAutomaticShotgun::~CWeaponAutomaticShotgun()
 {
 }
+
+bool CWeaponAutomaticShotgun::NeedPump()
+{
+	return m_bTriStateReload && bNeedPumpAfterReload;
+}
+
 
 void CWeaponAutomaticShotgun::Load(LPCSTR section)
 {
@@ -25,6 +33,9 @@ void CWeaponAutomaticShotgun::Load(LPCSTR section)
 	if(pSettings->line_exist(section, "tri_state_reload")){
 		m_bTriStateReload = !!pSettings->r_bool(section, "tri_state_reload");
 	};
+
+	bPumpShotgun = READ_IF_EXISTS(pSettings, r_bool, section, "is_pump", false);
+
 	if(m_bTriStateReload){
 		m_sounds.LoadSound(section, "snd_open_weapon", "sndOpen", false, m_eSoundOpen);
 
@@ -37,6 +48,13 @@ void CWeaponAutomaticShotgun::Load(LPCSTR section)
 
 bool CWeaponAutomaticShotgun::Action(u16 cmd, u32 flags) 
 {
+	if (cmd == kWPN_FIRE && flags & CMD_START && NeedPump() && GetState() != eReload && bPumpShotgun)
+	{
+		SetPending(TRUE);
+		switch2_Pump();
+		return true;
+	}
+
 	if(inherited::Action(cmd, flags)) return true;
 
 	if(	m_bTriStateReload && GetState()==eReload &&
@@ -45,6 +63,12 @@ bool CWeaponAutomaticShotgun::Action(u16 cmd, u32 flags)
 	{
 		AddCartridge(1);
 		m_sub_state = eSubstateReloadEnd;
+		if (bPumpShotgun)
+		{
+			SetPending(TRUE);
+			switch2_Pump();
+		}
+
 		return true;
 	}
 	return false;
@@ -101,7 +125,8 @@ void CWeaponAutomaticShotgun::OnStateSwitch	(u32 S)
 
 	CWeapon::OnStateSwitch(S);
 
-	if( m_magazine.size() == (u32)iMagazineSize || !HaveCartridgeInInventory(1) ){
+	if( m_magazine.size() == (u32)iMagazineSize || !HaveCartridgeInInventory(1)){
+			switch2_Pump			();
 			switch2_EndReload		();
 			m_sub_state = eSubstateReloadEnd;
 			return;
@@ -126,6 +151,7 @@ void CWeaponAutomaticShotgun::OnStateSwitch	(u32 S)
 
 void CWeaponAutomaticShotgun::switch2_StartReload()
 {
+	if (!bNeedPumpAfterReload) bNeedPumpAfterReload = iAmmoElapsed == 0;
 	PlaySound			("sndOpen",get_LastFP());
 	PlayAnimOpenWeapon	();
 	SetPending			(TRUE);
@@ -145,6 +171,21 @@ void CWeaponAutomaticShotgun::switch2_EndReload	()
 	PlayAnimCloseWeapon	();
 }
 
+void CWeaponAutomaticShotgun::switch2_Pump()
+{
+	if (NeedPump())
+	{
+		PlayAnimPumpWeapon();
+		SetPending(FALSE);
+	}
+	else
+	{
+		SwitchState(eIdle);
+		SetPending(FALSE);
+	}
+}
+
+
 void CWeaponAutomaticShotgun::PlayAnimOpenWeapon()
 {
 	VERIFY(GetState()==eReload);
@@ -161,6 +202,14 @@ void CWeaponAutomaticShotgun::PlayAnimCloseWeapon()
 
 	PlayHUDMotion("anm_close",FALSE,this,GetState());
 }
+
+void CWeaponAutomaticShotgun::PlayAnimPumpWeapon()
+{
+	bNeedPumpAfterReload = false;
+	PlaySound("sndClose_2", get_LastFP());
+	PlayHUDMotion("anm_close", TRUE, this, GetState());
+}
+
 
 bool CWeaponAutomaticShotgun::HaveCartridgeInInventory(u8 cnt)
 {

@@ -35,7 +35,7 @@
 #include "../PDA.h"
 
 #include "../actor_defs.h"
-
+#include "Actor.h"
 
 void move_item_from_to(u16 from_id, u16 to_id, u16 what_id);
 
@@ -62,7 +62,6 @@ void CUIActorMenu::InitInventoryMode()
 void CUIActorMenu::DeInitInventoryMode()
 {
 	m_pTrashList->Show				(false);
-//	m_clock_value->Show					(false);
 }
 
 void CUIActorMenu::SendEvent_ActivateSlot(u16 slot, u16 recipient)
@@ -444,26 +443,27 @@ void CUIActorMenu::InitInventoryContents(CUIDragDropListEx* pBagList)
 
 	itb = ruck_list.begin();
 	ite = ruck_list.end();
-	for ( ; itb != ite; ++itb )
+	for (auto &item : ruck_list)
 	{
-		CMPPlayersBag* bag = smart_cast<CMPPlayersBag*>( &(*itb)->object() );
-		if ( bag )
-			continue;
 
-		CUICellItem* itm = create_cell_item( *itb );
-		curr_list->SetItem(itm);
+		CUICellItem* itm = create_cell_item( item);
+		if(item->m_ItemUIPos.pos.x != -1)
+			curr_list->SetItem(itm, item->m_ItemUIPos.pos);
+		else
+			curr_list->SetItem(itm);
+
 		if ( m_currMenuMode == mmTrade && m_pPartnerInvOwner )
-			ColorizeItem( itm, !CanMoveToPartner( *itb ) );
-
-		//CCustomOutfit* outfit = smart_cast<CCustomOutfit*>(*itb);
-		//if(outfit)
-		//	outfit->ReloadBonesProtection();
-
-		//CHelmet* helmet = smart_cast<CHelmet*>(*itb);
-		//if(helmet)
-		//	helmet->ReloadBonesProtection();
+			ColorizeItem( itm, !CanMoveToPartner( item) );
 	}
 	m_pQuickSlot->ReloadReferences(m_pActorInvOwner);
+
+	u32 idx = pBagList->ItemsCount();
+
+	for (u32 id = 0; id < idx; id++)
+	{
+		Ivector2 pos = pBagList->GetItemPos(pBagList->GetItemIdx(id));
+		Msg("Item %d has pos : %d-%d",id,pos.x,pos.y);
+	}
 }
 
 bool CUIActorMenu::TryActiveSlot(CUICellItem* itm)
@@ -488,6 +488,11 @@ bool CUIActorMenu::TryActiveSlot(CUICellItem* itm)
 	}
 	return false;
 }
+bool CUIActorMenu::SwapItem(CUICellItem* itm, bool b_use_cursor_pos)
+{
+	return false;
+}
+
 
 bool CUIActorMenu::ToSlot(CUICellItem* itm, bool force_place, u16 slot_id)
 {
@@ -565,6 +570,9 @@ bool CUIActorMenu::ToSlot(CUICellItem* itm, bool force_place, u16 slot_id)
 		CUICellItem* slot_cell				= slot_list->GetItemIdx(0);
 		VERIFY								(slot_cell && ((PIItem)slot_cell->m_pData)==_iitem);
 
+		// swap slots, its be fine if we can 
+		// TODO: implement it
+
 		bool result							= ToBag(slot_cell, false);
 		VERIFY								(result);
 
@@ -617,6 +625,9 @@ bool CUIActorMenu::ToBag(CUICellItem* itm, bool b_use_cursor_pos)
 		{
 			ColorizeItem( itm, !CanMoveToPartner( iitem ) );
 		}
+
+		iitem->m_ItemUIPos.pos.set(new_owner->GetItemPos(i));
+
 		return true;
 	}
 	return false;
@@ -849,7 +860,7 @@ void CUIActorMenu::PropertiesBoxForSlots( PIItem item, bool& b_show )
 	CHelmet* pHelmet		= smart_cast<CHelmet*>		( item );
 	CInventory&  inv		= m_pActorInvOwner->inventory();
 
-	// Флаг-признак для невлючения пункта контекстного меню: Dreess Outfit, если костюм уже надет
+	// Р¤Р»Р°Рі-РїСЂРёР·РЅР°Рє РґР»СЏ РЅРµРІР»СЋС‡РµРЅРёСЏ РїСѓРЅРєС‚Р° РєРѕРЅС‚РµРєСЃС‚РЅРѕРіРѕ РјРµРЅСЋ: Dreess Outfit, РµСЃР»Рё РєРѕСЃС‚СЋРј СѓР¶Рµ РЅР°РґРµС‚
 	bool bAlreadyDressed	= false;
 	u16 cur_slot			= item->BaseSlot();
 
@@ -901,7 +912,7 @@ void CUIActorMenu::PropertiesBoxForSlots( PIItem item, bool& b_show )
 
 void CUIActorMenu::PropertiesBoxForWeapon( CUICellItem* cell_item, PIItem item, bool& b_show )
 {
-	//отсоединение аддонов от вещи
+	//РѕС‚СЃРѕРµРґРёРЅРµРЅРёРµ Р°РґРґРѕРЅРѕРІ РѕС‚ РІРµС‰Рё
 	CWeapon*	pWeapon = smart_cast<CWeapon*>( item );
 	if ( !pWeapon )
 	{
@@ -966,7 +977,7 @@ void CUIActorMenu::PropertiesBoxForWeapon( CUICellItem* cell_item, PIItem item, 
 #include "../string_table.h"
 void CUIActorMenu::PropertiesBoxForAddon( PIItem item, bool& b_show )
 {
-	//присоединение аддонов к активному слоту (2 или 3)
+	//РїСЂРёСЃРѕРµРґРёРЅРµРЅРёРµ Р°РґРґРѕРЅРѕРІ Рє Р°РєС‚РёРІРЅРѕРјСѓ СЃР»РѕС‚Сѓ (2 РёР»Рё 3)
 
 	CScope*				pScope				= smart_cast<CScope*>			(item);
 	CSilencer*			pSilencer			= smart_cast<CSilencer*>		(item);

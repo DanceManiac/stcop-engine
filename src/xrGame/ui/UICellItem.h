@@ -90,6 +90,7 @@ class CUIDragItem: public CUIWindow, public pureRender, public pureFrame
 	CUIStatic				m_static;
 	CUICellItem*			m_pParent;
 	Fvector2				m_pos_offset;
+	Ivector2				m_old_pos;
 	CUIDragDropListEx*		m_back_list;
 	ICustomDrawDragItem*	m_custom_draw;
 public:
@@ -109,4 +110,5 @@ public:
 				void		SetBackList				(CUIDragDropListEx*l);
 	CUIDragDropListEx*		BackList				()							{return m_back_list;}
 				Fvector2	GetPosition				();
+				Ivector2	GetOldPosition				() {return m_old_pos;}
 };

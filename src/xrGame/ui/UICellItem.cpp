@@ -305,6 +305,10 @@ CUIDragItem::CUIDragItem(CUICellItem* parent)
 	m_custom_draw					= NULL;
 	m_back_list						= NULL;
 	m_pParent						= parent;
+
+	m_old_pos.set(-1,-1);
+	if(parent->OwnerList()) m_old_pos = parent->OwnerList()->GetItemPos(parent);
+		
 	AttachChild						(&m_static);
 	Device.seqRender.Add			(this, REG_PRIORITY_LOW-5000);
 	Device.seqFrame.Add				(this, REG_PRIORITY_LOW-5000);

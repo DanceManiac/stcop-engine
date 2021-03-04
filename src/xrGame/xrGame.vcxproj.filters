@@ -7354,6 +7354,9 @@
     <ClInclude Include="Weapon.h">
       <Filter>Core\Client\Objects\items &amp; weapons\Weapons\Custom Weapon\Weapon Generic\Refactored</Filter>
     </ClInclude>
+    <ClInclude Include="inventory_cell_container.h">
+      <Filter>Core\Client\Objects\inventory</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="damage_manager.cpp">
@@ -10986,6 +10989,9 @@
     <ClCompile Include="AmebaZone.cpp" />
     <ClCompile Include="Weapon.cpp">
       <Filter>Core\Client\Objects\items &amp; weapons\Weapons\Custom Weapon\Weapon Generic\Refactored</Filter>
+    </ClCompile>
+    <ClCompile Include="inventory_cell_container.cpp">
+      <Filter>Core\Client\Objects\inventory</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

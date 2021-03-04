@@ -194,7 +194,7 @@ void attachable_hud_item::debug_draw_firedeps()
 		setup_firedeps		(fd);
 		
 		if(hud_adj_mode==5||bForce)
-			render.draw_aabb(fd.vLastFP,0.005f,0.005f,0.005f,D3DCOLOR_XRGB(255,0,0));
+			render.draw_line(Fidentity, fd.vLastFP, Fvector().mad(fd.vLastFP, fd.vLastFD, HUD().GetCurrentRayQuery().range), D3DCOLOR_XRGB(255, 0, 0));//render.draw_aabb(fd.vLastFP,0.005f,0.005f,0.005f,D3DCOLOR_XRGB(255,0,0));
 
 		if(hud_adj_mode==6)
 			render.draw_aabb(fd.vLastFP2,0.005f,0.005f,0.005f,D3DCOLOR_XRGB(0,0,255));

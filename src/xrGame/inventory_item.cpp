@@ -60,6 +60,9 @@ CInventoryItem::CInventoryItem()
 	m_ItemCurrPlace.base_slot_id	= NO_ACTIVE_SLOT;
 	m_ItemCurrPlace.slot_id			= NO_ACTIVE_SLOT;
 
+	m_ItemUIPos.pos.set(-1,-1);
+	m_ItemUIPos.bVertical			= false;
+
 	m_Description					= "";
 	m_section_id					= 0;
 	m_flags.set						(FIsHelperItem,FALSE);
@@ -186,25 +189,27 @@ void CInventoryItem::DeactivateItem()
 {
 }
 
-void CInventoryItem::OnH_B_Independent(bool just_before_destroy)
+void CInventoryItem::OnH_B_Independent(bool just_before_destroy) // before detach
 {
 	UpdateXForm();
 	m_ItemCurrPlace.type = eItemPlaceUndefined ;
+	m_ItemUIPos.bVertical = false;
+	m_ItemUIPos.pos.set(-1,-1);
 }
 
-void CInventoryItem::OnH_A_Independent()
+void CInventoryItem::OnH_A_Independent() // after detach
 {
 	m_dwItemIndependencyTime	= Level().timeServer();
-	m_ItemCurrPlace.type		= eItemPlaceUndefined;	
+	m_ItemCurrPlace.type		= eItemPlaceUndefined;
 	inherited::OnH_A_Independent();
 }
 
-void CInventoryItem::OnH_B_Chield()
+void CInventoryItem::OnH_B_Chield() // before attach
 {
 	Level().RemoveObject_From_4CrPr(m_object);
 }
 
-void CInventoryItem::OnH_A_Chield()
+void CInventoryItem::OnH_A_Chield() // after attach
 {
 	inherited::OnH_A_Chield		();
 }
@@ -268,9 +273,9 @@ void CInventoryItem::OnEvent (NET_Packet& P, u16 type)
 	}
 }
 
-//процесс отсоединения вещи заключается в спауне новой вещи 
-//в инвентаре и установке соответствующих флагов в родительском
-//объекте, поэтому функция должна быть переопределена
+//РїСЂРѕС†РµСЃСЃ РѕС‚СЃРѕРµРґРёРЅРµРЅРёСЏ РІРµС‰Рё Р·Р°РєР»СЋС‡Р°РµС‚СЃСЏ РІ СЃРїР°СѓРЅРµ РЅРѕРІРѕР№ РІРµС‰Рё 
+//РІ РёРЅРІРµРЅС‚Р°СЂРµ Рё СѓСЃС‚Р°РЅРѕРІРєРµ СЃРѕРѕС‚РІРµС‚СЃС‚РІСѓСЋС‰РёС… С„Р»Р°РіРѕРІ РІ СЂРѕРґРёС‚РµР»СЊСЃРєРѕРј
+//РѕР±СЉРµРєС‚Рµ, РїРѕСЌС‚РѕРјСѓ С„СѓРЅРєС†РёСЏ РґРѕР»Р¶РЅР° Р±С‹С‚СЊ РїРµСЂРµРѕРїСЂРµРґРµР»РµРЅР°
 bool CInventoryItem::Detach(const char* item_section_name, bool b_spawn_item) 
 {
 	if (OnClient()) return true;
@@ -359,7 +364,7 @@ void CInventoryItem::net_Destroy		()
 		VERIFY(std::find(m_pInventory->m_all.begin(), m_pInventory->m_all.end(), this)==m_pInventory->m_all.end() );
 	}
 
-	//инвентарь которому мы принадлежали
+	//РёРЅРІРµРЅС‚Р°СЂСЊ РєРѕС‚РѕСЂРѕРјСѓ РјС‹ РїСЂРёРЅР°РґР»РµР¶Р°Р»Рё
 //.	m_pInventory = NULL;
 }
 
@@ -951,7 +956,7 @@ void CInventoryItem::CalculateInterpolationParams()
 		for (u32 k=0; k<3; k++)
 		{
 			P0[k] = c*(c*(c*p->SCoeff[k][0]+p->SCoeff[k][1])+p->SCoeff[k][2])+p->SCoeff[k][3];
-			P1[k] = (c*c*p->SCoeff[k][0]*3+c*p->SCoeff[k][1]*2+p->SCoeff[k][2])/3; // сокрость из формулы в 3 раза превышает скорость при расчете коэффициентов !!!!
+			P1[k] = (c*c*p->SCoeff[k][0]*3+c*p->SCoeff[k][1]*2+p->SCoeff[k][2])/3; // СЃРѕРєСЂРѕСЃС‚СЊ РёР· С„РѕСЂРјСѓР»С‹ РІ 3 СЂР°Р·Р° РїСЂРµРІС‹С€Р°РµС‚ СЃРєРѕСЂРѕСЃС‚СЊ РїСЂРё СЂР°СЃС‡РµС‚Рµ РєРѕСЌС„С„РёС†РёРµРЅС‚РѕРІ !!!!
 		};
 		P0.set(p->IStartPos);
 		P1.add(p->IStartPos);

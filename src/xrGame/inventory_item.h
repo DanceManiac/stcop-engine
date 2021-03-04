@@ -20,6 +20,12 @@ enum EHandDependence{
 	hd2Hand	= 2
 };
 
+struct EItemPos
+{
+	Ivector2 pos;
+	bool bVertical;
+};
+
 class CSE_Abstract;
 class CGameObject;
 class CFoodItem;
@@ -144,6 +150,8 @@ public:
 	shared_str					m_nameComplex;
 
 	SInvItemPlace				m_ItemCurrPlace;
+
+	EItemPos                    m_ItemUIPos;
 
 
 	virtual void				OnMoveToSlot		(const SInvItemPlace& prev) {};

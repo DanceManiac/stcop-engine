@@ -17,7 +17,7 @@
 
 #include "step_manager.h"
 #include "script_export_space.h"
-
+#include "inventory_cell_container.h"
 using namespace ACTOR_DEFS;
 
 class CInfoPortion;
@@ -372,7 +372,9 @@ protected:
 	float					m_fFeelGrenadeTime; 	//время гранаты (сек) после которого актер чувствует гранату
 	//расстояние подсветки предметов
 	float					m_fPickupInfoRadius;
-
+public:
+	FakeCellContainer*		m_cell_container; // Сейчас это будет только рюкзак ( карманы ) актора, для остального сделаем каждое внутреннее хранилище.
+protected:
 	void					PickupModeUpdate	();
 	void					PickupInfoDraw		(CObject* object);
 	void					PickupModeUpdate_COD ();

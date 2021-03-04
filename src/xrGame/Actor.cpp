@@ -123,6 +123,9 @@ CActor::CActor() : CEntityAlive(),current_ik_cam_shift(0)
 	cameras[eacFixedLookAt]	= xr_new<CCameraFixedLook>				(this);
 	cameras[eacFixedLookAt]->Load("actor_look_cam");
 
+	m_cell_container = xr_new<FakeCellContainer>();
+	m_cell_container->Init(7,8);
+
 	cam_active				= eacFirstEye;
 	fPrevCamPos				= 0.0f;
 	vPrevCamDir.set			(0.f,0.f,1.f);
@@ -317,12 +320,6 @@ void CActor::Load	(LPCSTR section )
 	bb.set	(vBOX_center,vBOX_center); bb.grow(vBOX_size);
 	character_physics_support()->movement()->SetBox		(0,bb);
 	*/
-	
-
-
-	
-	
-	
 	
 	//// m_PhysicMovementControl: Foots
 	//Fvector	vFOOT_center= pSettings->r_fvector3	(section,"ph_foot_center"	);

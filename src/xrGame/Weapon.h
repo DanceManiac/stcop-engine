@@ -316,6 +316,8 @@ protected:
 	ALife::EWeaponAddonStatus	m_eScopeStatus;
 	ALife::EWeaponAddonStatus	m_eSilencerStatus;
 	ALife::EWeaponAddonStatus	m_eGrenadeLauncherStatus;
+	ALife::EWeaponAddonStatus	m_eMagazineStatus;
+	
 
 	//названия секций подключаемых аддонов
 	shared_str		m_sScopeName;

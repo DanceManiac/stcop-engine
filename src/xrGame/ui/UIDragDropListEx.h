@@ -118,11 +118,17 @@ public:
 			virtual void	SetItem				(CUICellItem* itm); //auto
 			virtual void	SetItem				(CUICellItem* itm, Fvector2 abs_pos);  // start at cursor pos
 			virtual void	SetItem				(CUICellItem* itm, Ivector2 cell_pos); // start at cell
+			virtual void	SwapItem			(CUICellItem* itm, Ivector2 cell_pos); // start at cell
+			virtual void	SwapItem			(CUICellItem* itm, CUICellItem* itm2);
+
 					bool	CanSetItem			(CUICellItem* itm);
+					bool	CanSetItem			(CUICellItem* itm, Fvector2 abs_pos);
+					bool	CanSwapItem			(CUICellItem* itm, Fvector2 abs_pos);
 			
 			u32				ItemsCount			();
 			CUICellItem*	GetItemIdx			(u32 idx);
 	virtual CUICellItem*	RemoveItem			(CUICellItem* itm, bool force_root);
+	virtual	Ivector2		GetItemPos			(CUICellItem* itm);
 			void			CreateDragItem		(CUICellItem* itm);
 
 			void			DestroyDragItem		();
@@ -184,6 +190,7 @@ protected:
 				Ivector2		FindFreeCell		(const Ivector2& size);
 				bool			HasFreeSpace		(const Ivector2& size);
 				bool			IsRoomFree			(const Ivector2& pos, const Ivector2& size);
+				bool			IsRoomFree			(const Ivector2& pos, const Ivector2& size, CUICellItem* item);
 				
 				bool			AddSimilar			(CUICellItem* itm);
 				CUICellItem*	FindSimilar			(CUICellItem* itm);
@@ -192,8 +199,8 @@ protected:
 				CUICellItem*	RemoveItem			(CUICellItem* itm, bool force_root);
 				bool			ValidCell			(const Ivector2& pos) const;
 
-				void			Grow				();
-				void			Shrink				();
+	virtual		void			Grow				();
+	virtual		void			Shrink				();
 				void			ClearAll			(bool bDestroy);
 				void			clear_select_armament();
 

@@ -19,13 +19,17 @@ public:
 	void			switch2_StartReload		();
 	void			switch2_AddCartgidge	();
 	void			switch2_EndReload		();
-
+	void			switch2_Pump			();
 	virtual void	PlayAnimOpenWeapon		();
 	virtual void	PlayAnimAddOneCartridgeWeapon();
 	void			PlayAnimCloseWeapon		();
-
+	void            PlayAnimPumpWeapon		();
 	virtual bool	Action					(u16 cmd, u32 flags);
 	virtual	int		GetCurrentFireMode	() { return m_aFireModes[m_iCurFireMode]; };
+
+	bool			NeedPump();
+	bool			bNeedPumpAfterReload;
+	bool			bPumpShotgun;
 
 protected:
 	virtual void	OnAnimationEnd			(u32 state);

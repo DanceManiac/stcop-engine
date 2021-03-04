@@ -268,6 +268,8 @@ protected:
 	bool						TryUseItem					(CUICellItem* cell_itm);
 	bool						ToQuickSlot					(CUICellItem* itm);
 
+	bool                        SwapItem					(CUICellItem* itm, bool b_use_cursor_pos);
+
 	void						UpdateActorMP				();
 	void						UpdateOutfit				();
 	void						MoveArtefactsToBag			();
