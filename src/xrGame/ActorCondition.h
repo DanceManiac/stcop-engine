@@ -75,7 +75,7 @@ public:
 	virtual void		UpdateCondition();
 	void				UpdateBoosters();
 
-	virtual void 		ChangeAlcohol(const float value) { m_fAlcohol += value; };
+	virtual void 		ChangeAlcohol(const float value) { clamp(m_fAlcohol += value, 0.0f, 1.0f); };
 	virtual void 		ChangeSatiety(const float value) { clamp(m_fSatiety += value, 0.0f, 1.0f); };
 	virtual void 		ChangeThirst(const float value) { clamp(m_fThirst += value, 0.0f, 1.0f); };
 	virtual void 		ChangeToxicity(const float value) { clamp(m_fToxicity += value, 0.0f, 1.0f); };
@@ -86,7 +86,7 @@ public:
 	IC void				BoostThirstRestore(const float value) { m_fV_Thirst += value; };
 	IC void				BoostAlcoholRestore(const float value) { m_fV_Alcohol += value; };
 	IC void				BoostHpRestore(const float value) { m_change_v.m_fV_HealthRestore += value; };
-	IC void				BoostPowerRestore(const float value) { m_fV_Power += value; };
+	IC void				BoostPowerRestore(const float value) { m_fV_SatietyPower += value; };
 	IC void				BoostRadiationRestore(const float value) { m_change_v.m_fV_Radiation += value; };
 	IC void				BoostBleedingRestore(const float value) { m_change_v.m_fV_WoundIncarnation += value; };
 	IC void				BoostBurnImmunity(const float value) { m_fBoostBurnImmunity += value; };
@@ -122,7 +122,8 @@ public:
 	float	xr_stdcall	GetPsy() { return 1.0f - GetPsyHealth(); }
 	float				GetThirst() { return m_fThirst; }
 	float				GetSatiety() { return m_fSatiety; }
-	IC float GetConditionPower() const { return m_fV_Power * m_fSatiety * m_fThirst; };
+	float				GetToxicity() { return m_fToxicity; }
+	IC float GetConditionPower() const { return m_fV_SatietyPower * m_fSatiety * m_fThirst; };
 
 	void		AffectDamage_InjuriousMaterialAndMonstersInfluence();
 	float		GetInjuriousMaterialDamage();
@@ -140,9 +141,11 @@ public:
 	virtual void			load(IReader& input_packet);
 	//	IC		float const&	Satiety					()	{ return m_fSatiety; }
 	IC		float const& V_Satiety() { return m_fV_Satiety; }
-	IC		float const& V_SatietyPower() { return m_fV_Power; }
+	IC		float const& V_SatietyPower() { return m_fV_SatietyPower; }
 	IC		float const& V_SatietyHealth() { return m_fV_SatietyHealth; }
 	IC		float const& SatietyCritical() { return m_fSatietyCritical; }
+
+	IC		float const& ThirstCritical() { return m_fThirstCritical; }
 
 	float	GetZoneMaxPower(ALife::EInfluenceType type) const;
 	float	GetZoneMaxPower(ALife::EHitType hit_type) const;
@@ -167,13 +170,13 @@ protected:
 	//--
 	float m_fThirst;
 	float m_fV_Thirst;
+	float m_fThirstCritical;
 	//--
 	float m_fToxicity;
 	float m_fV_Toxicity;
 	float m_fV_ToxicityDamage;
 	float m_fToxicityCritical;
 	//--
-	float m_fV_Power;
 	float m_fPowerLeakSpeed;
 
 	float m_fJumpPower;

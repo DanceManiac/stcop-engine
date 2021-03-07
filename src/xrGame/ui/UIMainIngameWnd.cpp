@@ -106,20 +106,6 @@ void CUIMainIngameWnd::Init()
 
 	Enable(false);
 
-//	AttachChild					(&UIStaticHealth);	xml_init.InitStatic			(uiXml, "static_health", 0, &UIStaticHealth);
-//	AttachChild					(&UIStaticArmor);	xml_init.InitStatic			(uiXml, "static_armor", 0, &UIStaticArmor);
-//	AttachChild					(&UIWeaponBack);
-//	xml_init.InitStatic			(uiXml, "static_weapon", 0, &UIWeaponBack);
-
-/*	UIWeaponBack.AttachChild	(&UIWeaponSignAmmo);
-	xml_init.InitStatic			(uiXml, "static_ammo", 0, &UIWeaponSignAmmo);
-	UIWeaponSignAmmo.SetEllipsis	(CUIStatic::eepEnd, 2);
-
-	UIWeaponBack.AttachChild	(&UIWeaponIcon);
-	xml_init.InitStatic			(uiXml, "static_wpn_icon", 0, &UIWeaponIcon);
-	UIWeaponIcon.SetShader		(GetEquipmentIconsShader());
-	UIWeaponIcon_rect			= UIWeaponIcon.GetWndRect();
-*/	//---------------------------------------------------------
 	UIPickUpItemIcon			= UIHelper::CreateStatic		(uiXml, "pick_up_item", this);
 	UIPickUpItemIcon->SetShader	(GetEquipmentIconsShader());
 
@@ -144,6 +130,7 @@ void CUIMainIngameWnd::Init()
 	m_ind_bleeding			= UIHelper::CreateStatic(uiXml, "indicator_bleeding", this);
 	m_ind_radiation			= UIHelper::CreateStatic(uiXml, "indicator_radiation", this);
 	m_ind_starvation		= UIHelper::CreateStatic(uiXml, "indicator_starvation", this);
+	m_ind_thirst			= UIHelper::CreateStatic(uiXml, "indicator_thirst", this);
 	m_ind_weapon_broken		= UIHelper::CreateStatic(uiXml, "indicator_weapon_broken", this);
 	m_ind_helmet_broken		= UIHelper::CreateStatic(uiXml, "indicator_helmet_broken", this);
 	m_ind_outfit_broken		= UIHelper::CreateStatic(uiXml, "indicator_outfit_broken", this);
@@ -167,23 +154,9 @@ void CUIMainIngameWnd::Init()
 	m_ind_boost_rad			->Show(false);
 	
 	// Загружаем иконки 
-/*	if ( IsGameTypeSingle() )
-	{
-		xml_init.InitStatic		(uiXml, "starvation_static", 0, &UIStarvationIcon);
-		UIStarvationIcon.Show	(false);
 
-//		xml_init.InitStatic		(uiXml, "psy_health_static", 0, &UIPsyHealthIcon);
-//		UIPsyHealthIcon.Show	(false);
-	}
-*/
 	UIWeaponJammedIcon			= UIHelper::CreateStatic(uiXml, "weapon_jammed_static", NULL);
 	UIWeaponJammedIcon->Show	(false);
-
-//	xml_init.InitStatic			(uiXml, "radiation_static", 0, &UIRadiaitionIcon);
-//	UIRadiaitionIcon.Show		(false);
-
-//	xml_init.InitStatic			(uiXml, "wound_static", 0, &UIWoundIcon);
-//	UIWoundIcon.Show			(false);
 
 	UIInvincibleIcon			= UIHelper::CreateStatic(uiXml, "invincible_static", NULL);
 	UIInvincibleIcon->Show		(false);
@@ -330,9 +303,6 @@ void CUIMainIngameWnd::Update()
 		return;
 
 	UIZoneMap->Update();
-	
-//	UIHealthBar.SetProgressPos	(m_pActor->GetfHealth()*100.0f);
-//	UIMotionIcon->SetPower		(m_pActor->conditions().GetPower()*100.0f);
 	
 	UpdatePickUpItem			();
 
@@ -738,6 +708,22 @@ void CUIMainIngameWnd::UpdateMainIndicators()
 			m_ind_starvation->InitTexture("ui_inGame2_circle_hunger_yellow");
 		else
 			m_ind_starvation->InitTexture("ui_inGame2_circle_hunger_red");
+	}
+// Thirst icon
+	float thirst = pActor->conditions().GetThirst();
+	float thirst_critical = pActor->conditions().ThirstCritical();
+	float thirst_koef = (thirst - thirst_critical) / (thirst >= thirst_critical ? 1 - thirst_critical : thirst_critical);
+	if (thirst_koef > 0.5)
+		m_ind_thirst->Show(false);
+	else
+	{
+		m_ind_thirst->Show(true);
+		if (thirst_koef > 0.0f)
+			m_ind_thirst->InitTexture("ui_inGame2_circle_thirst_green");
+		else if (thirst_koef > -0.5f)
+			m_ind_thirst->InitTexture("ui_inGame2_circle_thirst_yellow");
+		else
+			m_ind_thirst->InitTexture("ui_inGame2_circle_thirst_red");
 	}
 // Armor broken icon
 	CCustomOutfit* outfit = smart_cast<CCustomOutfit*>(pActor->inventory().ItemFromSlot(OUTFIT_SLOT));

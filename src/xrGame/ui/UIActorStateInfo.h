@@ -59,7 +59,7 @@ public:
 	virtual void			Show					( bool status );
 
 private:
-			void			update_round_states		( CActor* actor, ALife::EHitType hit_type, EStateType stt_type );
+			void			update_round_states	(float value, ALife::EHitType hit_type, ui_actor_state_wnd::EStateType state_type);
 
 };
 

@@ -40,7 +40,13 @@ protected:
 	UIBoosterInfoItem* m_booster_telepatic_immunity;
 	UIBoosterInfoItem* m_booster_chemburn_immunity;
 
+	UIBoosterInfoItem* m_booster_satiety_restore;
+	UIBoosterInfoItem* m_booster_thirst_restore;
+	UIBoosterInfoItem* m_booster_toxicity_restore;
+
 	UIBoosterInfoItem*	m_booster_satiety;
+	UIBoosterInfoItem*  m_booster_thirst;
+	UIBoosterInfoItem*  m_booster_toxicity;
 	UIBoosterInfoItem*	m_booster_anabiotic;
 	UIBoosterInfoItem*	m_booster_time;
 

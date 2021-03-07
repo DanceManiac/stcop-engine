@@ -1,4 +1,4 @@
-////////////////////////////////////////////////////////////////////////////
+п»ї////////////////////////////////////////////////////////////////////////////
 //	Module 		: UIActorStateInfo.cpp
 //	Created 	: 15.02.2008
 //	Author		: Evgeniy Sokolov
@@ -140,20 +140,17 @@ void ui_actor_state_wnd::UpdateActorInfo( CInventoryOwner* owner )
 	float woun_value = 0.0f;
 	float shoc_value = 0.0f;
 	float fwou_value = 0.0f;
-
-	/*CEntityCondition::BOOSTER_MAP cur_booster_influences = actor->conditions().GetCurBoosterInfluences();
-	CEntityCondition::BOOSTER_MAP::const_iterator it;
-	it = cur_booster_influences.find(eBoostRadiationProtection);
-	if(it!=cur_booster_influences.end())
-		radi_value += it->second.fBoostValue;
-
-	it = cur_booster_influences.find(eBoostChemicalBurnProtection);
-	if(it!=cur_booster_influences.end())
-		cmbn_value += it->second.fBoostValue;
-
-	it = cur_booster_influences.find(eBoostTelepaticProtection);
-	if(it!=cur_booster_influences.end())
-		tele_value += it->second.fBoostValue;*/
+	const std::list<SBooster> curBoosters = actor->conditions().BoostersList;
+	
+	for (auto& it = curBoosters.cbegin(); it != curBoosters.cend(); ++it) 
+	{
+		if (it->fRadiationProtection != 0)
+			radi_value += it->fRadiationProtection;
+		if (it->fChemburnProtection != 0)
+			cmbn_value += it->fChemburnProtection;
+		if (it->fTelepaticProtection != 0)
+			cmbn_value += it->fTelepaticProtection;
+	}
 
 	if(outfit)
 	{
@@ -190,82 +187,41 @@ void ui_actor_state_wnd::UpdateActorInfo( CInventoryOwner* owner )
 	}
 	
 //fire burn protection progress bar
-	{
-		burn_value += actor->GetProtection_ArtefactsOnBelt(ALife::eHitTypeBurn);
-		float max_power = actor->conditions().GetZoneMaxPower(ALife::eHitTypeBurn);
-		burn_value = floor(burn_value / max_power * 31) / 31; // number of sticks in progress bar
-		m_state[stt_fire]->set_progress(burn_value);//0..1
-	}
+	update_round_states(burn_value, ALife::eHitTypeBurn, stt_fire);
 //radiation protection progress bar
-	{
-		radi_value += actor->GetProtection_ArtefactsOnBelt(ALife::eHitTypeRadiation);
-		float max_power = actor->conditions().GetZoneMaxPower(ALife::eHitTypeRadiation);
-		radi_value = floor(radi_value / max_power * 31) / 31; // number of sticks in progress bar
-		m_state[stt_radia]->set_progress(radi_value);//0..1
-	}
+	update_round_states(radi_value, ALife::eHitTypeRadiation, stt_radia);
 //chemical burn protection progress bar
-	{
-		cmbn_value += actor->GetProtection_ArtefactsOnBelt(ALife::eHitTypeChemicalBurn);
-		float max_power = actor->conditions().GetZoneMaxPower(ALife::eHitTypeChemicalBurn);
-		cmbn_value = floor(cmbn_value / max_power * 31) / 31; // number of sticks in progress bar
-		m_state[stt_acid]->set_progress(cmbn_value);//0..1
-	}
+	update_round_states(cmbn_value, ALife::eHitTypeChemicalBurn, stt_acid);
 //telepatic protection progress bar
-	{
-		tele_value += actor->GetProtection_ArtefactsOnBelt(ALife::eHitTypeTelepatic);
-		float max_power = actor->conditions().GetZoneMaxPower(ALife::eHitTypeTelepatic);
-		tele_value = floor(tele_value / max_power * 31) / 31; // number of sticks in progress bar  
-		m_state[stt_psi]->set_progress(tele_value);//0..1
-	}
+	update_round_states(tele_value, ALife::eHitTypeTelepatic, stt_psi);
 //wound protection progress bar
-	{
-		float max_power = actor->conditions().GetMaxWoundProtection();
-		woun_value = floor(woun_value / max_power * 31) / 31; // number of sticks in progress bar
-		m_state[stt_wound]->set_progress(woun_value);//0..1
-	}
+	update_round_states(woun_value, ALife::eHitTypeWound, stt_wound);
 //shock protection progress bar
-	{
-		shoc_value += actor->GetProtection_ArtefactsOnBelt(ALife::eHitTypeShock);
-		float max_power = actor->conditions().GetZoneMaxPower(ALife::eHitTypeShock);
-		shoc_value = floor(shoc_value / max_power * 31) / 31; // number of sticks in progress bar  
-		m_state[stt_shock]->set_progress(shoc_value);//0..1
-	}
+	update_round_states(shoc_value, ALife::eHitTypeShock, stt_shock);
 //fire wound protection progress bar
-	{
-		float max_power = actor->conditions().GetMaxFireWoundProtection();
-		fwou_value = floor(fwou_value / max_power * 31) / 31; // number of sticks in progress bar
-		m_state[stt_fire_wound]->set_progress(fwou_value);
-	}
+	update_round_states(fwou_value, ALife::eHitTypeFireWound, stt_fire_wound);
 //power restore speed progress bar
 	{
 		value = actor->GetRestoreSpeed(ALife::ePowerRestoreSpeed) / actor->conditions().GetMaxPowerRestoreSpeed();;
 		value = floor(value * 31) / 31; // number of sticks in progress bar  
-		m_state[stt_power]->set_progress(value);//0..1
+		m_state[stt_power]->set_progress(value);
 	}
 // -----------------------------------------------------------------------------------
 
 	UpdateHitZone();
 }
 
-void ui_actor_state_wnd::update_round_states( CActor* actor, ALife::EHitType hit_type, EStateType stt_type )
+void ui_actor_state_wnd::update_round_states(float value, ALife::EHitType hit_type, ui_actor_state_wnd::EStateType state_type)
 {
-	CCustomOutfit* outfit = actor->GetOutfit();
-	PIItem itm = actor->inventory().ItemFromSlot(HELMET_SLOT);
-	CHelmet* helmet = smart_cast<CHelmet*>(itm);
-	float value = (outfit)? outfit->GetDefHitTypeProtection( hit_type ) : 0.0f;
-	value += actor->GetProtection_ArtefactsOnBelt( hit_type );
-	value += helmet?helmet->GetDefHitTypeProtection(ALife::eHitTypeShock):0.0f;
-	
-	float max_power = actor->conditions().GetZoneMaxPower( hit_type );
-	value = value / max_power; //  = 0..1
-	//	m_state[stt_type]->set_progress_shape( value );
-	m_state[stt_type]->set_arrow( value );//0..1
-	m_state[stt_type]->set_text( value );//0..1
+	value += Actor()->GetProtection_ArtefactsOnBelt(hit_type);
+	float max_power = Actor()->conditions().GetZoneMaxPower(hit_type);
+	value = floor(value / max_power * 31) / 31; // number of sticks in progress bar  
+	m_state[state_type]->set_progress(value);//0..1
 }
 
 void ui_actor_state_wnd::UpdateHitZone()
 {
-	CUIHudStatesWnd* wnd = CurrentGameUI()->UIMainIngameWnd->get_hud_states(); //некрасиво слишком
+	CUIHudStatesWnd* wnd = CurrentGameUI()->UIMainIngameWnd->get_hud_states(); //РЅРµРєСЂР°СЃРёРІРѕ СЃР»РёС€РєРѕРј
 	VERIFY( wnd );
 	if ( !wnd )
 	{

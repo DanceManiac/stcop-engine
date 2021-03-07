@@ -26,7 +26,14 @@ CUIBoosterInfo::CUIBoosterInfo()
 	m_booster_telepatic_immunity = NULL;
 	m_booster_chemburn_immunity = NULL;
 
+	m_booster_satiety_restore = NULL;
+	m_booster_thirst_restore = NULL;
+	m_booster_toxicity_restore = NULL;
+
 	m_booster_satiety = NULL;
+	m_booster_thirst = NULL;
+	m_booster_toxicity = NULL;
+
 	m_booster_anabiotic = NULL;
 	m_booster_time = NULL;
 }
@@ -47,7 +54,14 @@ CUIBoosterInfo::~CUIBoosterInfo()
 	xr_delete(m_booster_telepatic_immunity);
 	xr_delete(m_booster_chemburn_immunity);
 
+	xr_delete(m_booster_satiety_restore);
+	xr_delete(m_booster_thirst_restore);
+	xr_delete(m_booster_toxicity_restore);
+
 	xr_delete(m_booster_satiety);
+	xr_delete(m_booster_thirst);
+	xr_delete(m_booster_toxicity);
+
 	xr_delete(m_booster_anabiotic);
 	xr_delete(m_booster_time);
 	xr_delete(m_Prop_line);
@@ -96,8 +110,21 @@ void CUIBoosterInfo::InitFromXml(CUIXml& xml)
 	InitInfoItemXml(xml, m_booster_chemburn_immunity, "boost_chemburn_immunity", "ui_inv_outfit_chemical_burn_immunity");
 	xml.SetLocalRoot(base_node);
 
+	InitInfoItemXml(xml, m_booster_satiety_restore, "boost_satiety_restore", "ui_inv_satiety_restore");
+	xml.SetLocalRoot(base_node);
+	InitInfoItemXml(xml, m_booster_thirst_restore, "boost_thirst_restore", "ui_inv_thirst_restore");
+	xml.SetLocalRoot(base_node);
+	InitInfoItemXml(xml, m_booster_toxicity_restore, "boost_toxicity_restore", "ui_inv_toxicity_restore");
+	xml.SetLocalRoot(base_node);
+	
+
 	InitInfoItemXml(xml, m_booster_satiety, "boost_satiety", "ui_inv_satiety");
 	xml.SetLocalRoot(base_node);
+	InitInfoItemXml(xml, m_booster_thirst, "boost_thirst", "ui_inv_thirst");
+	xml.SetLocalRoot(base_node);
+	InitInfoItemXml(xml, m_booster_toxicity, "boost_toxicity", "ui_inv_toxicity");
+	xml.SetLocalRoot(base_node);
+
 	InitInfoItemXml(xml, m_booster_anabiotic, "boost_anabiotic", "ui_inv_survive_surge");
 	xml.SetLocalRoot(base_node);
 
@@ -155,6 +182,14 @@ void CUIBoosterInfo::UpdateInfo(const CEatableItem& object)
 		SetInfo(m_booster_telepatic_immunity, object.m_Boosters.fTelepaticImmunity / GetMaxValue(ALife::infl_psi), cur_h);
 	if (!fis_zero(object.m_Boosters.fChemburnImmunity))
 		SetInfo(m_booster_chemburn_immunity, object.m_Boosters.fChemburnImmunity / GetMaxValue(ALife::infl_acid), cur_h);
+
+	if (!fis_zero(object.m_Boosters.fSatietyRestore))
+		SetInfo(m_booster_satiety_restore, object.m_Boosters.fSatietyRestore, cur_h);
+	if (!fis_zero(object.m_Boosters.fThirstRestore))
+		SetInfo(m_booster_thirst_restore, object.m_Boosters.fThirstRestore, cur_h);
+	if (!fis_zero(object.m_Boosters.fToxicityRestore))
+		SetInfo(m_booster_toxicity_restore, object.m_Boosters.fToxicityRestore, cur_h);
+
 	if (!fis_zero(object.m_fSatiety))
 		SetInfo(m_booster_satiety, object.m_fSatiety, cur_h);
 
@@ -237,9 +272,9 @@ void UIBoosterInfoItem::SetValue(float value)
 	value *= m_magnitude;
 	string32 buf;
 	if(m_show_sign)
-		xr_sprintf(buf, "%+.0f", value);
+		xr_sprintf(buf, "%+.f", value);
 	else
-		xr_sprintf(buf, "%.0f", value);
+		xr_sprintf(buf, "%.f", value);
 	
 	LPSTR str;
 	if(m_unit_str.size())
