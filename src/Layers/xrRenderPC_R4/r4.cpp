@@ -286,24 +286,6 @@ void					CRender::create					()
 	o.disasm			= (strstr(Core.Params,"-disasm"))?		TRUE	:FALSE	;
 	o.forceskinw		= (strstr(Core.Params,"-skinw"))?		TRUE	:FALSE	;
 
-	o.ssao_blur_on		= ps_r2_ls_flags_ext.test(R2FLAGEXT_SSAO_BLUR) && (ps_r_ssao != 0);
-	o.ssao_opt_data		= ps_r2_ls_flags_ext.test(R2FLAGEXT_SSAO_OPT_DATA) && (ps_r_ssao != 0);
-	o.ssao_half_data	= ps_r2_ls_flags_ext.test(R2FLAGEXT_SSAO_HALF_DATA) && o.ssao_opt_data && (ps_r_ssao != 0);
-	o.ssao_hdao			= ps_r2_ls_flags_ext.test(R2FLAGEXT_SSAO_HDAO) && (ps_r_ssao != 0);
-	o.ssao_hbao			= !o.ssao_hdao && ps_r2_ls_flags_ext.test(R2FLAGEXT_SSAO_HBAO) && (ps_r_ssao != 0);
-
-	//	TODO: fix hbao shader to allow to perform per-subsample effect!
-	o.hbao_vectorized = false;
-	if (o.ssao_hbao )
-	{
-		if (HW.Caps.id_vendor==0x1002)
-			o.hbao_vectorized = true;
-		o.ssao_opt_data = true;
-	}
-
-    if( o.ssao_hdao )
-        o.ssao_opt_data = false;
-
 	o.dx10_sm4_1		= ps_r2_ls_flags.test((u32)R3FLAG_USE_DX10_1);
 	o.dx10_sm4_1		= o.dx10_sm4_1 && ( HW.FeatureLevel >= D3D_FEATURE_LEVEL_10_1 );
 
@@ -1132,52 +1114,6 @@ HRESULT	CRender::shader_compile			(
 		def_it						++;
 	}
 	sh_name[len]='0'+char(o.forceskinw); ++len;
-
-	if (o.ssao_blur_on)
-	{
-		defines[def_it].Name		=	"USE_SSAO_BLUR";
-		defines[def_it].Definition	=	"1";
-		def_it						++;
-	}
-	sh_name[len]='0'+char(o.ssao_blur_on); ++len;
-
-    if (o.ssao_hdao)
-    {
-        defines[def_it].Name		=	"HDAO";
-        defines[def_it].Definition	=	"1";
-        def_it						++;
-		sh_name[len]='1'; ++len;
-		sh_name[len]='0'; ++len;
-		sh_name[len]='0'; ++len;
-    }
-	else {
-		sh_name[len]='0'; ++len;
-		sh_name[len]='0'+char(o.ssao_hbao); ++len;
-		sh_name[len]='0'+char(o.ssao_half_data); ++len;
-		if (o.ssao_hbao) {
-			defines[def_it].Name		=	"SSAO_OPT_DATA";
-			if (o.ssao_half_data)
-			{
-				defines[def_it].Definition	=	"2";
-			}
-			else
-			{
-				defines[def_it].Definition	=	"1";
-			}
-			def_it						++;
-
-			if (o.hbao_vectorized)
-			{
-				defines[def_it].Name		=	"VECTORIZED_CODE";
-				defines[def_it].Definition	=	"1";
-				def_it						++;
-			}
-
-			defines[def_it].Name		=	"USE_HBAO";
-			defines[def_it].Definition	=	"1";
-			def_it						++;
-		}
-	}
 
     if( o.dx10_msaa )
 	{

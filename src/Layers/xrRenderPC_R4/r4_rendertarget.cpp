@@ -9,9 +9,8 @@
 #include "blender_combine.h"
 #include "blender_bloom_build.h"
 #include "blender_luminance.h"
-#include "blender_ssao.h"
+
 #include "dx11MinMaxSMBlender.h"
-#include "dx11HDAOCSBlender.h"
 #include "../xrRenderDX10/msaa/dx10MSAABlender.h"
 #include "../xrRenderDX10/DX10 Rain/dx10RainBlender.h"
 
@@ -19,6 +18,9 @@
 #include "blender_cut.h"
 #include "blender_gasmask.h"
 #include "blender_nightvision.h"
+#include "blender_smaa.h"
+#include "blender_ao.h"
+#include "blender_ssr.h"
 
 #include "../xrRender/dxRenderDeviceRender.h"
 
@@ -274,10 +276,6 @@ CRenderTarget::CRenderTarget		()
 {
    u32 SampleCount = 1;
 
-   if (ps_r_ssao_mode!=2/*hdao*/)
-	   ps_r_ssao = _min(ps_r_ssao, 3);
-
-	RImplementation.o.ssao_ultra		= ps_r_ssao>3;
    if( RImplementation.o.dx10_msaa )
       SampleCount    = RImplementation.o.dx10_msaa_samples;
 
@@ -308,13 +306,6 @@ CRenderTarget::CRenderTarget		()
 	dxRenderDeviceRender::Instance().Resources->Evict			();
 
 	// Blenders
-	
-	//FFT
-	b_cut					= xr_new<CBlender_cut>					(); //New
-	b_gasmask				= xr_new<CBlender_gasmask>				(); //New
-	b_nightvision			= xr_new<CBlender_nightvision>			(); //New
-		
-	
 	b_occq					= xr_new<CBlender_light_occq>			();
 	b_accum_mask			= xr_new<CBlender_accum_direct_mask>	();
 	b_accum_direct			= xr_new<CBlender_accum_direct>			();
@@ -329,14 +320,6 @@ CRenderTarget::CRenderTarget		()
 	}
 	b_luminance				= xr_new<CBlender_luminance>		();
 	b_combine				= xr_new<CBlender_combine>			();
-	b_ssao					= xr_new<CBlender_SSAO_noMSAA>		();
-
-	// HDAO
-	b_hdao_cs               = xr_new<CBlender_CS_HDAO>			();
-	if( RImplementation.o.dx10_msaa )
-	{
-		b_hdao_msaa_cs      = xr_new<CBlender_CS_HDAO_MSAA>     ();
-	}
 
 	if( RImplementation.o.dx10_msaa )
 	{
@@ -357,7 +340,6 @@ CRenderTarget::CRenderTarget		()
 			b_accum_volumetric_msaa[i]				= xr_new<CBlender_accum_volumetric_msaa>	();
 			b_accum_point_msaa[i]						= xr_new<CBlender_accum_point_msaa>			();
 			b_accum_reflected_msaa[i]					= xr_new<CBlender_accum_reflected_msaa>		();
-			b_ssao_msaa[i]							= xr_new<CBlender_SSAO_MSAA>				();
 			static_cast<CBlender_accum_direct_mask_msaa*>( b_accum_mask_msaa[i] )->SetDefine( "ISAMPLE", SampleDefs[i]);
 			static_cast<CBlender_accum_direct_volumetric_msaa*>(b_accum_direct_volumetric_msaa[i])->SetDefine( "ISAMPLE", SampleDefs[i]);
 			//static_cast<CBlender_accum_direct_volumetric_sun_msaa*>(b_accum_direct_volumetric_sun_msaa[i])->SetDefine( "ISAMPLE", SampleDefs[i]);
@@ -367,7 +349,6 @@ CRenderTarget::CRenderTarget		()
 			static_cast<CBlender_accum_point_msaa*>(b_accum_point_msaa[i])->SetDefine( "ISAMPLE", SampleDefs[i]);
 			static_cast<CBlender_accum_reflected_msaa*>(b_accum_reflected_msaa[i])->SetDefine( "ISAMPLE", SampleDefs[i]);
 			static_cast<CBlender_combine_msaa*>(b_combine_msaa[i])->SetDefine( "ISAMPLE", SampleDefs[i]);
-			static_cast<CBlender_SSAO_MSAA*>(b_ssao_msaa[i])->SetDefine("ISAMPLE", SampleDefs[i]);
 		}
 	}
 	//	NORMAL
@@ -424,7 +405,7 @@ CRenderTarget::CRenderTarget		()
 		//rt_Generic_2.create			(r2_RT_generic2,w,h,D3DFMT_A8R8G8B8		);
 		//	temp: for higher quality blends
 		if (RImplementation.o.advancedpp)
-			rt_Generic_2.create			(r2_RT_generic2, vp_params_main_secondary,D3DFMT_A16B16G16R16F, SampleCount );
+			rt_Generic_2.create			(r2_RT_generic2, vp_params_main_secondary,D3DFMT_A16B16G16R16F, SampleCount );	
 	}
 
 	// OCCLUSION
@@ -588,21 +569,72 @@ CRenderTarget::CRenderTarget		()
 		}
 	}
 
+
 	//SVP cut shader
 	{
+		b_cut = xr_new<CBlender_cut>();		
 		s_cut.create(b_cut, "r4\\cut");
 	}
 
 	//Gasmask shader
 	{
+		b_gasmask = xr_new<CBlender_gasmask>();		
 		s_gasmask.create(b_gasmask, "r4\\gasmask");
 	}	
 
 	//Nightvision shader
 	{
+		b_nightvision = xr_new<CBlender_nightvision>();		
 		s_nightvision.create(b_nightvision, "r4\\nightvision");
 	}	
+	
+	//SMAA shader
+	{
+		u32	w = Device.dwWidth;
+		u32 h = Device.dwHeight;
 		
+		xr_vector<RtCreationParams> vp_params_main_secondary;
+		vp_params_main_secondary.push_back(RtCreationParams(w, h, MAIN_VIEWPORT));
+		vp_params_main_secondary.push_back(RtCreationParams(Device.m_SecondViewport.screenWidth, Device.m_SecondViewport.screenHeight, SECONDARY_WEAPON_SCOPE));
+		
+		rt_smaa_edgetex.create(r2_RT_smaa_edgetex, vp_params_main_secondary, D3DFMT_A8R8G8B8);
+		rt_smaa_blendtex.create(r2_RT_smaa_blendtex, vp_params_main_secondary, D3DFMT_A8R8G8B8);
+		
+		b_smaa = xr_new<CBlender_smaa>();
+		s_smaa.create(b_smaa, "r4\\smaa");
+	}
+	
+	//AO shader
+	{
+		u32	w = Device.dwWidth;
+		u32 h = Device.dwHeight;	
+
+		xr_vector<RtCreationParams> vp_params_main_secondary;
+		vp_params_main_secondary.push_back(RtCreationParams(w, h, MAIN_VIEWPORT));
+		vp_params_main_secondary.push_back(RtCreationParams(Device.m_SecondViewport.screenWidth, Device.m_SecondViewport.screenHeight, SECONDARY_WEAPON_SCOPE));
+
+		rt_ao.create(r2_RT_ao, vp_params_main_secondary, D3DFMT_R32F); //AMD compatible
+		rt_ao_blur.create(r2_RT_ao_blur, vp_params_main_secondary, D3DFMT_R32F); //AMD compatible
+		
+		b_ao = xr_new<CBlender_ao>();
+		s_ao.create(b_ao, "r4\\ao");
+	}
+
+	//SSR shader
+	{
+		u32	w = Device.dwWidth;
+		u32 h = Device.dwHeight;	
+
+		xr_vector<RtCreationParams> vp_params_main_secondary;
+		vp_params_main_secondary.push_back(RtCreationParams(w, h, MAIN_VIEWPORT));
+		vp_params_main_secondary.push_back(RtCreationParams(Device.m_SecondViewport.screenWidth, Device.m_SecondViewport.screenHeight, SECONDARY_WEAPON_SCOPE));
+
+		rt_ssr.create(r2_RT_ssr, vp_params_main_secondary, D3DFMT_A8R8G8B8);
+
+		b_ssr = xr_new<CBlender_ssr>();
+		s_ssr.create(b_ssr, "r4\\ssr");
+	}
+	
 	// BLOOM
 	{
 		D3DFORMAT	fmt				= D3DFMT_A8R8G8B8;			//;		// D3DFMT_X8R8G8B8
@@ -650,75 +682,6 @@ CRenderTarget::CRenderTarget		()
 			HW.pContext->ClearRenderTargetView(rt_LUM_pool[it]->pRT, ColorRGBA);
 		}
 		u_setrt						( Device.dwWidth,Device.dwHeight,HW.pBaseRT,NULL,NULL,HW.pBaseZB);
-	}
-
-	// HBAO
-	if (RImplementation.o.ssao_opt_data)
-	{
-		u32		w = 0;
-		u32		h = 0;
-		if (RImplementation.o.ssao_half_data)
-		{
-			w = Device.dwWidth / 2;
-			h = Device.dwHeight / 2;
-		}
-		else
-		{
-			w = Device.dwWidth;
-			h = Device.dwHeight;
-		}
-
-		D3DFORMAT	fmt = HW.Caps.id_vendor==0x10DE?D3DFMT_R32F:D3DFMT_R16F;
-		rt_half_depth.create(r2_RT_half_depth, RtCreationParams(w, h, MAIN_VIEWPORT), RtCreationParams(u32(w * psSVPImageSizeK), u32(h * psSVPImageSizeK), SECONDARY_WEAPON_SCOPE), fmt);
-
-		s_ssao.create				(b_ssao, "r2\\ssao");
-	}
-
-	//if (RImplementation.o.ssao_blur_on)
-	//{
-	//	u32		w = Device.dwWidth, h = Device.dwHeight;
-	//	rt_ssao_temp.create			(r2_RT_ssao_temp, w, h, D3DFMT_G16R16F, SampleCount);
-	//	s_ssao.create				(b_ssao, "r2\\ssao");
-
-	//	if( RImplementation.o.dx10_msaa )
-	//	{
-	//		int bound = RImplementation.o.dx10_msaa_opt ? 1 : RImplementation.o.dx10_msaa_samples;
-
-	//		for( int i = 0; i < bound; ++i )
-	//		{
-	//			s_ssao_msaa[i].create( b_ssao_msaa[i], "null");
-	//		}
-	//	}
-	//}
-
-	// HDAO
-	const bool ssao_blur_on = RImplementation.o.ssao_blur_on;
-	const bool ssao_hdao_ultra = RImplementation.o.ssao_hdao && RImplementation.o.ssao_ultra;
-	if (ssao_blur_on || ssao_hdao_ultra)
-	{
-		u32	w = Device.dwWidth, h = Device.dwHeight;
-
-		if (ssao_hdao_ultra)
-		{
-			rt_ssao_temp.create(r2_RT_ssao_temp, RtCreationParams(w, h, MAIN_VIEWPORT), RtCreationParams(Device.m_SecondViewport.screenWidth, Device.m_SecondViewport.screenHeight, SECONDARY_WEAPON_SCOPE), D3DFMT_R16F, 1, true);
-			s_hdao_cs.create(b_hdao_cs, "r2\\ssao");
-			if (RImplementation.o.dx10_msaa)
-				s_hdao_cs_msaa.create(b_hdao_msaa_cs, "r2\\ssao");
-		}
-		else if (ssao_blur_on)
-		{
-			rt_ssao_temp.create(r2_RT_ssao_temp, RtCreationParams(w, h, MAIN_VIEWPORT), RtCreationParams(Device.m_SecondViewport.screenWidth, Device.m_SecondViewport.screenHeight, SECONDARY_WEAPON_SCOPE), D3DFMT_R16F, 1, true);
-			s_ssao.create(b_ssao, "r2\\ssao");
-
-
-			/* Should be used in r4_rendertarget_phase_ssao.cpp but it's commented there.
-			if (RImplementation.o.dx10_msaa)
-			{
-				const int bound = RImplementation.o.dx10_msaa_opt ? 1 : RImplementation.o.dx10_msaa_samples;
-				for (int i = 0; i < bound; ++i)
-					s_ssao_msaa[i].create(b_ssao_msaa[i], "null");
-			}*/
-		}
 	}
 
 	// COMBINE
@@ -1087,7 +1050,6 @@ CRenderTarget::~CRenderTarget	()
 	xr_delete					(b_accum_spot			);
 	xr_delete					(b_accum_point			);
 	xr_delete					(b_accum_direct			);
-	xr_delete					(b_ssao					);
 
    if( RImplementation.o.dx10_msaa )
    {
@@ -1102,26 +1064,22 @@ CRenderTarget::~CRenderTarget	()
 		  xr_delete					(b_accum_direct_msaa[i]);
 		  xr_delete					(b_accum_mask_msaa[i]);
 		  xr_delete					(b_accum_direct_volumetric_msaa[i]);
-		  //xr_delete					(b_accum_direct_volumetric_sun_msaa[i]);
 		  xr_delete					(b_accum_spot_msaa[i]);
 		  xr_delete					(b_accum_volumetric_msaa[i]);
 		  xr_delete					(b_accum_point_msaa[i]);
 		  xr_delete					(b_accum_reflected_msaa[i]);
-		  xr_delete					(b_ssao_msaa[i]);
 	  }
    }
 	xr_delete					(b_accum_mask			);
 
 	xr_delete					(b_occq					);
-	xr_delete					(b_hdao_cs				);
-	if( RImplementation.o.dx10_msaa )
-	{
-        xr_delete( b_hdao_msaa_cs );
-    }
 	
 	xr_delete					(b_cut					);
-	xr_delete					(b_gasmask				);	
-	xr_delete					(b_nightvision			);		
+	xr_delete					(b_gasmask				);
+	xr_delete					(b_nightvision			);	
+	xr_delete					(b_smaa					);	
+	xr_delete					(b_ao					);	
+	xr_delete					(b_ssr					);
 }
 
 void CRenderTarget::reset_light_marker( bool bResetStencil)

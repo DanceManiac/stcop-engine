@@ -5,7 +5,6 @@
 #define		r2_RT_depth			"$user$depth"			      // MRT
 #define		r2_RT_MSAAdepth	"$user$msaadepth"	         // MRT
 #define		r2_RT_P				"$user$position"		      // MRT
-#define		r2_RT_N				"$user$normal"			      // MRT
 #define		r2_RT_M				"$user$misc"			      // MRT
 #define		r2_RT_albedo		"$user$albedo"			      // MRT
 
@@ -18,9 +17,6 @@
 
 #define		r2_T_sky0			"$user$sky0" 
 #define		r2_T_sky1			"$user$sky1" 
-
-#define		r2_RT_ssao_temp		"$user$ssao_temp"		//temporary rt for ssao calculation
-#define		r2_RT_half_depth	"$user$half_depth"		//temporary rt for ssao calculation
 
 #define		r2_RT_generic0		"$user$generic0"		// ---
 #define		r2_RT_generic0_r	"$user$generic0_r"	// ---
@@ -54,11 +50,19 @@
 #define     r2_RT_temp          "$user$temp"
 #define     r2_RT_temp_without_samples          "$user$temp_ws"
 
+#define		r2_RT_smaa_edgetex	"$user$smaa_edgetex"
+#define		r2_RT_smaa_blendtex	"$user$smaa_blendtex"
+
+#define		r2_RT_ao	"$user$ao"
+#define		r2_RT_ao_blur	"$user$ao_blur"
+
+#define		r2_RT_ssr "$user$ssr"
+
 #define		JITTER(a) r2_jitter #a
 
-const		float				SMAP_near_plane		= .1f	;
+const		float				SMAP_near_plane		= .1f	; //LV: Check it in future
 
-const		u32					SMAP_adapt_min		= 32	;
+const		u32					SMAP_adapt_min		= 128	;
 const		u32					SMAP_adapt_optimal	= 768	;
 const		u32					SMAP_adapt_max		= 1536	;
 

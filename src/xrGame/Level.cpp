@@ -593,7 +593,7 @@ void CLevel::OnFrame()
     }
 }
 
-int psLUA_GCSTEP = 10;
+int psLUA_GCSTEP = 128; //10 / 128 / 256
 void CLevel::script_gc()
 {
     lua_gc(ai().script_engine().lua(), LUA_GCSTEP, psLUA_GCSTEP);

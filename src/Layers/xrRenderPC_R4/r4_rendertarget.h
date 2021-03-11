@@ -47,17 +47,14 @@ public:
 	IBlender*					b_accum_volumetric_msaa[8];
 	IBlender*					b_accum_point_msaa[8];
 	IBlender*					b_accum_reflected_msaa[8];
-	IBlender*					b_ssao;
-	IBlender*					b_ssao_msaa[8];
 
 	IBlender*					b_cut;
 	IBlender*					b_gasmask;
 	IBlender*					b_nightvision;
+	IBlender*					b_smaa;
+	IBlender*					b_ao;
+	IBlender*					b_ssr;
 	
-    // compute shader for hdao
-    IBlender*                   b_hdao_cs;
-    IBlender*                   b_hdao_msaa_cs;
-
 #ifdef DEBUG
 	struct		dbg_line_t		{
 		Fvector	P0,P1;
@@ -80,6 +77,14 @@ public:
 
 	ref_rt                      rt_temp;
 	ref_rt                      rt_temp_without_samples;
+
+	ref_rt 						rt_smaa_edgetex;
+	ref_rt 						rt_smaa_blendtex;
+
+	ref_rt 						rt_ao;
+	ref_rt 						rt_ao_blur;
+	
+	ref_rt						rt_ssr;
 
 	// 
 	ref_rt						rt_Accumulator;		// 64bit		(r,g,b,specular)
@@ -128,14 +133,6 @@ private:
 
 	ref_shader					s_occq;
 
-	// SSAO
-	ref_rt						rt_ssao_temp;
-	ref_rt						rt_half_depth;
-	ref_shader					s_ssao;
-	ref_shader					s_ssao_msaa[8];
-	ref_shader					s_hdao_cs;
-	ref_shader					s_hdao_cs_msaa;
-
 	// Accum
 	ref_shader					s_accum_mask	;
 	ref_shader					s_accum_direct	;
@@ -149,6 +146,9 @@ private:
 	ref_shader					s_cut;
 	ref_shader					s_gasmask;
 	ref_shader					s_nightvision;
+	ref_shader 					s_smaa;
+	ref_shader 					s_ao;
+	ref_shader					s_ssr;
 	
 	//	generate min/max
 	ref_shader					s_create_minmax_sm;
@@ -268,9 +268,6 @@ public:
 	void						phase_scene_begin		();
 	void						phase_scene_end			();
 	void						phase_occq				();
-	void						phase_ssao				();
-	void						phase_hdao				();
-	void						phase_downsamp			();
 	void						phase_wallmarks			();
 	void						phase_smap_direct		(light* L,	u32 sub_phase);
 	void						phase_smap_direct_tsh	(light* L,	u32 sub_phase);
@@ -284,6 +281,9 @@ public:
 	void						phase_cut();
 	void						phase_gasmask();
 	void						phase_nightvision();
+	void						phase_smaa();
+	void						phase_ao();
+	void						phase_ssr();
 	
 	void						SwitchViewPort(ViewPort vp);
 	//	Generates min/max sm

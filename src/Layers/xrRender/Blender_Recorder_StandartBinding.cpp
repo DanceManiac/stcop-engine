@@ -337,6 +337,44 @@ static class cl_inv_v : public R_constant_setup //LV, inverted view matrix (v2w)
 	}
 } binder_inv_v;
 
+static class cl_screen_near_far : public R_constant_setup
+{
+	Fvector4 result;
+
+	virtual void setup(R_constant* C)
+	{
+		float nearPlane = float(VIEWPORT_NEAR);
+		float farPlane = g_pGamePersistent->Environment().CurrentEnv->far_plane;
+		result.set(nearPlane, farPlane, 0, 0);
+		RCache.set_c(C, result);
+	}
+} binder_screen_near_far;
+
+class cl_p_pixel : public R_constant_setup
+{
+	virtual void setup(R_constant* C)
+	{
+		Fmatrix mP_pixel;
+		
+		//Get viewport dimmensions
+		float vp_width = float(RDEVICE.dwWidth);
+		float vp_height = float(RDEVICE.dwHeight);
+		
+		Fmatrix mP_adjustment = 
+		{
+			0.5f * vp_width, 0.0f, 0.0f, 0.5f * vp_width,
+			0.0f, -0.5f * vp_height, 0.0f, 0.5f * vp_height,
+			0.0f, 0.0f, 1.0f, 0.0f,
+			0.0f, 0.0f, 0.0f, 1.0f			
+		};
+		
+		//Multiply proj matrix with our pixel adj
+		mP_pixel.mul(mP_adjustment, RCache.xforms.m_p); //Proj to pixel space
+
+		RCache.set_c(C, mP_pixel);
+	}
+};
+static cl_p_pixel binder_p_pixel;
 
 // Standart constant-binding
 void	CBlender_Compile::SetMapping	()
@@ -353,6 +391,8 @@ void	CBlender_Compile::SetMapping	()
 	r_Constant				("m_V",				&binder_v);				//View matrix
 	r_Constant				("m_invV",			&binder_inv_v);			//Inverted view matrix
 	r_Constant				("m_P",				&binder_p);				//Projection matrix
+	r_Constant				("m_P_pixel",		&binder_p_pixel);		//View to pixel space matrix
+		
 	r_Constant				("m_WV",			&binder_wv);			//Vertex->World->View matrix
 	r_Constant				("m_VP",			&binder_vp);			//World->View->Projection matrix
 	r_Constant				("m_WVP",			&binder_wvp);			//Vertex->View->Projection matrix
@@ -399,7 +439,7 @@ void	CBlender_Compile::SetMapping	()
 	r_Constant				("L_ambient",		&binder_amb_color);
 #endif
 	r_Constant				("screen_res",		&binder_screen_res);
-
+	r_Constant				("screen_near_far", &binder_screen_near_far);
 	// detail
 	//if (bDetail	&& detail_scaler)
 	//	Igor: bDetail can be overridden by no_detail_texture option.
