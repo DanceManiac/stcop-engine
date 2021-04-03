@@ -253,6 +253,20 @@ void CActorCondition::UpdateCondition()
 	AffectDamage_InjuriousMaterialAndMonstersInfluence();
 }
 
+void CActorCondition::UpdateBoosters()
+{
+	for (auto& it = m_BoostersList.begin(); it != m_BoostersList.end(); ++it)
+	{
+		it->fBoostTime -= m_fDeltaTime / (IsGameTypeSingle() ? Level().GetGameTimeFactor() : 1.0f);
+		if (it->fBoostTime <= 0.0f)
+		{
+			DisableBooster(*it);
+			m_BoostersList.erase(it);
+			break;
+		}
+	}
+}
+
 void CActorCondition::UpdateThirst()
 {
 	if (GetThirst() > 0)
@@ -296,27 +310,13 @@ void CActorCondition::UpdateAlcohol()
 	}
 }
 
-void CActorCondition::UpdateBoosters()
-{
-	for (auto &it = BoostersList.begin(); it != BoostersList.end(); ++it) 
-	{
-		it->fBoostTime -= m_fDeltaTime / (IsGameTypeSingle() ? Level().GetGameTimeFactor() : 1.0f);
-		if (it->fBoostTime <= 0.0f)
-		{
-			ChangeBoostParameters(*it, false);
-			BoostersList.erase(it);
-			break;
-		}
-	}
-}
-
 void CActorCondition::UpdateToxicity()
 {
 	ChangeToxicity(m_fV_Toxicity * m_fDeltaTime * (m_fV_Toxicity < 0 ? m_fThirst : 1));
 
 	if (CanBeHarmed() && !psActorFlags.test(AF_GODMODE_RT)) 
 	{
-		if (m_fToxicityCritical <= GetToxicity())
+		if (GetToxicity() >= m_fToxicityCritical)
 			ChangeHealth(m_fV_ToxicityDamage * m_fDeltaTime);
 	}
 }
@@ -459,9 +459,7 @@ bool CActorCondition::IsCantWalkWeight()
 {
 	if(!GodMode())
 	{
-		float max_w	= m_object->MaxWalkWeight();
-
-		if( object().inventory().TotalWeight() > max_w )
+		if( object().inventory().TotalWeight() > m_object->MaxWalkWeight())
 		{
 			m_condition_flags.set(eCantWalkWeight, TRUE);
 			return true;
@@ -499,9 +497,9 @@ void CActorCondition::save(NET_Packet &output_packet)
 	save_data			(m_fThirst, output_packet);
 	save_data			(m_fToxicity, output_packet);
 
-	save_data((u8)BoostersList.size(), output_packet);
+	save_data((u8)m_BoostersList.size(), output_packet);
 
-	for (auto& it = BoostersList.cbegin(); it != BoostersList.cend(); ++it)
+	for (auto& it = m_BoostersList.cbegin(); it != m_BoostersList.cend(); ++it)
 	{
 		//B.sSectionName = input_packet.r_s8();
 		save_data(it->fSatietyRestore, output_packet);
@@ -525,6 +523,8 @@ void CActorCondition::save(NET_Packet &output_packet)
 		save_data(it->fTelepaticProtection, output_packet);
 		save_data(it->fChemburnProtection, output_packet);
 		save_data(it->fToxicityRestore, output_packet);
+		save_data(it->fMaxSpeed, output_packet);
+
 		save_data(it->fBoostTime, output_packet);
 	}
 }
@@ -538,10 +538,7 @@ void CActorCondition::load(IReader &input_packet)
 	load_data			(m_fThirst, input_packet);
 	load_data			(m_fToxicity, input_packet);
 
-	u8 cntr;
-	load_data(cntr, input_packet);
-
-	for (; cntr > 0; --cntr)
+	for (u8 cntr = input_packet.r_u8(); cntr > 0; --cntr)
 	{
 		SBooster B;
 		load_data(B.fSatietyRestore, input_packet);
@@ -565,9 +562,10 @@ void CActorCondition::load(IReader &input_packet)
 		load_data(B.fTelepaticProtection, input_packet);
 		load_data(B.fChemburnProtection, input_packet);
 		load_data(B.fToxicityRestore, input_packet);
+		load_data(B.fMaxSpeed, input_packet);
+
 		load_data(B.fBoostTime, input_packet);
-		ChangeBoostParameters(B, true);
-		BoostersList.push_back(B);
+		EnableBooster(B);
 	}
 }
 
@@ -579,30 +577,57 @@ void CActorCondition::reinit	()
 	m_fThirst					= 1.f;
 }
 
-void CActorCondition::ChangeBoostParameters(const SBooster& B, bool positive)
+void CActorCondition::EnableBooster(const SBooster& B)
 {
-	int m = positive ? 1 : -1;
-	BoostSatietyRestore(B.fSatietyRestore * m);
-	BoostThirstRestore(B.fThirstRestore * m);
-	BoostAlcoholRestore(B.fAlcoholRestore * m);
-	BoostHpRestore(B.fHealthRestore * m);
-	BoostPowerRestore(B.fPowerRestore * m);
-	BoostRadiationRestore(B.fRadiationRestore * m);
-	BoostBleedingRestore(B.fBleedingRestore * m);
-	BoostMaxWeight(B.fMaxWeight * m);
-	BoostBurnImmunity(B.fBurnImmunity * m);
-	BoostShockImmunity(B.fShockImmunity * m);
-	BoostRadiationImmunity(B.fRadiationImmunity * m);
-	BoostTelepaticImmunity(B.fTelepaticImmunity * m);
-	BoostChemicalBurnImmunity(B.fChemburnImmunity * m);
-	BoostExplImmunity(B.fExplosionImmunity * m);
-	BoostStrikeImmunity(B.fStrikeImmunity * m);
-	BoostFireWoundImmunity(B.fFireWoundImmunity * m);
-	BoostWoundImmunity(B.fWoundImmunity * m);
-	BoostRadiationProtection(B.fRadiationProtection * m);
-	BoostTelepaticProtection(B.fTelepaticProtection * m);
-	BoostChemicalBurnProtection(B.fChemburnProtection * m);
-	BoostToxicityRestore(B.fToxicityRestore * m);
+	BoostSatietyRestore(B.fSatietyRestore);
+	BoostThirstRestore(B.fThirstRestore);
+	BoostAlcoholRestore(B.fAlcoholRestore);
+	BoostHpRestore(B.fHealthRestore);
+	BoostPowerRestore(B.fPowerRestore);
+	BoostRadiationRestore(B.fRadiationRestore);
+	BoostBleedingRestore(B.fBleedingRestore);
+	BoostMaxWeight(B.fMaxWeight);
+	BoostBurnImmunity(B.fBurnImmunity);
+	BoostShockImmunity(B.fShockImmunity);
+	BoostRadiationImmunity(B.fRadiationImmunity);
+	BoostTelepaticImmunity(B.fTelepaticImmunity);
+	BoostChemicalBurnImmunity(B.fChemburnImmunity);
+	BoostExplImmunity(B.fExplosionImmunity);
+	BoostStrikeImmunity(B.fStrikeImmunity);
+	BoostFireWoundImmunity(B.fFireWoundImmunity);
+	BoostWoundImmunity(B.fWoundImmunity);
+	BoostRadiationProtection(B.fRadiationProtection);
+	BoostTelepaticProtection(B.fTelepaticProtection);
+	BoostChemicalBurnProtection(B.fChemburnProtection);
+	BoostToxicityRestore(B.fToxicityRestore);
+	BoostMaxSpeed(B.fMaxSpeed);
+
+	m_BoostersList.push_back(B);
+}
+void CActorCondition::DisableBooster(const SBooster& B)
+{
+	BoostSatietyRestore(-B.fSatietyRestore);
+	BoostThirstRestore(-B.fThirstRestore);
+	BoostAlcoholRestore(-B.fAlcoholRestore);
+	BoostHpRestore(-B.fHealthRestore);
+	BoostPowerRestore(-B.fPowerRestore);
+	BoostRadiationRestore(-B.fRadiationRestore);
+	BoostBleedingRestore(-B.fBleedingRestore);
+	BoostMaxWeight(-B.fMaxWeight);
+	BoostBurnImmunity(-B.fBurnImmunity);
+	BoostShockImmunity(-B.fShockImmunity);
+	BoostRadiationImmunity(-B.fRadiationImmunity);
+	BoostTelepaticImmunity(-B.fTelepaticImmunity);
+	BoostChemicalBurnImmunity(-B.fChemburnImmunity);
+	BoostExplImmunity(-B.fExplosionImmunity);
+	BoostStrikeImmunity(-B.fStrikeImmunity);
+	BoostFireWoundImmunity(-B.fFireWoundImmunity);
+	BoostWoundImmunity(-B.fWoundImmunity);
+	BoostRadiationProtection(-B.fRadiationProtection);
+	BoostTelepaticProtection(-B.fTelepaticProtection);
+	BoostChemicalBurnProtection(-B.fChemburnProtection);
+	BoostToxicityRestore(-B.fToxicityRestore);
+	BoostMaxSpeed(-B.fMaxSpeed);
 }
 
 void CActorCondition::UpdateTutorialThresholds()
@@ -760,8 +785,8 @@ void CActorCondition::ApplyBooster(const CEatableItem& object)
 	ChangeToxicity(object.m_fToxicity);
 
 	//Temporary boosters
-	BoostersList.push_back(object.m_Boosters);
-	ChangeBoostParameters(object.m_Boosters, true);
+	m_BoostersList.push_back(object.m_Boosters);
+	EnableBooster(object.m_Boosters);
 }
 
 void disable_input();

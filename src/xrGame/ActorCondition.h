@@ -32,6 +32,8 @@ struct SBooster
 	float fTelepaticProtection;
 	float fChemburnProtection;
 	float fToxicityRestore;
+	float fMaxSpeed;
+
 	float fBoostTime;
 };
 
@@ -80,7 +82,8 @@ public:
 	virtual void 		ChangeThirst(const float value) { clamp(m_fThirst += value, 0.0f, 1.0f); };
 	virtual void 		ChangeToxicity(const float value) { clamp(m_fToxicity += value, 0.0f, 1.0f); };
 
-	void 				ChangeBoostParameters(const SBooster& B, bool positive);
+	void 				EnableBooster(const SBooster& B);
+	void 				DisableBooster(const SBooster& B);
 	IC void				BoostMaxWeight(const float value) { m_object->inventory().SetMaxWeight(object().inventory().GetMaxWeight() + value); m_MaxWalkWeight += value; };
 	IC void				BoostSatietyRestore(const float value) { m_fV_Satiety += value; };
 	IC void				BoostThirstRestore(const float value) { m_fV_Thirst += value; };
@@ -102,7 +105,8 @@ public:
 	IC void				BoostTelepaticProtection(const float value) { m_fBoostTelepaticProtection += value; };
 	IC void				BoostChemicalBurnProtection(const float value) { m_fBoostChemicalBurnProtection += value; };
 	IC void				BoostToxicityRestore(const float value) { m_fV_Toxicity += value; };
-	std::list<SBooster>   BoostersList;
+	IC void				BoostMaxSpeed(const float value) { m_object->m_fBoostFactor += value; };
+	std::list<SBooster>   m_BoostersList;
 
 	// хромание при потере сил и здоровья
 	virtual	bool		IsLimping() const;

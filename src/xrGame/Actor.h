@@ -417,6 +417,7 @@ protected:
 	float					m_fCrouchFactor;
 	float					m_fClimbFactor;
 	float					m_fSprintFactor;
+	float					m_fBoostFactor;//влияние бустера на скорость
 
 	float					m_fWalk_StrafeFactor;
 	float					m_fRun_StrafeFactor;

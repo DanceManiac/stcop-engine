@@ -244,24 +244,27 @@ void CActor::g_cl_CheckControls(u32 mstate_wf, Fvector &vControlAccel, float &Ju
 			if (_abs(vControlAccel.x)<EPS)	mstate_real &= ~(mcLStrafe+mcRStrafe);
 
 			// normalize and analyze crouch and run
-			float	scale			= vControlAccel.magnitude();
+			float scale = vControlAccel.magnitude();
 			if(scale>EPS)	
 			{
-				scale	=	m_fWalkAccel/scale;
+				scale	=	m_fWalkAccel/scale * (1.f + m_fBoostFactor);
+
 				if (bAccelerated)
-					if (mstate_real&mcBack)
+				{
+					if (mstate_real & mcBack)
 						scale *= m_fRunBackFactor;
 					else
 						scale *= m_fRunFactor;
-				else
-					if (mstate_real&mcBack)
+				}
+				else if (mstate_real&mcBack)
 						scale *= m_fWalkBackFactor;
 
-
-
-				if (mstate_real&mcCrouch)	scale *= m_fCrouchFactor;
-				if (mstate_real&mcClimb)	scale *= m_fClimbFactor;
-				if (mstate_real&mcSprint)	scale *= m_fSprintFactor;
+				if (mstate_real&mcCrouch)
+					scale *= m_fCrouchFactor;
+				if (mstate_real&mcClimb)
+					scale *= m_fClimbFactor;
+				if (mstate_real&mcSprint) 
+					scale *= m_fSprintFactor;
 
 				if (mstate_real&(mcLStrafe|mcRStrafe) && !(mstate_real&mcCrouch))
 				{
@@ -273,9 +276,9 @@ void CActor::g_cl_CheckControls(u32 mstate_wf, Fvector &vControlAccel, float &Ju
 
 				vControlAccel.mul			(scale);
 				cam_eff_factor				= scale;
-			}//scale>EPS
-		}//(mstate_real&mcAnyMove)
-	}//peOnGround || peAtWall
+			}
+		}
+	}
 
 	if(IsGameTypeSingle() && cam_eff_factor>EPS)
 	{
@@ -402,7 +405,6 @@ bool CActor::g_LadderOrient()
 	Fvector leader_norm;
 	character_physics_support()->movement()->GroundNormal(leader_norm);
 	if(_abs(leader_norm.y)>M_SQRT1_2) return false;
-	//leader_norm.y=0.f;
 	float mag=leader_norm.magnitude();
 	if(mag<EPS_L) return false;
 	leader_norm.div(mag);
@@ -412,28 +414,9 @@ bool CActor::g_LadderOrient()
 	M.j.set(0.f,1.f,0.f);
 	generate_orthonormal_basis1(M.k,M.j,M.i);
 	M.i.invert();
-	//M.j.invert();
 
-
-	//Fquaternion q1,q2,q3;
-	//q1.set(XFORM());
-	//q2.set(M);
-	//q3.slerp(q1,q2,dt);
-	//Fvector angles1,angles2,angles3;
-	//XFORM().getHPB(angles1.x,angles1.y,angles1.z);
-	//M.getHPB(angles2.x,angles2.y,angles2.z);
-	////angle_lerp(angles3.x,angles1.x,angles2.x,dt);
-	////angle_lerp(angles3.y,angles1.y,angles2.y,dt);
-	////angle_lerp(angles3.z,angles1.z,angles2.z,dt);
-
-	//angles3.lerp(angles1,angles2,dt);
-	////angle_lerp(angles3.y,angles1.y,angles2.y,dt);
-	////angle_lerp(angles3.z,angles1.z,angles2.z,dt);
-	//angle_lerp(angles3.x,angles1.x,angles2.x,dt);
-	//XFORM().setHPB(angles3.x,angles3.y,angles3.z);
 	Fvector position;
 	position.set(Position());
-	//XFORM().rotation(q3);
 	VERIFY2(_valid(M),"Invalide matrix in g_LadderOrient");
 	XFORM().set(M);
 	VERIFY2(_valid(position),"Invalide position in g_LadderOrient");
@@ -609,14 +592,14 @@ bool CActor::is_jump()
 float CActor::MaxCarryWeight () const
 {
 	float res = inventory().GetMaxWeight();
-	res      += get_additional_weight();
+	res += get_additional_weight();
 	return res;
 }
 
 float CActor::MaxWalkWeight() const
 {
 	float max_w = CActor::conditions().MaxWalkWeight();
-	max_w      += get_additional_weight();
+	max_w += get_additional_weight();
 	return max_w;
 }
 #include "artefact.h"
@@ -625,16 +608,13 @@ float CActor::get_additional_weight() const
 	float res = 0.0f ;
 	CCustomOutfit* outfit	= GetOutfit();
 	if ( outfit )
-	{
-		res				+= outfit->m_additional_weight;
-	}
+		res	+= outfit->m_additional_weight;
 
-	for(TIItemContainer::const_iterator it = inventory().m_belt.begin(); 
-		inventory().m_belt.end() != it; ++it) 
+	for(TIItemContainer::const_iterator it = inventory().m_belt.begin(); inventory().m_belt.end() != it; ++it) 
 	{
 		CArtefact*	artefact = smart_cast<CArtefact*>(*it);
 		if(artefact)
-			res			+= artefact->AdditionalInventoryWeight();
+			res	+= artefact->AdditionalInventoryWeight();
 	}
 
 	return res;

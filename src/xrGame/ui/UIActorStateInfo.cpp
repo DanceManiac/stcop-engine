@@ -140,7 +140,7 @@ void ui_actor_state_wnd::UpdateActorInfo( CInventoryOwner* owner )
 	float woun_value = 0.0f;
 	float shoc_value = 0.0f;
 	float fwou_value = 0.0f;
-	const std::list<SBooster> curBoosters = actor->conditions().BoostersList;
+	const std::list<SBooster> curBoosters = actor->conditions().m_BoostersList;
 	
 	for (auto& it = curBoosters.cbegin(); it != curBoosters.cend(); ++it) 
 	{

@@ -580,7 +580,7 @@ void	CActor::Hit(SHit* pHDS)
 
 	if(IsGameTypeSingle())	
 	{
-		float hit_power				= HitArtefactsOnBelt(HDS.damage(), HDS.hit_type);
+		float hit_power	= HitArtefactsOnBelt(HDS.damage(), HDS.hit_type);
 
 		if(GodMode())
 		{
@@ -1430,9 +1430,9 @@ void CActor::shedule_Update	(u32 DT)
 //	UpdateSleep									();
 
 	//для свойст артефактов, находящихся на поясе
-	UpdateArtefactsOnBeltAndOutfit				();
-	m_pPhysics_support->in_shedule_Update		(DT);
-	Check_for_AutoPickUp						();
+	UpdateArtefactsOnBeltAndOutfit();
+	m_pPhysics_support->in_shedule_Update(DT);
+	Check_for_AutoPickUp();
 };
 #include "debug_renderer.h"
 void CActor::renderable_Render	()
@@ -1807,29 +1807,23 @@ void CActor::UpdateArtefactsOnBeltAndOutfit()
 	}
 	else
 	{
-		CHelmet* pHelmet				= smart_cast<CHelmet*>(inventory().ItemFromSlot(HELMET_SLOT));
+		CHelmet* pHelmet= smart_cast<CHelmet*>(inventory().ItemFromSlot(HELMET_SLOT));
 		if(!pHelmet)
 		{
 			CTorch* pTorch = smart_cast<CTorch*>( inventory().ItemFromSlot(TORCH_SLOT) );
 			if ( pTorch && pTorch->GetNightVisionStatus() )
-			{
 				pTorch->SwitchNightVision(false);
-			}
 		}
 	}
 }
 
-float	CActor::HitArtefactsOnBelt(float hit_power, ALife::EHitType hit_type)
+float CActor::HitArtefactsOnBelt(float hit_power, ALife::EHitType hit_type)
 {
-	TIItemContainer::iterator it  = inventory().m_belt.begin(); 
-	TIItemContainer::iterator ite = inventory().m_belt.end() ;
-	for( ; it != ite; ++it )
+	for (auto it = inventory().m_belt.begin(); it != inventory().m_belt.end(); ++it )
 	{
 		CArtefact*	artefact = smart_cast<CArtefact*>(*it);
-		if ( artefact )
-		{
-			hit_power -= artefact->m_ArtefactHitImmunities.AffectHit( 1.0f, hit_type );
-		}
+		if  (artefact)
+			hit_power -= artefact->m_ArtefactHitImmunities.AffectHit(1.0f, hit_type);
 	}
 	clamp(hit_power, 0.0f, flt_max);
 
@@ -1839,12 +1833,10 @@ float	CActor::HitArtefactsOnBelt(float hit_power, ALife::EHitType hit_type)
 float CActor::GetProtection_ArtefactsOnBelt( ALife::EHitType hit_type )
 {
 	float sum = 0.0f;
-	TIItemContainer::iterator it  = inventory().m_belt.begin(); 
-	TIItemContainer::iterator ite = inventory().m_belt.end() ;
-	for( ; it != ite; ++it )
+	for (auto it = inventory().m_belt.begin(); it != inventory().m_belt.end(); ++it )
 	{
-		CArtefact*	artefact = smart_cast<CArtefact*>(*it);
-		if ( artefact )
+		CArtefact* artefact = smart_cast<CArtefact*>(*it);
+		if (artefact)
 		{
 			sum += artefact->m_ArtefactHitImmunities.AffectHit( 1.0f, hit_type );
 		}
@@ -1852,13 +1844,13 @@ float CActor::GetProtection_ArtefactsOnBelt( ALife::EHitType hit_type )
 	return sum;
 }
 
-void	CActor::SetZoomRndSeed		(s32 Seed)
+void CActor::SetZoomRndSeed(s32 Seed)
 {
 	if (0 != Seed) m_ZoomRndSeed = Seed;
 	else m_ZoomRndSeed = s32(Level().timeServer_Async());
 };
 
-void	CActor::SetShotRndSeed		(s32 Seed)
+void CActor::SetShotRndSeed		(s32 Seed)
 {
 	if (0 != Seed) m_ShotRndSeed = Seed;
 	else m_ShotRndSeed = s32(Level().timeServer_Async());
@@ -1876,7 +1868,6 @@ void CActor::AnimTorsoPlayCallBack(CBlend* B)
 	CActor* actor		= (CActor*)B->CallbackParam;
 	actor->m_bAnimTorsoPlayed = FALSE;
 }
-
 
 /*
 void CActor::UpdateMotionIcon(u32 mstate_rl)
@@ -1907,38 +1898,37 @@ void CActor::UpdateMotionIcon(u32 mstate_rl)
 }
 */
 
-
-CPHDestroyable*	CActor::ph_destroyable	()
+CPHDestroyable*	CActor::ph_destroyable()
 {
 	return smart_cast<CPHDestroyable*>(character_physics_support());
 }
 
 CEntityConditionSimple *CActor::create_entity_condition	(CEntityConditionSimple* ec)
 {
-	if(!ec)
-		m_entity_condition		= xr_new<CActorCondition>(this);
+	if (!ec)
+		m_entity_condition = xr_new<CActorCondition>(this);
 	else
-		m_entity_condition		= smart_cast<CActorCondition*>(ec);
+		m_entity_condition = smart_cast<CActorCondition*>(ec);
 	
 	return		(inherited::create_entity_condition(m_entity_condition));
 }
 
-DLL_Pure *CActor::_construct			()
+DLL_Pure *CActor::_construct()
 {
 	m_pPhysics_support				=	xr_new<CCharacterPhysicsSupport>(CCharacterPhysicsSupport::etActor,this);
 	CEntityAlive::_construct		();
 	CInventoryOwner::_construct		();
 	CStepManager::_construct		();
 	
-	return							(this);
+	return(this);
 }
 
-bool CActor::use_center_to_aim			() const
+bool CActor::use_center_to_aim() const
 {
-	return							(!!(mstate_real&mcCrouch));
+	return(!!(mstate_real&mcCrouch));
 }
 
-bool CActor::can_attach			(const CInventoryItem *inventory_item) const
+bool CActor::can_attach	(const CInventoryItem *inventory_item) const
 {
 	const CAttachableItem	*item = smart_cast<const CAttachableItem*>(inventory_item);
 	if (!item || /*!item->enabled() ||*/ !item->can_be_attached())
@@ -1971,12 +1961,12 @@ void CActor::OnDifficultyChanged	()
 	conditions().LoadTwoHitsDeathParams(tmp);
 }
 
-CVisualMemoryManager	*CActor::visual_memory	() const
+CVisualMemoryManager *CActor::visual_memory() const
 {
-	return							(&memory().visual());
+	return(&memory().visual());
 }
 
-float		CActor::GetMass				()
+float CActor::GetMass()
 {
 	return g_Alive()?character_physics_support()->movement()->GetMass():m_pPhysicsShell?m_pPhysicsShell->getMass():0; 
 }
@@ -1987,9 +1977,9 @@ bool CActor::is_on_ground()
 }
 
 
-bool CActor::is_ai_obstacle				() const
+bool CActor::is_ai_obstacle() const
 {
-	return							(false);//true);
+	return (false);//true);
 }
 
 float CActor::GetRestoreSpeed( ALife::EConditionRestoreType const& type )
@@ -2002,76 +1992,54 @@ float CActor::GetRestoreSpeed( ALife::EConditionRestoreType const& type )
 		res = conditions().change_v().m_fV_HealthRestore;
 		res += conditions().V_SatietyHealth() * ( (conditions().GetSatiety() > 0.0f) ? 1.0f : -1.0f );
 
-		TIItemContainer::iterator itb = inventory().m_belt.begin();
-		TIItemContainer::iterator ite = inventory().m_belt.end();
-		for( ; itb != ite; ++itb ) 
+		for(auto it = inventory().m_belt.begin(); it != inventory().m_belt.end(); ++it)
 		{
-			CArtefact*	artefact = smart_cast<CArtefact*>( *itb );
-			if ( artefact )
-			{
+			CArtefact*	artefact = smart_cast<CArtefact*>( *it);
+			if (artefact)
 				res += artefact->m_fHealthRestoreSpeed;
-			}
 		}
 		CCustomOutfit* outfit = GetOutfit();
 		if ( outfit )
-		{
 			res += outfit->m_fHealthRestoreSpeed;
-		}
 		break;
 	}
 	case ALife::eRadiationRestoreSpeed:
 	{	
-		TIItemContainer::iterator itb = inventory().m_belt.begin();
-		TIItemContainer::iterator ite = inventory().m_belt.end();
-		for( ; itb != ite; ++itb ) 
+		for (auto it = inventory().m_belt.begin(); it != inventory().m_belt.end(); ++it)
 		{
-			CArtefact*	artefact = smart_cast<CArtefact*>( *itb );
-			if ( artefact )
-			{
+			CArtefact*	artefact = smart_cast<CArtefact*>( *it);
+			if (artefact)
 				res += artefact->m_fRadiationRestoreSpeed;
-			}
 		}
 		CCustomOutfit* outfit = GetOutfit();
-		if ( outfit )
-		{
+		if (outfit)
 			res += outfit->m_fRadiationRestoreSpeed;
-		}
 		break;
 	}
 	case ALife::eSatietyRestoreSpeed:
 	{
 		res = conditions().V_Satiety();
 
-		TIItemContainer::iterator itb = inventory().m_belt.begin();
-		TIItemContainer::iterator ite = inventory().m_belt.end();
-		for( ; itb != ite; ++itb ) 
+		for (auto it = inventory().m_belt.begin(); it != inventory().m_belt.end(); ++it)
 		{
-			CArtefact*	artefact = smart_cast<CArtefact*>( *itb );
+			CArtefact*	artefact = smart_cast<CArtefact*>(*it);
 			if ( artefact )
-			{
 				res += artefact->m_fSatietyRestoreSpeed;
-			}
 		}
 		CCustomOutfit* outfit = GetOutfit();
 		if ( outfit )
-		{
 			res += outfit->m_fSatietyRestoreSpeed;
-		}
 		break;
 	}
 	case ALife::ePowerRestoreSpeed:
 	{
 		res = conditions().GetConditionPower();
 
-		TIItemContainer::iterator itb = inventory().m_belt.begin();
-		TIItemContainer::iterator ite = inventory().m_belt.end();
-		for( ; itb != ite; ++itb ) 
+		for (auto it = inventory().m_belt.begin(); it != inventory().m_belt.end(); ++it)
 		{
-			CArtefact*	artefact = smart_cast<CArtefact*>( *itb );
+			CArtefact*	artefact = smart_cast<CArtefact*>(*it);
 			if ( artefact )
-			{
 				res += artefact->m_fPowerRestoreSpeed;
-			}
 		}
 		CCustomOutfit* outfit = GetOutfit();
 		if ( outfit )
@@ -2088,28 +2056,21 @@ float CActor::GetRestoreSpeed( ALife::EConditionRestoreType const& type )
 	{
 		res = conditions().change_v().m_fV_WoundIncarnation;
 	
-		TIItemContainer::iterator itb = inventory().m_belt.begin();
-		TIItemContainer::iterator ite = inventory().m_belt.end();
-		for( ; itb != ite; ++itb ) 
+		for (auto it = inventory().m_belt.begin(); it != inventory().m_belt.end(); ++it)
 		{
-			CArtefact*	artefact = smart_cast<CArtefact*>( *itb );
+			CArtefact*	artefact = smart_cast<CArtefact*>(*it);
 			if ( artefact )
-			{
 				res += artefact->m_fBleedingRestoreSpeed;
-			}
 		}
 		CCustomOutfit* outfit = GetOutfit();
 		if ( outfit )
-		{
 			res += outfit->m_fBleedingRestoreSpeed;
-		}
 		break;
 	}
 	}//switch
 
 	return res;
 }
-
 
 void CActor::On_SetEntity()
 {
