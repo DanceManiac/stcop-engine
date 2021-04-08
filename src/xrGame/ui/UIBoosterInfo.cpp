@@ -17,6 +17,7 @@ CUIBoosterInfo::CUIBoosterInfo()
 	m_booster_radiation_restore = NULL;
 	m_booster_bleeding_restore = NULL;
 	m_booster_max_weight = NULL;
+	m_booster_speed_factor = NULL;
 	m_booster_radiation_protection = NULL;
 	m_booster_telepatic_protection = NULL;
 	m_booster_chemburn_protection = NULL;
@@ -45,6 +46,7 @@ CUIBoosterInfo::~CUIBoosterInfo()
 	xr_delete(m_booster_radiation_restore);
 	xr_delete(m_booster_bleeding_restore);
 	xr_delete(m_booster_max_weight);
+	xr_delete(m_booster_speed_factor);
 	xr_delete(m_booster_radiation_protection);
 	xr_delete(m_booster_telepatic_protection);
 	xr_delete(m_booster_chemburn_protection);
@@ -92,6 +94,8 @@ void CUIBoosterInfo::InitFromXml(CUIXml& xml)
 	InitInfoItemXml(xml, m_booster_bleeding_restore, "boost_bleeding_restore", "ui_inv_bleeding");
 	xml.SetLocalRoot(base_node);
 	InitInfoItemXml(xml, m_booster_max_weight, "boost_max_weight", "ui_inv_outfit_additional_weight");
+	xml.SetLocalRoot(base_node);
+	InitInfoItemXml(xml, m_booster_speed_factor, "boost_speed_factor", "ui_inv_speed_factor");
 	xml.SetLocalRoot(base_node);
 	InitInfoItemXml(xml, m_booster_radiation_protection, "boost_radiation_protection", "ui_inv_outfit_radiation_protection");
 	xml.SetLocalRoot(base_node);
@@ -166,6 +170,8 @@ void CUIBoosterInfo::UpdateInfo(const CEatableItem& object)
 		SetInfo(m_booster_bleeding_restore, object.m_Boosters.fBleedingRestore, cur_h);
 	if (!fis_zero(object.m_Boosters.fMaxWeight))
 		SetInfo(m_booster_max_weight, object.m_Boosters.fMaxWeight, cur_h);
+	if (!fis_zero(object.m_Boosters.fSpeedFactor))
+		SetInfo(m_booster_speed_factor, object.m_Boosters.fSpeedFactor, cur_h);
 	if (!fis_zero(object.m_Boosters.fRadiationProtection))
 		SetInfo(m_booster_radiation_protection, object.m_Boosters.fRadiationProtection / GetMaxValue(ALife::infl_rad), cur_h);
 	if (!fis_zero(object.m_Boosters.fTelepaticProtection))

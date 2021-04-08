@@ -257,7 +257,7 @@ void CActorCondition::UpdateBoosters()
 {
 	for (auto& it = m_BoostersList.begin(); it != m_BoostersList.end(); ++it)
 	{
-		it->fBoostTime -= m_fDeltaTime / (IsGameTypeSingle() ? Level().GetGameTimeFactor() : 1.0f);
+		it->fBoostTime -= m_fDeltaTime / Level().GetGameTimeFactor();
 		if (it->fBoostTime <= 0.0f)
 		{
 			DisableBooster(*it);
@@ -523,7 +523,7 @@ void CActorCondition::save(NET_Packet &output_packet)
 		save_data(it->fTelepaticProtection, output_packet);
 		save_data(it->fChemburnProtection, output_packet);
 		save_data(it->fToxicityRestore, output_packet);
-		save_data(it->fMaxSpeed, output_packet);
+		save_data(it->fSpeedFactor, output_packet);
 
 		save_data(it->fBoostTime, output_packet);
 	}
@@ -562,7 +562,7 @@ void CActorCondition::load(IReader &input_packet)
 		load_data(B.fTelepaticProtection, input_packet);
 		load_data(B.fChemburnProtection, input_packet);
 		load_data(B.fToxicityRestore, input_packet);
-		load_data(B.fMaxSpeed, input_packet);
+		load_data(B.fSpeedFactor, input_packet);
 
 		load_data(B.fBoostTime, input_packet);
 		EnableBooster(B);
@@ -600,7 +600,7 @@ void CActorCondition::EnableBooster(const SBooster& B)
 	BoostTelepaticProtection(B.fTelepaticProtection);
 	BoostChemicalBurnProtection(B.fChemburnProtection);
 	BoostToxicityRestore(B.fToxicityRestore);
-	BoostMaxSpeed(B.fMaxSpeed);
+	BoostSpeedFactor(B.fSpeedFactor);
 
 	m_BoostersList.push_back(B);
 }
@@ -627,7 +627,7 @@ void CActorCondition::DisableBooster(const SBooster& B)
 	BoostTelepaticProtection(-B.fTelepaticProtection);
 	BoostChemicalBurnProtection(-B.fChemburnProtection);
 	BoostToxicityRestore(-B.fToxicityRestore);
-	BoostMaxSpeed(-B.fMaxSpeed);
+	BoostSpeedFactor(-B.fSpeedFactor);
 }
 
 void CActorCondition::UpdateTutorialThresholds()
@@ -785,7 +785,6 @@ void CActorCondition::ApplyBooster(const CEatableItem& object)
 	ChangeToxicity(object.m_fToxicity);
 
 	//Temporary boosters
-	m_BoostersList.push_back(object.m_Boosters);
 	EnableBooster(object.m_Boosters);
 }
 

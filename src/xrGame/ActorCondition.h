@@ -32,7 +32,7 @@ struct SBooster
 	float fTelepaticProtection;
 	float fChemburnProtection;
 	float fToxicityRestore;
-	float fMaxSpeed;
+	float fSpeedFactor;
 
 	float fBoostTime;
 };
@@ -105,7 +105,7 @@ public:
 	IC void				BoostTelepaticProtection(const float value) { m_fBoostTelepaticProtection += value; };
 	IC void				BoostChemicalBurnProtection(const float value) { m_fBoostChemicalBurnProtection += value; };
 	IC void				BoostToxicityRestore(const float value) { m_fV_Toxicity += value; };
-	IC void				BoostMaxSpeed(const float value) { m_object->m_fBoostFactor += value; };
+	IC void				BoostSpeedFactor(const float value) { m_object->m_fBoostSpeedFactor += value; };
 	std::list<SBooster>   m_BoostersList;
 
 	// хромание при потере сил и здоровья

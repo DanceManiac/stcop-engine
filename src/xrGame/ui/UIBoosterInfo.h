@@ -31,6 +31,7 @@ protected:
 	UIBoosterInfoItem* m_booster_radiation_restore;
 	UIBoosterInfoItem* m_booster_bleeding_restore;
 	UIBoosterInfoItem* m_booster_max_weight;
+	UIBoosterInfoItem* m_booster_speed_factor;
 	UIBoosterInfoItem* m_booster_radiation_protection;
 	UIBoosterInfoItem* m_booster_telepatic_protection;
 	UIBoosterInfoItem* m_booster_chemburn_protection;

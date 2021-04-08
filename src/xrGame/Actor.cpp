@@ -360,6 +360,8 @@ void CActor::Load	(LPCSTR section )
 	m_fWalk_StrafeFactor		= READ_IF_EXISTS(pSettings, r_float, section, "walk_strafe_coef", 1.0f);
 	m_fRun_StrafeFactor			= READ_IF_EXISTS(pSettings, r_float, section, "run_strafe_coef", 1.0f);
 
+	m_fBoostMinSpeedFactor = READ_IF_EXISTS(pSettings, r_float, section, "boost_speed_factor_min", NULL);
+	m_fBoostMaxSpeedFactor = READ_IF_EXISTS(pSettings, r_float, section, "boost_speed_factor_max", NULL);
 
 	m_fCamHeightFactor			= pSettings->r_float(section,"camera_height_factor");
 	character_physics_support()->movement()->SetJumpUpVelocity(m_fJumpSpeed);
@@ -736,10 +738,7 @@ void CActor::Die	(CObject* who)
 
 	if (OnServer())
 	{	
-		u16 I = inventory().FirstSlot();
-		u16 E = inventory().LastSlot();
-
-		for (; I <= E; ++I)
+		for (u16 I = inventory().FirstSlot(); I <= inventory().LastSlot(); ++I)
 		{
 			PIItem item_in_slot = inventory().ItemFromSlot(I);
 			if (I == inventory().GetActiveSlot()) 
@@ -753,14 +752,6 @@ void CActor::Die	(CObject* who)
 							grenade->DropGrenade();
 						else
 							item_in_slot->SetDropManual(TRUE);
-					}else
-					{
-						//This logic we do on a server site
-						/*
-						if ((*I).m_pIItem->object().CLS_ID != CLSID_OBJECT_W_KNIFE)
-						{
-							(*I).m_pIItem->SetDropManual(TRUE);
-						}*/							
 					}
 				};
 			continue;
@@ -773,7 +764,6 @@ void CActor::Die	(CObject* who)
 			if(item_in_slot) 
 				inventory().Ruck(item_in_slot);
 		};
-
 
 		///!!! чистка пояса
 		TIItemContainer &l_blist = inventory().m_belt;
