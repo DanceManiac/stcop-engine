@@ -293,7 +293,7 @@ void	CKinematics::Load(const char* N, IReader *data, u32 dwFlags)
 			for (u32 child_idx=0; child_idx<children.size(); child_idx++){
 				CBoneData::FacesVec faces		= B->child_faces[child_idx];
 				std::sort						(faces.begin(),faces.end());
-				CBoneData::FacesVecIt new_end	= std::unique(faces.begin(),faces.end());
+				auto new_end	= std::unique(faces.begin(),faces.end());
 				faces.erase						(new_end,faces.end());
 				B->child_faces[child_idx].clear();
 				B->child_faces[child_idx]		= faces;

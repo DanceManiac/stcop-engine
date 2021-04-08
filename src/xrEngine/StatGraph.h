@@ -30,7 +30,7 @@ protected:
             data = d;
         }
     };
-    DEFINE_DEQUE(SElement, ElementsDeq, ElementsDeqIt);
+    using ElementsDeq = xr_deque<SElement>;
     struct SSubGraph
     {
         EStyle style;
@@ -44,7 +44,7 @@ protected:
             style = s;
         };
     };
-    DEFINE_VECTOR(SSubGraph, SubGraphVec, SubGraphVecIt);
+    using SubGraphVec = xr_vector<SSubGraph>;
     SubGraphVec subgraphs;
 
     float mn, mx;
@@ -68,7 +68,7 @@ protected:
         u32 m_dwColor;
     };
 
-    DEFINE_DEQUE(SMarker, MarkersDeq, MarkersDeqIt);
+    using MarkersDeq = xr_deque<SMarker>;
     MarkersDeq m_Markers;
 
 protected:
@@ -89,7 +89,7 @@ public:
     IC void SetStyle(EStyle s, u32 SubGraphID = 0)
     {
         if (SubGraphID >= subgraphs.size()) return;
-        SubGraphVecIt it = subgraphs.begin() + SubGraphID;
+        auto it = subgraphs.begin() + SubGraphID;
         it->SetStyle(s);
     }
 
@@ -112,7 +112,7 @@ public:
         mn = _mn;
         mx = _mx;
         max_item_count = item_count;
-        for (SubGraphVecIt it = subgraphs.begin(); it != subgraphs.end(); it++)
+        for (auto it = subgraphs.begin(); it != subgraphs.end(); it++)
         {
             while (it->elements.size() > max_item_count) it->elements.pop_front();
         };
@@ -123,7 +123,7 @@ public:
 
         clamp(d, mn, mx);
 
-        SubGraphVecIt it = subgraphs.begin() + SubGraphID;
+        auto it = subgraphs.begin() + SubGraphID;
         it->elements.push_back(SElement(d, clr));
         while (it->elements.size() > max_item_count) it->elements.pop_front();
     };

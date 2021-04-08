@@ -3,12 +3,12 @@
 #include "xalloc.h"
 
 #define DEF_VECTOR(N, T)\
-    typedef xr_vector<T> N;\
-    typedef N::iterator N##_it;
+    using N = xr_vector<T>;\
+    using N##_it = N::iterator;
 
 #define DEFINE_VECTOR(T, N, I)\
-    typedef xr_vector<T> N;\
-    typedef N::iterator I;
+    using N = xr_vector<T>;\
+    using I = N::iterator;
 
 // vector
 template <typename T, typename allocator = xalloc<T> >

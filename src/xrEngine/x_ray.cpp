@@ -1368,11 +1368,9 @@ int CApplication::Level_ID(LPCSTR name, LPCSTR ver, bool bSet)
 
     SECUROM_MARKER_SECURITY_ON(7)
 
-    CLocatorAPI::archives_it it = FS.m_archives.begin();
-    CLocatorAPI::archives_it it_e = FS.m_archives.end();
     bool arch_res = false;
 
-    for (; it != it_e; ++it)
+    for (auto it = FS.m_archives.begin(); it != FS.m_archives.end(); ++it)
     {
         CLocatorAPI::archive& A = *it;
         if (A.hSrcFile == NULL)
@@ -1414,10 +1412,7 @@ int CApplication::Level_ID(LPCSTR name, LPCSTR ver, bool bSet)
 
 CInifile* CApplication::GetArchiveHeader(LPCSTR name, LPCSTR ver)
 {
-    CLocatorAPI::archives_it it = FS.m_archives.begin();
-    CLocatorAPI::archives_it it_e = FS.m_archives.end();
-
-    for (; it != it_e; ++it)
+    for (auto it = FS.m_archives.begin(); it != FS.m_archives.end(); ++it)
     {
         CLocatorAPI::archive& A = *it;
 

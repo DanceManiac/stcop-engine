@@ -165,9 +165,7 @@ void CDetailManager::hw_Render_dump(const Fvector4 &consts, const Fvector4 &wave
 				xr_vector <SlotItemVec* >::iterator _vE = vis.end();
 				for (; _vI!=_vE; _vI++){
 					SlotItemVec*	items		= *_vI;
-					SlotItemVecIt _iI			= items->begin();
-					SlotItemVecIt _iE			= items->end();
-					for (; _iI!=_iE; _iI++){
+					for (auto _iI = items->begin(); _iI!= items->end(); _iI++){
 						SlotItem&	Instance	= **_iI;
 						u32			base		= dwBatch*4;
 

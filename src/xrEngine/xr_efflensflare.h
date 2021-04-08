@@ -27,7 +27,7 @@ public:
     {
         BOOL ignore_color;
     };
-    DEFINE_VECTOR(SFlare, FlareVec, FlareIt);
+    using FlareVec = xr_vector<SFlare>;
     FlareVec m_Flares;
 
     enum

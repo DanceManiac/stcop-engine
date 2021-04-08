@@ -487,7 +487,7 @@ void CEnvDescriptorMixer::lerp(CEnvironment*, CEnvDescriptor& A, CEnvDescriptor&
 //-----------------------------------------------------------------------------
 CEnvAmbient* CEnvironment::AppendEnvAmb(const shared_str& sect)
 {
-    for (EnvAmbVecIt it = Ambients.begin(); it != Ambients.end(); it++)
+    for (auto it = Ambients.begin(); it != Ambients.end(); it++)
         if ((*it)->name().equal(sect))
             return (*it);
 
@@ -553,7 +553,7 @@ void CEnvironment::load_level_specific_ambients()
         TRUE,
         FALSE);
 
-    for (EnvAmbVecIt I = Ambients.begin(), E = Ambients.end(); I != E; ++I)
+    for (auto I = Ambients.begin(), E = Ambients.end(); I != E; ++I)
     {
         CEnvAmbient* ambient = *I;
 
@@ -631,9 +631,7 @@ void CEnvironment::load_weathers()
     FS.file_list_close(file_list);
 
     // sorting weather envs
-    EnvsMapIt _I = WeatherCycles.begin();
-    EnvsMapIt _E = WeatherCycles.end();
-    for (; _I != _E; _I++)
+    for (auto _I = WeatherCycles.begin(); _I != WeatherCycles.end(); _I++)
     {
         R_ASSERT3(_I->second.size() > 1, "Environment in weather must >=2", *_I->first);
         std::sort(_I->second.begin(), _I->second.end(), sort_env_etl_pred);
@@ -717,9 +715,7 @@ void CEnvironment::load_weather_effects()
 #endif // #if 0
 
     // sorting weather envs
-    EnvsMapIt _I = WeatherFXs.begin();
-    EnvsMapIt _E = WeatherFXs.end();
-    for (; _I != _E; _I++)
+    for (auto _I = WeatherFXs.begin(); _I != WeatherFXs.end(); _I++)
     {
         R_ASSERT3(_I->second.size() > 1, "Environment in weather must >=2", *_I->first);
         std::sort(_I->second.begin(), _I->second.end(), sort_env_etl_pred);
@@ -743,28 +739,23 @@ void CEnvironment::load()
 
 void CEnvironment::unload()
 {
-    EnvsMapIt _I, _E;
     // clear weathers
-    _I = WeatherCycles.begin();
-    _E = WeatherCycles.end();
-    for (; _I != _E; _I++)
+    for (auto _I = WeatherCycles.begin(); _I != WeatherCycles.end(); _I++)
     {
-        for (EnvIt it = _I->second.begin(); it != _I->second.end(); it++)
+        for (auto it = _I->second.begin(); it != _I->second.end(); it++)
             xr_delete(*it);
     }
 
     WeatherCycles.clear();
     // clear weather effect
-    _I = WeatherFXs.begin();
-    _E = WeatherFXs.end();
-    for (; _I != _E; _I++)
+    for (auto _I = WeatherFXs.begin(); _I != WeatherFXs.end(); _I++)
     {
-        for (EnvIt it = _I->second.begin(); it != _I->second.end(); it++)
+        for (auto it = _I->second.begin(); it != _I->second.end(); it++)
             xr_delete(*it);
     }
     WeatherFXs.clear();
     // clear ambient
-    for (EnvAmbVecIt it = Ambients.begin(); it != Ambients.end(); it++)
+    for (auto it = Ambients.begin(); it != Ambients.end(); it++)
         xr_delete(*it);
     Ambients.clear();
     // misc

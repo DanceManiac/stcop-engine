@@ -22,7 +22,7 @@ CPGDef::CPGDef()
 
 CPGDef::~CPGDef()
 {
-    for (EffectIt it=m_Effects.begin(); it!=m_Effects.end(); ++it)
+    for (auto it=m_Effects.begin(); it!=m_Effects.end(); ++it)
 		xr_delete	(*it);
     m_Effects.clear	();
 }
@@ -72,7 +72,7 @@ BOOL CPGDef::Load(IReader& F)
     if (F.find_chunk(PGD_CHUNK_EFFECTS))
 	{
         m_Effects.resize(F.r_u32());
-        for (EffectIt it=m_Effects.begin(); it!=m_Effects.end(); ++it){
+        for (auto it=m_Effects.begin(); it!=m_Effects.end(); ++it){
         	*it				= xr_new<SEffect>();
             F.r_stringZ		((*it)->m_EffectName);
             F.r_stringZ		((*it)->m_OnPlayChildName);
@@ -99,7 +99,7 @@ BOOL CPGDef::Load2(CInifile& ini)
 
 	u32 counter						= 0;
 	string256						buff;
-    for (EffectIt it=m_Effects.begin(); it!=m_Effects.end(); ++it,++counter)
+    for (auto it=m_Effects.begin(); it!=m_Effects.end(); ++it,++counter)
 	{
     	*it							= xr_new<SEffect>();
 
@@ -132,7 +132,7 @@ void CPGDef::Save(IWriter& F)
 
 	F.open_chunk	(PGD_CHUNK_EFFECTS);
     F.w_u32			(m_Effects.size());
-    for (EffectIt it=m_Effects.begin(); it!=m_Effects.end(); ++it){
+    for (auto it=m_Effects.begin(); it!=m_Effects.end(); ++it){
     	F.w_stringZ	((*it)->m_EffectName);
     	F.w_stringZ	((*it)->m_OnPlayChildName);
     	F.w_stringZ	((*it)->m_OnBirthChildName);
@@ -158,7 +158,7 @@ void CPGDef::Save2(CInifile& ini)
 
 	u32 counter		= 0;
 	string256		buff;
-    for (EffectIt it=m_Effects.begin(); it!=m_Effects.end(); ++it,++counter)
+    for (auto it=m_Effects.begin(); it!=m_Effects.end(); ++it,++counter)
 	{
 		xr_sprintf		(buff, sizeof(buff), "effect_%04d", counter);
     	
@@ -465,7 +465,7 @@ void CParticleGroup::OnFrame(u32 u_dt)
 
         bool bPlaying = false;
         Fbox box; box.invalidate();
-        for (SItemVecIt i_it=items.begin(); i_it!=items.end(); ++i_it) 
+        for (auto i_it=items.begin(); i_it!=items.end(); ++i_it) 
         	i_it->OnFrame(u_dt,*m_Def->m_Effects[i_it-items.begin()],box,bPlaying);
 
         if (m_RT_Flags.is(flRT_DefferedStop)&&!bPlaying){
@@ -485,7 +485,7 @@ void CParticleGroup::OnFrame(u32 u_dt)
 void CParticleGroup::UpdateParent(const Fmatrix& m, const Fvector& velocity, BOOL bXFORM)
 {
 	m_InitialPosition		= m.c;
-    for (SItemVecIt i_it=items.begin(); i_it!=items.end(); ++i_it) 
+    for (auto i_it=items.begin(); i_it!=items.end(); ++i_it) 
     	i_it->UpdateParent(m,velocity,bXFORM);
 }
 
@@ -493,7 +493,7 @@ BOOL CParticleGroup::Compile(CPGDef* def)
 {
 	m_Def 						= def;
 	// destroy existing
-    for (SItemVecIt i_it=items.begin(); i_it!=items.end(); ++i_it) 
+    for (auto i_it=items.begin(); i_it!=items.end(); ++i_it) 
     	i_it->Clear();
     items.clear();
     // create new
@@ -522,30 +522,33 @@ void CParticleGroup::Stop(BOOL bDefferedStop)
     }else{
     	m_RT_Flags.set	(flRT_Playing,FALSE);
     }
-    for (SItemVecIt i_it=items.begin(); i_it!=items.end(); ++i_it) i_it->Stop(bDefferedStop);
+    for (auto i_it=items.begin(); i_it!=items.end(); ++i_it)
+        i_it->Stop(bDefferedStop);
 }
 
 void CParticleGroup::OnDeviceCreate()
 {
-    for (SItemVecIt i_it=items.begin(); i_it!=items.end(); ++i_it) i_it->OnDeviceCreate();
+    for (auto i_it=items.begin(); i_it!=items.end(); ++i_it)
+        i_it->OnDeviceCreate();
 }
 
 void CParticleGroup::OnDeviceDestroy()
 {
-    for (SItemVecIt i_it=items.begin(); i_it!=items.end(); ++i_it) i_it->OnDeviceDestroy();
+    for (auto i_it=items.begin(); i_it!=items.end(); ++i_it)
+        i_it->OnDeviceDestroy();
 }
 
 u32 CParticleGroup::ParticlesCount()
 {
 	int p_count=0;
-    for (SItemVecIt i_it=items.begin(); i_it!=items.end(); ++i_it)
+    for (auto i_it=items.begin(); i_it!=items.end(); ++i_it)
         p_count 	+= i_it->ParticlesCount();
 	return p_count;
 }
 
 void CParticleGroup::SetHudMode(BOOL b)
 {
-    for (SItemVecIt i_it=items.begin(); i_it!=items.end(); ++i_it)
+    for (auto i_it=items.begin(); i_it!=items.end(); ++i_it)
 	{
 		CParticleEffect* E	= static_cast<CParticleEffect*>(i_it->_effect);
 		E->SetHudMode(b);

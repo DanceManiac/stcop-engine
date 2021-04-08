@@ -103,7 +103,7 @@ void SThunderboltCollection::load(CInifile* pIni, CInifile* thunderbolts, LPCSTR
 }
 SThunderboltCollection::~SThunderboltCollection()
 {
-    for (DescIt d_it = palette.begin(); d_it != palette.end(); d_it++)
+    for (auto d_it = palette.begin(); d_it != palette.end(); d_it++)
         xr_delete(*d_it);
 
     palette.clear();
@@ -139,7 +139,7 @@ CEffect_Thunderbolt::CEffect_Thunderbolt()
 
 CEffect_Thunderbolt::~CEffect_Thunderbolt()
 {
-    for (CollectionVecIt d_it = collection.begin(); d_it != collection.end(); d_it++)
+    for (auto d_it = collection.begin(); d_it != collection.end(); d_it++)
         xr_delete(*d_it);
     collection.clear();
     //hGeom_model.destroy ();
@@ -149,7 +149,7 @@ CEffect_Thunderbolt::~CEffect_Thunderbolt()
 shared_str CEffect_Thunderbolt::AppendDef(CEnvironment& environment, CInifile* pIni, CInifile* thunderbolts, LPCSTR sect)
 {
     if (!sect || (0 == sect[0])) return "";
-    for (CollectionVecIt it = collection.begin(); it != collection.end(); it++)
+    for (auto it = collection.begin(); it != collection.end(); it++)
         if ((*it)->section == sect) return (*it)->section;
     collection.push_back(environment.thunderbolt_collection(pIni, thunderbolts, sect));
     return collection.back()->section;

@@ -121,7 +121,7 @@ void CLensFlareDescriptor::OnDeviceCreate()
     // shaders
     m_Gradient.m_pRender->CreateShader(*m_Gradient.shader, *m_Gradient.texture);
     m_Source.m_pRender->CreateShader(*m_Source.shader, *m_Source.texture);
-    for (FlareIt it = m_Flares.begin(); it != m_Flares.end(); it++)
+    for (auto it = m_Flares.begin(); it != m_Flares.end(); it++)
         it->m_pRender->CreateShader(*it->shader, *it->texture);
     /*
     m_Gradient.hShader = CreateShader (*m_Gradient.texture,*m_Gradient.shader);
@@ -135,7 +135,7 @@ void CLensFlareDescriptor::OnDeviceDestroy()
     // shaders
     m_Gradient.m_pRender->DestroyShader();
     m_Source.m_pRender->DestroyShader();
-    for (FlareIt it = m_Flares.begin(); it != m_Flares.end(); it++)
+    for (auto it = m_Flares.begin(); it != m_Flares.end(); it++)
         it->m_pRender->DestroyShader();
     /*
     m_Gradient.hShader.destroy ();
