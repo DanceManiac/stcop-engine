@@ -248,7 +248,7 @@ void CActor::g_cl_CheckControls(u32 mstate_wf, Fvector &vControlAccel, float &Ju
 			if(scale>EPS)	
 			{
 				scale = m_fWalkAccel /scale;
-				scale *= clampr(m_fBoostSpeedFactor, m_fBoostMinSpeedFactor, m_fBoostMaxSpeedFactor != NULL ? m_fBoostMaxSpeedFactor : FLT_MAX);
+				scale *= clampr(m_fBoostSpeedFactor, m_fBoostSpeedFactorMin, m_fBoostSpeedFactorMax);
 
 				if (bAccelerated)
 				{

@@ -524,6 +524,7 @@ void CActorCondition::save(NET_Packet &output_packet)
 		save_data(it->fChemburnProtection, output_packet);
 		save_data(it->fToxicityRestore, output_packet);
 		save_data(it->fSpeedFactor, output_packet);
+		save_data(it->fDispFactor, output_packet);
 
 		save_data(it->fBoostTime, output_packet);
 	}
@@ -563,6 +564,7 @@ void CActorCondition::load(IReader &input_packet)
 		load_data(B.fChemburnProtection, input_packet);
 		load_data(B.fToxicityRestore, input_packet);
 		load_data(B.fSpeedFactor, input_packet);
+		load_data(B.fDispFactor, input_packet);
 
 		load_data(B.fBoostTime, input_packet);
 		EnableBooster(B);
@@ -601,6 +603,7 @@ void CActorCondition::EnableBooster(const SBooster& B)
 	BoostChemicalBurnProtection(B.fChemburnProtection);
 	BoostToxicityRestore(B.fToxicityRestore);
 	BoostSpeedFactor(B.fSpeedFactor);
+	BoostDispFactor(B.fDispFactor);
 
 	m_BoostersList.push_back(B);
 }
@@ -628,6 +631,7 @@ void CActorCondition::DisableBooster(const SBooster& B)
 	BoostChemicalBurnProtection(-B.fChemburnProtection);
 	BoostToxicityRestore(-B.fToxicityRestore);
 	BoostSpeedFactor(-B.fSpeedFactor);
+	BoostDispFactor(-B.fDispFactor);
 }
 
 void CActorCondition::UpdateTutorialThresholds()

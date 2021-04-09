@@ -417,9 +417,10 @@ protected:
 	float					m_fCrouchFactor;
 	float					m_fClimbFactor;
 	float					m_fSprintFactor;
+
 	float					m_fBoostSpeedFactor = 1.0f;
-	float					m_fBoostMinSpeedFactor;
-	float					m_fBoostMaxSpeedFactor;
+	float					m_fBoostSpeedFactorMin;
+	float					m_fBoostSpeedFactorMax;
 
 	float					m_fWalk_StrafeFactor;
 	float					m_fRun_StrafeFactor;
@@ -471,6 +472,10 @@ protected:
 	float								m_fDispCrouchFactor;
 	//crouch+no acceleration
 	float								m_fDispCrouchNoAccelFactor;
+	//фактор бустера
+	float								m_fBoostDispFactor = 1.0f;
+	float								m_fBoostDispFactorMin;
+	float								m_fBoostDispFactorMax;
 
 protected:
 	//косточки используемые при стрельбе

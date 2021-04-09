@@ -35,6 +35,8 @@ CUIBoosterInfo::CUIBoosterInfo()
 	m_booster_thirst = NULL;
 	m_booster_toxicity = NULL;
 
+	m_booster_disp_factor = NULL;
+
 	m_booster_anabiotic = NULL;
 	m_booster_time = NULL;
 }
@@ -63,6 +65,8 @@ CUIBoosterInfo::~CUIBoosterInfo()
 	xr_delete(m_booster_satiety);
 	xr_delete(m_booster_thirst);
 	xr_delete(m_booster_toxicity);
+
+	xr_delete(m_booster_disp_factor);
 
 	xr_delete(m_booster_anabiotic);
 	xr_delete(m_booster_time);
@@ -120,7 +124,9 @@ void CUIBoosterInfo::InitFromXml(CUIXml& xml)
 	xml.SetLocalRoot(base_node);
 	InitInfoItemXml(xml, m_booster_toxicity_restore, "boost_toxicity_restore", "ui_inv_toxicity_restore");
 	xml.SetLocalRoot(base_node);
-	
+
+	InitInfoItemXml(xml, m_booster_disp_factor, "boost_disp_factor", "ui_inv_disp_factor");
+	xml.SetLocalRoot(base_node);
 
 	InitInfoItemXml(xml, m_booster_satiety, "boost_satiety", "ui_inv_satiety");
 	xml.SetLocalRoot(base_node);
@@ -195,6 +201,9 @@ void CUIBoosterInfo::UpdateInfo(const CEatableItem& object)
 		SetInfo(m_booster_thirst_restore, object.m_Boosters.fThirstRestore, cur_h);
 	if (!fis_zero(object.m_Boosters.fToxicityRestore))
 		SetInfo(m_booster_toxicity_restore, object.m_Boosters.fToxicityRestore, cur_h);
+
+	if (!fis_zero(object.m_Boosters.fDispFactor))
+		SetInfo(m_booster_disp_factor, object.m_Boosters.fDispFactor, cur_h);
 
 	if (!fis_zero(object.m_fSatiety))
 		SetInfo(m_booster_satiety, object.m_fSatiety, cur_h);

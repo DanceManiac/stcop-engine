@@ -31,7 +31,7 @@ float CActor::GetWeaponAccuracy() const
 	{
 		return m_fDispAim;
 	}
-	float dispersion = m_fDispBase*GetWeaponParam(W, Get_PDM_Base(), 1.0f);
+	float dispersion = m_fDispBase * GetWeaponParam(W, Get_PDM_Base(), 1.0f) * clampr(m_fBoostDispFactor, m_fBoostDispFactorMin, m_fBoostDispFactorMax);
 
 	CEntity::SEntityState state;
 	if ( g_State(state) )

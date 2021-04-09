@@ -48,6 +48,9 @@ protected:
 	UIBoosterInfoItem*	m_booster_satiety;
 	UIBoosterInfoItem*  m_booster_thirst;
 	UIBoosterInfoItem*  m_booster_toxicity;
+
+	UIBoosterInfoItem* m_booster_disp_factor;
+
 	UIBoosterInfoItem*	m_booster_anabiotic;
 	UIBoosterInfoItem*	m_booster_time;
 

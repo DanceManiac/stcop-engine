@@ -68,7 +68,9 @@ void CEatableItem::Load(LPCSTR section)
 	m_Boosters.fTelepaticProtection = pSettings->r_float(section, "boost_telepat_protection");
 	m_Boosters.fChemburnProtection = pSettings->r_float(section, "boost_chemburn_protection");
 	m_Boosters.fToxicityRestore = pSettings->r_float(section, "boost_toxicity_restore");
-	m_Boosters.fSpeedFactor = pSettings->r_float(section, "boost_max_speed");
+
+	m_Boosters.fSpeedFactor = pSettings->r_float(section, "boost_speed_factor");
+	m_Boosters.fDispFactor = pSettings->r_float(section, "boost_disp_factor");
 
 	m_Boosters.fBoostTime = pSettings->r_float(section, "boost_time");
 

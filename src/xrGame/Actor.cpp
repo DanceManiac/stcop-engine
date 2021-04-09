@@ -360,8 +360,8 @@ void CActor::Load	(LPCSTR section )
 	m_fWalk_StrafeFactor		= READ_IF_EXISTS(pSettings, r_float, section, "walk_strafe_coef", 1.0f);
 	m_fRun_StrafeFactor			= READ_IF_EXISTS(pSettings, r_float, section, "run_strafe_coef", 1.0f);
 
-	m_fBoostMinSpeedFactor = READ_IF_EXISTS(pSettings, r_float, section, "boost_speed_factor_min", NULL);
-	m_fBoostMaxSpeedFactor = READ_IF_EXISTS(pSettings, r_float, section, "boost_speed_factor_max", NULL);
+	m_fBoostSpeedFactorMin = READ_IF_EXISTS(pSettings, r_float, section, "boost_speed_factor_min", NULL);
+	m_fBoostSpeedFactorMax = READ_IF_EXISTS(pSettings, r_float, section, "boost_speed_factor_max", FLT_MAX);
 
 	m_fCamHeightFactor			= pSettings->r_float(section,"camera_height_factor");
 	character_physics_support()->movement()->SetJumpUpVelocity(m_fJumpSpeed);
@@ -428,6 +428,9 @@ if(!g_dedicated_server)
 	m_fDispAccelFactor			= pSettings->r_float		(section,"disp_accel_factor" );
 	m_fDispCrouchFactor			= pSettings->r_float		(section,"disp_crouch_factor");
 	m_fDispCrouchNoAccelFactor	= pSettings->r_float		(section,"disp_crouch_no_acc_factor");
+
+	m_fBoostDispFactorMin = READ_IF_EXISTS(pSettings, r_float, section, "boost_disp_factor_min", NULL);
+	m_fBoostDispFactorMax = READ_IF_EXISTS(pSettings, r_float, section, "boost_disp_factor_max", FLT_MAX);
 
 	LPCSTR							default_outfit = READ_IF_EXISTS(pSettings,r_string,section,"default_outfit",0);
 	SetDefaultVisualOutfit			(default_outfit);
