@@ -1059,6 +1059,15 @@ bool CInventory::Eat(PIItem pIItem)
 	if (!pItemToEat->UseBy(entity_alive))
 		return false;
 
+	if (entity_alive->Local() && entity_alive == Level().CurrentViewEntity())
+	{
+		if (m_use_sound._feedback())
+			m_use_sound.stop();
+
+		m_use_sound.create(pItemToEat->UseSoundName(), st_Effect, sg_SourceType);
+		m_use_sound.play(NULL, sm_2D);
+	}
+
 #ifdef MP_LOGGING
 	Msg( "--- Actor [%d] use or eat [%d][%s]", entity_alive->ID(), pItemToEat->object().ID(), pItemToEat->object().cNameSect().c_str() );
 #endif // MP_LOGGING

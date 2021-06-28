@@ -193,4 +193,6 @@ private:
 	bool				IsSlotBlocked(u16 slot_id) const;
 	void				TryActivatePrevSlot		();
 	void				TryDeactivateActiveSlot	();
+
+	ref_sound m_use_sound;
 };

@@ -639,60 +639,14 @@ void CEntityCondition::remove_links	(const CObject *object)
 	m_iWhoID				= m_object->ID();
 }
 
-bool CEntityCondition::ApplyInfluence(const SMedicineInfluenceValues& V, const shared_str& sect)
+void CEntityCondition::ApplyBooster(const CEatableItem& object)
 {
-	ChangeHealth	(V.fHealth);
-	ChangePower		(V.fPower);
-	ChangeSatiety	(V.fSatiety);
-	ChangeRadiation	(V.fRadiation);
-	ChangeBleeding	(V.fWoundsHeal);
-	SetMaxPower		(GetMaxPower()+V.fMaxPowerUp);
-	ChangeAlcohol	(V.fAlcohol);
-	return true;
-}
-
-bool CEntityCondition::ApplyBooster(const SBooster& B, const shared_str& sect)
-{
-	return true;
-}
-
-void SMedicineInfluenceValues::Load(const shared_str& sect)
-{
-	fHealth			= pSettings->r_float(sect.c_str(), "eat_health");
-	fPower			= pSettings->r_float(sect.c_str(), "eat_power");
-	fSatiety		= pSettings->r_float(sect.c_str(), "eat_satiety");
-	fRadiation		= pSettings->r_float(sect.c_str(), "eat_radiation");
-	fWoundsHeal		= pSettings->r_float(sect.c_str(), "wounds_heal_perc");
-	clamp			(fWoundsHeal, 0.f, 1.f);
-	fMaxPowerUp		= READ_IF_EXISTS	(pSettings,r_float,sect.c_str(),	"eat_max_power",0.0f);
-	fAlcohol		= READ_IF_EXISTS	(pSettings, r_float, sect.c_str(),	"eat_alcohol", 0.0f);
-	fTimeTotal		= READ_IF_EXISTS	(pSettings, r_float, sect.c_str(),	"apply_time_sec", -1.0f);
-}
-
-void SBooster::Load(const shared_str& sect, EBoostParams type)
-{
-	fBoostTime = pSettings->r_float(sect.c_str(), "boost_time");
-	m_type = type;
-	switch(type)
-	{
-		case eBoostHpRestore: fBoostValue = pSettings->r_float(sect.c_str(), "boost_health_restore"); break;
-		case eBoostPowerRestore: fBoostValue = pSettings->r_float(sect.c_str(), "boost_power_restore"); break;
-		case eBoostRadiationRestore: fBoostValue = pSettings->r_float(sect.c_str(), "boost_radiation_restore"); break;
-		case eBoostBleedingRestore: fBoostValue = pSettings->r_float(sect.c_str(), "boost_bleeding_restore"); break;
-		case eBoostMaxWeight: fBoostValue = pSettings->r_float(sect.c_str(), "boost_max_weight"); break;
-		case eBoostBurnImmunity: fBoostValue = pSettings->r_float(sect.c_str(), "boost_burn_immunity"); break;
-		case eBoostShockImmunity: fBoostValue = pSettings->r_float(sect.c_str(), "boost_shock_immunity"); break;
-		case eBoostRadiationImmunity: fBoostValue = pSettings->r_float(sect.c_str(), "boost_radiation_immunity"); break;
-		case eBoostTelepaticImmunity: fBoostValue = pSettings->r_float(sect.c_str(), "boost_telepat_immunity"); break;
-		case eBoostChemicalBurnImmunity: fBoostValue = pSettings->r_float(sect.c_str(), "boost_chemburn_immunity"); break;
-		case eBoostExplImmunity: fBoostValue = pSettings->r_float(sect.c_str(), "boost_explosion_immunity"); break;
-		case eBoostStrikeImmunity: fBoostValue = pSettings->r_float(sect.c_str(), "boost_strike_immunity"); break;
-		case eBoostFireWoundImmunity: fBoostValue = pSettings->r_float(sect.c_str(), "boost_fire_wound_immunity"); break;
-		case eBoostWoundImmunity: fBoostValue = pSettings->r_float(sect.c_str(), "boost_wound_immunity"); break;
-		case eBoostRadiationProtection: fBoostValue = pSettings->r_float(sect.c_str(), "boost_radiation_protection"); break;
-		case eBoostTelepaticProtection: fBoostValue = pSettings->r_float(sect.c_str(), "boost_telepat_protection"); break;
-		case eBoostChemicalBurnProtection: fBoostValue = pSettings->r_float(sect.c_str(), "boost_chemburn_protection"); break;
-		default: NODEFAULT;	
-	}
+	ChangeHealth(object.m_fHealth);
+	ChangePower(object.m_fPower);
+	ChangeSatiety(object.m_fSatiety);
+	ChangeRadiation(object.m_fRadiation);
+	ChangeBleeding(object.m_fWoundsHeal);
+	SetMaxPower(GetMaxPower() + object.m_fMaxPowerUp);
+	ChangeAlcohol(object.m_fAlcohol);
 }
 

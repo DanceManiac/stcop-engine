@@ -1,6 +1,8 @@
 #pragma once
 #include "UIWindow.h"
 #include "../EntityCondition.h"
+#include "../ActorCondition.h"
+#include "Actor.h"
 
 class CUIXml;
 class CUIStatic;
@@ -10,40 +12,62 @@ class UIBoosterInfoItem;
 class CUIBoosterInfo : public CUIWindow
 {
 public:
-					CUIBoosterInfo		();
-	virtual			~CUIBoosterInfo		();
-			void	InitFromXml				(CUIXml& xml);
-			void	SetInfo					(const shared_str& section);
+	CUIBoosterInfo();
+	virtual			~CUIBoosterInfo();
+	void	InitFromXml(CUIXml& xml);
+	void	UpdateInfo(const CEatableItem& object);
+	void	SetInfo(UIBoosterInfoItem*& InfoItem, float value);
 
 protected:
-	UIBoosterInfoItem*	m_booster_items[eBoostExplImmunity];
-	UIBoosterInfoItem*	m_booster_satiety;
-	UIBoosterInfoItem*	m_booster_anabiotic;
-	UIBoosterInfoItem*	m_booster_time;
+	UIBoosterInfoItem* m_booster_health_restore;
+	UIBoosterInfoItem* m_booster_satiety_restore;
+	UIBoosterInfoItem* m_booster_power_restore;
+	UIBoosterInfoItem* m_booster_radiation_restore;
+	UIBoosterInfoItem* m_booster_bleeding_restore;
+	UIBoosterInfoItem* m_booster_max_weight;
+	UIBoosterInfoItem* m_booster_radiation_protection;
+	UIBoosterInfoItem* m_booster_telepatic_protection;
+	UIBoosterInfoItem* m_booster_chemburn_protection;
+	UIBoosterInfoItem* m_booster_burn_immunity;
+	UIBoosterInfoItem* m_booster_shock_immunity;
+	UIBoosterInfoItem* m_booster_radiation_immunity;
+	UIBoosterInfoItem* m_booster_telepatic_immunity;
+	UIBoosterInfoItem* m_booster_chemburn_immunity;
 
-	CUIStatic*			m_Prop_line;
+	UIBoosterInfoItem* m_booster_satiety;
+	UIBoosterInfoItem* m_booster_anabiotic;
+	UIBoosterInfoItem* m_booster_time;
 
-}; // class CUIBoosterInfo
+	CUIStatic* m_Prop_line;
 
-// -----------------------------------
+private:
+	float	GetMaxValue(ALife::EInfluenceType type)
+	{
+		CActor* actor = smart_cast<CActor*>(Level().CurrentViewEntity());
+		if (actor)
+			return actor->conditions().GetZoneMaxPower(type);
+		else return 1.0f;
+	};
+
+	float CurH;
+};
 
 class UIBoosterInfoItem : public CUIWindow
 {
 public:
-				UIBoosterInfoItem	();
+	UIBoosterInfoItem();
 	virtual		~UIBoosterInfoItem();
-		
-		void	Init				( CUIXml& xml, LPCSTR section );
-		void	SetCaption			( LPCSTR name );
-		void	SetValue			( float value );
-	
+
+	void	InitFromXML(CUIXml& xml, LPCSTR section, LPCSTR name);
+	void	SetValue(float value);
+
 private:
-	CUIStatic*	m_caption;
-	CUITextWnd*	m_value;
+	CUIStatic* m_caption;
+	CUITextWnd* m_value;
 	float		m_magnitude;
 	bool		m_show_sign;
 	shared_str	m_unit_str;
 	shared_str	m_texture_minus;
 	shared_str	m_texture_plus;
 
-}; // class UIBoosterInfoItem
+};
