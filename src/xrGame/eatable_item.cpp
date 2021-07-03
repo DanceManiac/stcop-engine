@@ -75,9 +75,10 @@ void CEatableItem::Load(LPCSTR section)
 BOOL CEatableItem::net_Spawn(CSE_Abstract* DC)
 {
 	if (!inherited::net_Spawn(DC))
+	{
 		return FALSE;
-	else
-		return TRUE;
+	}
+	return TRUE;
 };
 
 bool CEatableItem::Useful() const
