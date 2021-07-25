@@ -655,7 +655,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\xrGameSpy\gamespy\md5.h" />
     <ClInclude Include="..\xrServerEntities\ai_sounds.h" />
     <ClInclude Include="..\xrServerEntities\alife_human_brain.h" />
     <ClInclude Include="..\xrServerEntities\alife_human_brain_inline.h" />
@@ -709,6 +708,7 @@
     <ClInclude Include="..\xrServerEntities\script_debugger_messages.h" />
     <ClInclude Include="..\xrServerEntities\script_debugger_threads.h" />
     <ClInclude Include="..\xrServerEntities\script_engine.h" />
+    <ClInclude Include="..\xrServerEntities\script_engine_export.h" />
     <ClInclude Include="..\xrServerEntities\script_engine_inline.h" />
     <ClInclude Include="..\xrServerEntities\script_engine_space.h" />
     <ClInclude Include="..\xrServerEntities\script_export_macroses.h" />
@@ -764,8 +764,6 @@
     <ClInclude Include="abstract_location_selector_inline.h" />
     <ClInclude Include="abstract_path_manager.h" />
     <ClInclude Include="abstract_path_manager_inline.h" />
-    <ClInclude Include="account_manager.h" />
-    <ClInclude Include="account_manager_console.h" />
     <ClInclude Include="accumulative_states.h" />
     <ClInclude Include="action_base.h" />
     <ClInclude Include="action_base_inline.h" />
@@ -1240,22 +1238,17 @@
     <ClInclude Include="antirad.h" />
     <ClInclude Include="Artefact.h" />
     <ClInclude Include="artefact_activation.h" />
-    <ClInclude Include="atlas_stalkercoppc_v1.h" />
-    <ClInclude Include="atlas_submit_queue.h" />
     <ClInclude Include="attachable_item.h" />
     <ClInclude Include="attachable_item_inline.h" />
     <ClInclude Include="attachment_owner.h" />
     <ClInclude Include="attachment_owner_inline.h" />
     <ClInclude Include="autosave_manager.h" />
     <ClInclude Include="autosave_manager_inline.h" />
-    <ClInclude Include="awards_store.h" />
     <ClInclude Include="a_star.h" />
     <ClInclude Include="a_star_inline.h" />
     <ClInclude Include="base_client_classes.h" />
     <ClInclude Include="base_client_classes_wrappers.h" />
     <ClInclude Include="BastArtifact.h" />
-    <ClInclude Include="best_scores_helper.h" />
-    <ClInclude Include="best_scores_store.h" />
     <ClInclude Include="BlackDrops.h" />
     <ClInclude Include="BlackGraviArtifact.h" />
     <ClInclude Include="black_list.h" />
@@ -1413,22 +1406,6 @@
     <ClInclude Include="GalantineArtifact.h" />
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="GamePersistent.h" />
-    <ClInclude Include="gamespy\CdkeyDecode\base32.h" />
-    <ClInclude Include="gamespy\CdkeyDecode\cdkeydecode.h" />
-    <ClInclude Include="gamespy\GameSpy_ATLAS.h" />
-    <ClInclude Include="GameSpy\GameSpy_Available.h" />
-    <ClInclude Include="GameSpy\GameSpy_Base_Defs.h" />
-    <ClInclude Include="gamespy\GameSpy_Full.h" />
-    <ClInclude Include="GameSpy\GameSpy_FuncDefs.h" />
-    <ClInclude Include="GameSpy\GameSpy_GCD_Client.h" />
-    <ClInclude Include="GameSpy\GameSpy_GCD_Server.h" />
-    <ClInclude Include="gamespy\GameSpy_GP.h" />
-    <ClInclude Include="gamespy\GameSpy_HTTP.h" />
-    <ClInclude Include="GameSpy\GameSpy_Keys.h" />
-    <ClInclude Include="GameSpy\GameSpy_Patching.h" />
-    <ClInclude Include="GameSpy\GameSpy_QR2.h" />
-    <ClInclude Include="GameSpy\GameSpy_QR2_callbacks.h" />
-    <ClInclude Include="gamespy\GameSpy_SAKE.h" />
     <ClInclude Include="GameTask.h" />
     <ClInclude Include="GameTaskDefs.h" />
     <ClInclude Include="GametaskManager.h" />
@@ -1586,7 +1563,6 @@
     <ClInclude Include="level_sounds.h" />
     <ClInclude Include="location_manager.h" />
     <ClInclude Include="location_manager_inline.h" />
-    <ClInclude Include="login_manager.h" />
     <ClInclude Include="magic_box3.h" />
     <ClInclude Include="magic_box3_inline.h" />
     <ClInclude Include="magic_minimize_1d.h" />
@@ -1619,7 +1595,6 @@
     <ClInclude Include="Mincer.h" />
     <ClInclude Include="Missile.h" />
     <ClInclude Include="mixed_delegate.h" />
-    <ClInclude Include="mixed_delegate_unique_tags.h" />
     <ClInclude Include="monster_community.h" />
     <ClInclude Include="MosquitoBald.h" />
     <ClInclude Include="movement_manager.h" />
@@ -1731,9 +1706,7 @@
     <ClInclude Include="physics_world_scripted.h" />
     <ClInclude Include="physic_item.h" />
     <ClInclude Include="physic_item_inline.h" />
-    <ClInclude Include="player_account.h" />
     <ClInclude Include="player_hud.h" />
-    <ClInclude Include="player_name_modifyer.h" />
     <ClInclude Include="player_spot_params.h" />
     <ClInclude Include="player_state_achilles_heel.h" />
     <ClInclude Include="player_state_ambassador.h" />
@@ -1761,9 +1734,6 @@
     <ClInclude Include="problem_solver_inline.h" />
     <ClInclude Include="profiler.h" />
     <ClInclude Include="profiler_inline.h" />
-    <ClInclude Include="profile_data_types.h" />
-    <ClInclude Include="profile_data_types_script.h" />
-    <ClInclude Include="profile_store.h" />
     <ClInclude Include="PropertiesListHelper.h" />
     <ClInclude Include="property_evaluator.h" />
     <ClInclude Include="property_evaluator_const.h" />
@@ -1777,7 +1747,6 @@
     <ClInclude Include="purchase_list_inline.h" />
     <ClInclude Include="quadtree.h" />
     <ClInclude Include="quadtree_inline.h" />
-    <ClInclude Include="queued_async_method.h" />
     <ClInclude Include="RadioactiveZone.h" />
     <ClInclude Include="random32.h" />
     <ClInclude Include="rat_states.h" />
@@ -1787,17 +1756,14 @@
     <ClInclude Include="rat_state_manager_inline.h" />
     <ClInclude Include="refreshable_obstacles_query.h" />
     <ClInclude Include="refreshable_obstacles_query_inline.h" />
-    <ClInclude Include="RegistryFuncs.h" />
     <ClInclude Include="relation_registry.h" />
     <ClInclude Include="relation_registry_defs.h" />
     <ClInclude Include="relation_registry_inline.h" />
     <ClInclude Include="restricted_object.h" />
     <ClInclude Include="restricted_object_inline.h" />
     <ClInclude Include="restricted_object_obstacle.h" />
-    <ClInclude Include="rewarding_events_handlers.h" />
     <ClInclude Include="rewarding_state_events.h" />
     <ClInclude Include="reward_event_generator.h" />
-    <ClInclude Include="reward_event_handler.h" />
     <ClInclude Include="reward_manager.h" />
     <ClInclude Include="reward_snd_messages.h" />
     <ClInclude Include="RGD5.h" />
@@ -2026,7 +1992,6 @@
     <ClInclude Include="static_cast_checked.hpp" />
     <ClInclude Include="static_obstacles_avoider.h" />
     <ClInclude Include="static_obstacles_avoider_inline.h" />
-    <ClInclude Include="stats_submitter.h" />
     <ClInclude Include="StdAfx.h" />
     <ClInclude Include="steering_behaviour.h" />
     <ClInclude Include="steering_behaviour_alignment.h" />
@@ -2096,7 +2061,6 @@
     <ClInclude Include="ui\UIBuyWndBase.h" />
     <ClInclude Include="ui\UIBuyWndShared.h" />
     <ClInclude Include="ui\UICarPanel.h" />
-    <ClInclude Include="ui\UICDkey.h" />
     <ClInclude Include="ui\UICellCustomItems.h" />
     <ClInclude Include="ui\UICellItem.h" />
     <ClInclude Include="ui\UICellItemFactory.h" />
@@ -2264,7 +2228,6 @@
     <ClInclude Include="wrapper_abstract_inline.h" />
     <ClInclude Include="xrClientsPool.h" />
     <ClInclude Include="xrGameSpyServer.h" />
-    <ClInclude Include="xrGameSpyServer_callbacks.h" />
     <ClInclude Include="xrServer.h" />
     <ClInclude Include="xrServerMapSync.h" />
     <ClInclude Include="xrServer_info.h" />
@@ -2280,16 +2243,6 @@
     <ClInclude Include="ZudaArtifact.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\xrGameSpy\gamespy\md5c.c">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release_AVX|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Mixed|Win32'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release_AVX|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Mixed|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
     <ClCompile Include="..\xrServerEntities\alife_human_brain.cpp" />
     <ClCompile Include="..\xrServerEntities\alife_monster_brain.cpp" />
     <ClCompile Include="..\xrServerEntities\alife_space.cpp" />
@@ -2462,9 +2415,6 @@
       <PrecompiledHeaderOutputFile>$(IntDir)$(ProjectName)_script.pch</PrecompiledHeaderOutputFile>
     </ClCompile>
     <ClCompile Include="..\xrServerEntities\xrServer_Object_Base.cpp" />
-    <ClCompile Include="account_manager.cpp" />
-    <ClCompile Include="account_manager_console.cpp" />
-    <ClCompile Include="account_manager_script.cpp" />
     <ClCompile Include="action_base_script.cpp">
       <PrecompiledHeaderFile>pch_script.h</PrecompiledHeaderFile>
       <PrecompiledHeaderOutputFile>$(IntDir)$(ProjectName)_script.pch</PrecompiledHeaderOutputFile>
@@ -2912,22 +2862,14 @@
       <PrecompiledHeaderFile>pch_script.h</PrecompiledHeaderFile>
       <PrecompiledHeaderOutputFile>$(IntDir)$(ProjectName)_script.pch</PrecompiledHeaderOutputFile>
     </ClCompile>
-    <ClCompile Include="atlas_stalkercoppc_v1.c">
-      <PrecompiledHeader>
-      </PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="atlas_submit_queue.cpp" />
     <ClCompile Include="attachable_item.cpp" />
     <ClCompile Include="attachment_owner.cpp" />
     <ClCompile Include="autosave_manager.cpp" />
-    <ClCompile Include="awards_store.cpp" />
     <ClCompile Include="base_client_classes_script.cpp">
       <PrecompiledHeaderFile>pch_script.h</PrecompiledHeaderFile>
       <PrecompiledHeaderOutputFile>$(IntDir)$(ProjectName)_script.pch</PrecompiledHeaderOutputFile>
     </ClCompile>
     <ClCompile Include="BastArtifact.cpp" />
-    <ClCompile Include="best_scores_helper.cpp" />
-    <ClCompile Include="best_scores_store.cpp" />
     <ClCompile Include="BlackDrops.cpp" />
     <ClCompile Include="BlackGraviArtifact.cpp" />
     <ClCompile Include="black_list.cpp" />
@@ -3099,25 +3041,6 @@
       <PrecompiledHeaderFile>pch_script.h</PrecompiledHeaderFile>
       <PrecompiledHeaderOutputFile>$(IntDir)$(ProjectName)_script.pch</PrecompiledHeaderOutputFile>
     </ClCompile>
-    <ClCompile Include="gamespy\CdkeyDecode\base32.c">
-      <PrecompiledHeader>
-      </PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="gamespy\CdkeyDecode\cdkeydecode.c">
-      <PrecompiledHeader>
-      </PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="gamespy\GameSpy_ATLAS.cpp" />
-    <ClCompile Include="GameSpy\GameSpy_Available.cpp" />
-    <ClCompile Include="gamespy\GameSpy_Full.cpp" />
-    <ClCompile Include="GameSpy\GameSpy_GCD_Client.cpp" />
-    <ClCompile Include="GameSpy\GameSpy_GCD_Server.cpp" />
-    <ClCompile Include="gamespy\GameSpy_GP.cpp" />
-    <ClCompile Include="gamespy\GameSpy_HTTP.cpp" />
-    <ClCompile Include="GameSpy\GameSpy_Patching.cpp" />
-    <ClCompile Include="GameSpy\GameSpy_QR2.cpp" />
-    <ClCompile Include="GameSpy\GameSpy_QR2_callbacks.cpp" />
-    <ClCompile Include="gamespy\GameSpy_SAKE.cpp" />
     <ClCompile Include="GameTask.cpp">
       <PrecompiledHeaderFile>pch_script.h</PrecompiledHeaderFile>
       <PrecompiledHeaderOutputFile>$(IntDir)$(ProjectName)_script.pch</PrecompiledHeaderOutputFile>
@@ -3349,7 +3272,6 @@
     </ClCompile>
     <ClCompile Include="Level_network_compressed_updates.cpp" />
     <ClCompile Include="Level_network_Demo.cpp" />
-    <ClCompile Include="Level_network_digest_computer.cpp" />
     <ClCompile Include="Level_network_map_sync.cpp" />
     <ClCompile Include="Level_network_messages.cpp" />
     <ClCompile Include="Level_network_spawn.cpp">
@@ -3368,8 +3290,6 @@
     <ClCompile Include="level_sounds.cpp" />
     <ClCompile Include="Level_start.cpp" />
     <ClCompile Include="location_manager.cpp" />
-    <ClCompile Include="login_manager.cpp" />
-    <ClCompile Include="login_manager_script.cpp" />
     <ClCompile Include="magic_box3.cpp" />
     <ClCompile Include="magic_minimize_1d.cpp" />
     <ClCompile Include="MainMenu.cpp" />
@@ -3529,10 +3449,8 @@
       <PrecompiledHeaderOutputFile>$(IntDir)$(ProjectName)_script.pch</PrecompiledHeaderOutputFile>
     </ClCompile>
     <ClCompile Include="physic_item.cpp" />
-    <ClCompile Include="player_account.cpp" />
     <ClCompile Include="player_hud.cpp" />
     <ClCompile Include="player_hud_tune.cpp" />
-    <ClCompile Include="player_name_modifyer.cpp" />
     <ClCompile Include="player_spot_params.cpp" />
     <ClCompile Include="player_state_achilles_heel.cpp" />
     <ClCompile Include="player_state_ambassador.cpp" />
@@ -3563,10 +3481,6 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release_AVX|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Mixed|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="profile_data_types.cpp" />
-    <ClCompile Include="profile_data_types_script.cpp" />
-    <ClCompile Include="profile_store.cpp" />
-    <ClCompile Include="profile_store_script.cpp" />
     <ClCompile Include="property_evaluator_script.cpp">
       <PrecompiledHeaderFile>pch_script.h</PrecompiledHeaderFile>
       <PrecompiledHeaderOutputFile>$(IntDir)$(ProjectName)_script.pch</PrecompiledHeaderOutputFile>
@@ -3581,7 +3495,6 @@
     <ClCompile Include="rat_states.cpp" />
     <ClCompile Include="rat_state_base.cpp" />
     <ClCompile Include="rat_state_manager.cpp" />
-    <ClCompile Include="RegistryFuncs.cpp" />
     <ClCompile Include="relation_registry.cpp" />
     <ClCompile Include="relation_registry_actions.cpp">
       <PrecompiledHeaderFile>pch_script.h</PrecompiledHeaderFile>
@@ -3590,7 +3503,6 @@
     <ClCompile Include="relation_registry_fights.cpp" />
     <ClCompile Include="restricted_object.cpp" />
     <ClCompile Include="restricted_object_obstacle.cpp" />
-    <ClCompile Include="rewarding_events_handlers.cpp" />
     <ClCompile Include="rewarding_state_events.cpp" />
     <ClCompile Include="reward_event_generator.cpp" />
     <ClCompile Include="reward_manager.cpp" />
@@ -4048,8 +3960,6 @@
       <ExcludedFromBuild>true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="static_obstacles_avoider.cpp" />
-    <ClCompile Include="stats_submitter.cpp" />
-    <ClCompile Include="stats_submitter_dsa_params.cpp" />
     <ClCompile Include="StdAfx.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
@@ -4144,7 +4054,6 @@
     <ClCompile Include="ui\UIBuyWeaponTab.cpp" />
     <ClCompile Include="ui\UIBuyWndShared.cpp" />
     <ClCompile Include="ui\UICarPanel.cpp" />
-    <ClCompile Include="ui\UICDkey.cpp" />
     <ClCompile Include="ui\UICellCustomItems.cpp" />
     <ClCompile Include="ui\UICellItem.cpp" />
     <ClCompile Include="ui\UICellItemFactory.cpp" />
@@ -4487,8 +4396,6 @@
     <ClCompile Include="xrClientsPool.cpp" />
     <ClCompile Include="xrGame.cpp" />
     <ClCompile Include="xrGameSpyServer.cpp" />
-    <ClCompile Include="xrGameSpyServer_callbacks.cpp" />
-    <ClCompile Include="xrGameSpy_GameSpyFuncs.cpp" />
     <ClCompile Include="xrgame_dll_detach.cpp">
       <PrecompiledHeaderFile>pch_script.h</PrecompiledHeaderFile>
       <PrecompiledHeaderOutputFile>$(IntDir)$(ProjectName)_script.pch</PrecompiledHeaderOutputFile>
@@ -4537,10 +4444,6 @@
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
       <UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
       <CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
-    </ProjectReference>
-    <ProjectReference Include="$(SolutionDir)xrGameSpy\xrGameSpy.vcxproj">
-      <Project>{5535f6b4-7ae6-4b66-8aea-cc31c14d7ab7}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
     <ProjectReference Include="$(SolutionDir)xrPhysics\xrPhysics.vcxproj">
       <Project>{98d24a3d-7666-4c11-9d6e-b10393ce8cba}</Project>
